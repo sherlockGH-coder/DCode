@@ -1,0 +1,50 @@
+node_modules/
+dist/
+out/
+.env
+*.env
+*.env.*
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+*.sqlite
+*.sqlite3
+*.db
+*.log
+logs/
+test-results/
+*.rdb
+.DS_Store
+
+# 文档：除根目录 README.md 和内置技能外，其他 markdown 不入版本控制
+*.md
+!README.md
+!docs/dependency-management.md
+!docs/local-whisper-asr.md
+!resources/skills/*.md
+!.claude/skills/**/*.md
+!docs/superpowers/**/*.md
+!**/system.md
+!**/DCODE.md
+
+# Python local tooling
+__pycache__/
+*.py[cod]
+
+# 构建产物
+release/
+
+# TypeScript incremental build info
+tsconfig.tsbuildinfo
+scripts/git-automerge.sh
+.ace-tool/
+.superpowers/
+.codex/
+.claude/
+.deepseek/
+.dcode/*
+!.dcode/DCODE.md
+!.dcode/workflows/
+!.dcode/workflows/*.md

@@ -1,0 +1,5 @@
+{"compilerOptions":{"composite":true,"esModuleInterop":true,"forceConsistentCasingInFileNames":true,"jsx":"react-jsx","module":"ESNext","moduleResolution":"bundler","outDir":"./out","skipLibCheck":true,"strict":true,"target":"ESNext","types":["vitest/globals"]},  "include": [
+    "src/renderer/**/*.ts",
+    "src/renderer/**/*.tsx",
+    "src/shared/**/*.ts"
+  ]}

@@ -1,0 +1,17 @@
+packages:
+  - .
+
+allowBuilds:
+  better-sqlite3: true
+  electron: true
+  electron-winstaller: false
+  esbuild: true
+  node-pty: true
+
+peerDependencyRules:
+  allowedVersions:
+    react-material-icon-theme>react: ^19.0.0
+    react-material-icon-theme>react-dom: ^19.0.0
+
+patchedDependencies:
+  react-material-icon-theme: patches/react-material-icon-theme.patch

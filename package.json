@@ -1,0 +1,126 @@
+{
+  "name": "dcode-app",
+  "version": "0.0.1",
+  "description": "DCode 桌面聊天应用 — 基于 Electron + React",
+  "productName": "DCode",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "postinstall": "electron-builder install-app-deps",
+    "dev": "electron-vite dev",
+    "asr:dev": "uv run scripts/local_whisper_asr.py",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "package": "electron-vite build && electron-builder build --mac",
+    "package:dmg": "electron-vite build && electron-builder build --mac dmg",
+    "package:dir": "electron-vite build && electron-builder build --mac dir",
+    "package-win": "electron-vite build && electron-builder build --win",
+    "package-win:no-rcedit": "electron-vite build && electron-builder build --win zip --arm64 -c.win.signAndEditExecutable=false",
+    "native:smoke": "node scripts/run-native-smoke.cjs",
+    "typecheck": "tsc -p tsconfig.node.json --noEmit --pretty false && tsc -p tsconfig.web.json --noEmit --pretty false",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "pnpm build && playwright test"
+  },
+  "build": {
+    "appId": "com.dcode.desktop",
+    "productName": "DCode",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "resources/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/skills",
+        "to": "skills"
+      },
+      {
+        "from": "resources/mcp",
+        "to": "mcp"
+      }
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "resources/icon.icns",
+      "artifactName": "${productName}-${version}-${arch}.dmg",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "DCode 需要使用麦克风将语音转写为输入文本。"
+      }
+    },
+    "win": {
+      "icon": "resources/icon.png",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*",
+      "node_modules/node-pty/**/*"
+    ]
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.99.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@mozilla/readability": "^0.6.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/addon-webgl": "^0.19.0",
+    "@xterm/xterm": "^6.0.0",
+    "better-sqlite3": "12.11.1",
+    "linkedom": "^0.18.12",
+    "mammoth": "^1.12.0",
+    "node-pty": "1.1.0",
+    "pdf-parse": "^2.4.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "react-material-icon-theme": "^1.0.4",
+    "react-syntax-highlighter": "^16.1.1",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
+    "turndown": "^7.2.4",
+    "xlsx": "^0.18.5"
+  },
+  "optionalDependencies": {
+    "@napi-rs/canvas-darwin-arm64": "0.1.80",
+    "@napi-rs/canvas-win32-x64-msvc": "0.1.80"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@tailwindcss/vite": "^4.2.4",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/turndown": "^5.0.6",
+    "@vitejs/plugin-react": "^4.3.0",
+    "electron": "33.4.11",
+    "electron-builder": "26.15.3",
+    "electron-vite": "^3.0.0",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.7"
+  }
+}

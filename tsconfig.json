@@ -1,0 +1,1 @@
+{"compilerOptions":{"esModuleInterop":true,"forceConsistentCasingInFileNames":true,"jsx":"react-jsx","module":"ESNext","moduleResolution":"bundler","paths":{"@/*":["./src/*"]},"skipLibCheck":true,"strict":true,"target":"ESNext"},"include":["src/**/*.ts","src/**/*.tsx"],"references":[{"path":"./tsconfig.node.json"},{"path":"./tsconfig.web.json"}]}
