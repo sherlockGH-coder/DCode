@@ -86,7 +86,7 @@ async function walkDir(dir: string, basePath: string, files: GlobFile[]): Promis
     } else if (entry.isFile()) {
       try {
         const info = await stat(fullPath);
-        files.push({ path: relative(basePath, fullPath), mtimeMs: info.mtimeMs });
+        files.push({ path: relative(basePath, fullPath).replace(/\\/g, '/'), mtimeMs: info.mtimeMs });
       } catch {
 
       }
