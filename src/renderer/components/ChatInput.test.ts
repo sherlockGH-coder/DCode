@@ -125,7 +125,7 @@ describe('ChatInput slash commands', () => {
         selectedModel: 'deepseek-v4-flash',
         onModelChange: vi.fn(),
         onReasoningEffortChange: vi.fn(),
-        activeProject: '/Users/demo/DCode',
+        activeProject: '/Users/demo/DeepSeek-App',
         isWelcome: false,
       }));
     });

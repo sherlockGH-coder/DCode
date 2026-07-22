@@ -119,7 +119,7 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
 
   const handleAddLocalFile = useCallback(async () => {
     try {
-      const [attachment] = await window.dcodeApi.pickFiles();
+      const [attachment] = await window.deepseekApi.pickFiles();
       if (!attachment) return;
 
       const previewItem = await buildPreviewFromAttachment(attachment);
@@ -144,7 +144,7 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
     if (!preview?.filePath) return;
     setOpenOptionsLoading(true);
     try {
-      const options = await window.dcodeApi.getFileOpenOptions(preview.filePath);
+      const options = await window.deepseekApi.getFileOpenOptions(preview.filePath);
       setOpenOptions(options);
       if (options.length === 0) showOpenFeedback('文件不可打开或不存在');
     } catch (err) {
@@ -160,7 +160,7 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
     if (!preview?.filePath) return;
     setOpenWithMenuOpen(false);
     try {
-      const result = await window.dcodeApi.openFileWith(preview.filePath, optionId);
+      const result = await window.deepseekApi.openFileWith(preview.filePath, optionId);
       if (!result.success) {
         const label = result.name ?? optionName ?? '打开方式';
         console.error(`[ArtifactPanel] 打开文件失败 (${label}):`, result.error);

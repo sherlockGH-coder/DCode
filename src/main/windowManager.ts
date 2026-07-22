@@ -4,7 +4,7 @@ import { join } from 'node:path';
 const WINDOW_CONFIG = {
   DEFAULT_WIDTH: 1000,
   DEFAULT_HEIGHT: 800,
-  TITLE: 'DCode',
+  TITLE: 'DeepSeek',
 } as const;
 
 export const TRAFFIC_LIGHT_POSITIONS = {

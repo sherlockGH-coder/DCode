@@ -2,16 +2,6 @@ node_modules/
 dist/
 out/
 .env
-*.env
-*.env.*
-*.local
-*.pem
-*.key
-*.p12
-*.pfx
-*.sqlite
-*.sqlite3
-*.db
 *.log
 logs/
 test-results/
@@ -27,7 +17,7 @@ test-results/
 !.claude/skills/**/*.md
 !docs/superpowers/**/*.md
 !**/system.md
-!**/DCODE.md
+!**/DEEPSEEK.md
 
 # Python local tooling
 __pycache__/
@@ -41,10 +31,7 @@ tsconfig.tsbuildinfo
 scripts/git-automerge.sh
 .ace-tool/
 .superpowers/
-.codex/
-.claude/
-.deepseek/
-.dcode/*
-!.dcode/DCODE.md
-!.dcode/workflows/
-!.dcode/workflows/*.md
+.deepseek/*
+!.deepseek/DEEPSEEK.md
+!.deepseek/workflows/
+!.deepseek/workflows/*.md

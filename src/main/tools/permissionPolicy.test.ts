@@ -42,7 +42,7 @@ function registry(): ToolRegistry {
 
 describe('ToolRegistry file permission policy', () => {
   it('lets local readonly tools run without approval when their path is inside the project', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-project-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-project-'));
     try {
       const result = await registry().execute(
         toolCall('read_file', { file_path: join(projectRoot, 'notes.md') }),
@@ -57,8 +57,8 @@ describe('ToolRegistry file permission policy', () => {
   });
 
   it('requires approval for read_file outside the project', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-project-'));
-    const outsideRoot = mkdtempSync(join(tmpdir(), 'dcode-outside-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-project-'));
+    const outsideRoot = mkdtempSync(join(tmpdir(), 'deepseek-outside-'));
     try {
       const result = await registry().execute(
         toolCall('read_file', { file_path: join(outsideRoot, 'secret.txt') }),
@@ -74,8 +74,8 @@ describe('ToolRegistry file permission policy', () => {
   });
 
   it('requires approval for grep and glob outside the project', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-project-'));
-    const outsideRoot = mkdtempSync(join(tmpdir(), 'dcode-outside-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-project-'));
+    const outsideRoot = mkdtempSync(join(tmpdir(), 'deepseek-outside-'));
     try {
       for (const name of ['grep', 'glob']) {
         const result = await registry().execute(
@@ -103,7 +103,7 @@ describe('ToolRegistry file permission policy', () => {
   });
 
   it('allows an explicitly attached file in an unscoped conversation', async () => {
-    const filePath = join(tmpdir(), 'attached-notes.md');
+    const filePath = '/tmp/attached-notes.md';
     const result = await registry().execute(
       toolCall('read_file', { file_path: filePath }),
       {
@@ -125,8 +125,8 @@ describe('ToolRegistry file permission policy', () => {
   });
 
   it('requires approval for edit_file outside the project using file_path', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-project-'));
-    const outsideRoot = mkdtempSync(join(tmpdir(), 'dcode-outside-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-project-'));
+    const outsideRoot = mkdtempSync(join(tmpdir(), 'deepseek-outside-'));
     try {
       const result = await registry().execute(
         toolCall('edit_file', {
@@ -146,8 +146,8 @@ describe('ToolRegistry file permission policy', () => {
   });
 
   it('requires approval for write_file outside the project using file_path', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-project-'));
-    const outsideRoot = mkdtempSync(join(tmpdir(), 'dcode-outside-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-project-'));
+    const outsideRoot = mkdtempSync(join(tmpdir(), 'deepseek-outside-'));
     try {
       const result = await registry().execute(
         toolCall('write_file', {

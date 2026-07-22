@@ -35,13 +35,13 @@ import { registerAgentsIpc } from './agents';
 import { setupApplicationMenu } from './menu';
 import { debugLog } from './logger';
 
-const APP_NAME = 'DCode';
+const APP_NAME = 'DeepSeek';
 
 app.setName(APP_NAME);
 
 if (!app.isPackaged) {
   app.setName(`${APP_NAME}-Dev`);
-  app.setPath('userData', process.env.DCODE_E2E_USER_DATA_DIR || join(app.getPath('appData'), `${APP_NAME}-Dev`));
+  app.setPath('userData', process.env.DEEPSEEK_E2E_USER_DATA_DIR || join(app.getPath('appData'), `${APP_NAME}-Dev`));
 }
 
 const gotTheLock = app.isPackaged ? app.requestSingleInstanceLock() : true;

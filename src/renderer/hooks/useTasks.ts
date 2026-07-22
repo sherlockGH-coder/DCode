@@ -16,7 +16,7 @@ export function useTasks(projectPath: string | null, conversationId: string | nu
 
   const refresh = useCallback(async () => {
     try {
-      const list = await window.dcodeApi.taskList(undefined, undefined, conversationId);
+      const list = await window.deepseekApi.taskList(undefined, undefined, conversationId);
       setTasks(list);
     } catch (err) {
       console.error('[useTasks] failed to list tasks:', err);
@@ -28,7 +28,7 @@ export function useTasks(projectPath: string | null, conversationId: string | nu
   useEffect(() => {
     setIsLoading(true);
     refresh();
-    const unsub = window.dcodeApi.onTasksChanged(() => {
+    const unsub = window.deepseekApi.onTasksChanged(() => {
       refresh();
     });
     return unsub;
@@ -36,7 +36,7 @@ export function useTasks(projectPath: string | null, conversationId: string | nu
 
   const create = useCallback(
     async (scope: TaskScope, input: TaskInput) => {
-      const result = await window.dcodeApi.taskCreate(scope, input, projectPath);
+      const result = await window.deepseekApi.taskCreate(scope, input, projectPath);
       await refresh();
       return result;
     },
@@ -45,7 +45,7 @@ export function useTasks(projectPath: string | null, conversationId: string | nu
 
   const update = useCallback(
     async (id: string, input: TaskUpdateInput) => {
-      const result = await window.dcodeApi.taskUpdate(id, input, projectPath);
+      const result = await window.deepseekApi.taskUpdate(id, input, projectPath);
       await refresh();
       return result;
     },
@@ -54,7 +54,7 @@ export function useTasks(projectPath: string | null, conversationId: string | nu
 
   const remove = useCallback(
     async (id: string) => {
-      const result = await window.dcodeApi.taskDelete(id, projectPath);
+      const result = await window.deepseekApi.taskDelete(id, projectPath);
       await refresh();
       return result;
     },

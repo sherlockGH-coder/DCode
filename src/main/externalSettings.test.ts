@@ -11,7 +11,7 @@ import {
 } from './externalSettings';
 
 function writeSettings(contents: unknown): string {
-  const dir = mkdtempSync(join(tmpdir(), 'dcode-settings-'));
+  const dir = mkdtempSync(join(tmpdir(), 'deepseek-settings-'));
   const filePath = join(dir, 'settings.json');
   writeFileSync(filePath, JSON.stringify(contents), 'utf-8');
   return filePath;
@@ -67,6 +67,6 @@ describe('external settings', () => {
   });
 
   it('returns null when the external settings file does not exist', () => {
-    expect(loadExternalSettings(join(tmpdir(), 'dcode-missing-settings.json'))).toBeNull();
+    expect(loadExternalSettings(join(tmpdir(), 'deepseek-missing-settings.json'))).toBeNull();
   });
 });

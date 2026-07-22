@@ -69,7 +69,7 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
     // 双 rAF 确保计划完成两帧渲染后才签发审批 token
     const firstFrame = window.requestAnimationFrame(() => {
       secondFrame = window.requestAnimationFrame(() => {
-        void window.dcodeApi.markPlanPresented({
+        void window.deepseekApi.markPlanPresented({
           conversationId: plan.conversationId,
           planId: plan.id,
           version: plan.version,

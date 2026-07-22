@@ -39,7 +39,7 @@ export function useChatInputAttachments({
   const handlePickFiles = useCallback(async () => {
     if (isLoading) return;
     try {
-      const picked = await window.dcodeApi.pickFiles();
+      const picked = await window.deepseekApi.pickFiles();
       addAttachments(picked);
     } catch (err) {
       console.error('选择文件失败:', err);
@@ -69,7 +69,7 @@ export function useChatInputAttachments({
     const results = await Promise.all(
       files.map((file) => {
         const path = (file as unknown as { path?: string }).path;
-        return path ? window.dcodeApi.statPath(path) : Promise.resolve(null);
+        return path ? window.deepseekApi.statPath(path) : Promise.resolve(null);
       }),
     );
     addAttachments(results.filter((attachment): attachment is Attachment => attachment !== null));
@@ -81,7 +81,7 @@ export function useChatInputAttachments({
     if (imageItem) {
       e.preventDefault();
       try {
-        const attachment = await window.dcodeApi.pasteClipboardImage();
+        const attachment = await window.deepseekApi.pasteClipboardImage();
         if (attachment) addAttachments([attachment]);
       } catch (err) {
         console.error('粘贴图片失败:', err);
@@ -93,7 +93,7 @@ export function useChatInputAttachments({
     if (!text) return;
     const trimmed = text.trim();
     if (!trimmed.includes('\n') && ABS_PATH_RE.test(trimmed)) {
-      const stat = await window.dcodeApi.statPath(trimmed);
+      const stat = await window.deepseekApi.statPath(trimmed);
       if (stat) {
         e.preventDefault();
         addAttachments([stat]);

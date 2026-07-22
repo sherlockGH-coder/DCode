@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light" data-direction="native">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>DCode 设置 · MCP 与技能四种设计方向</title>
+  <!--
+    Shared system: 12 / 13 / 15 / 20 / 28 type scale; 4 / 8 / 12 / 16 / 24 / 32 rhythm.
+    Native: cool neutrals + DCode #4d6bfe, compact grouped rows, progressive disclosure.
+    Console: near-black + signal green/amber, split list/inspector, status-first hierarchy.
+    Index: paper/ink + vermilion, strict Swiss grid, numbered records and visible rules.
+    Workbench: mineral neutral + cyan/coral, scoped columns, modular operational workspace.
+    All directions use the same data model, actions, responsive breakpoints, and state transitions.
+  -->
+  <link rel="stylesheet" href="prototype.css">
+</head>
+<body>
+  <div class="prototype-shell">
+    <aside class="direction-rail" aria-label="原型方案选择">
+      <div class="rail-brand" aria-label="DCode design lab">
+        <span class="rail-mark">D</span>
+        <span class="rail-brand-copy">DESIGN<br>LAB</span>
+      </div>
+      <div class="direction-list" role="tablist" aria-label="四种设计方向">
+        <button class="direction-choice is-active" data-direction="native" role="tab" aria-selected="true">
+          <span class="choice-index">01</span><span><strong>原生实用</strong><small>低学习成本</small></span>
+        </button>
+        <button class="direction-choice" data-direction="console" role="tab" aria-selected="false">
+          <span class="choice-index">02</span><span><strong>运维控制台</strong><small>诊断优先</small></span>
+        </button>
+        <button class="direction-choice" data-direction="index" role="tab" aria-selected="false">
+          <span class="choice-index">03</span><span><strong>瑞士目录</strong><small>扫描与秩序</small></span>
+        </button>
+        <button class="direction-choice" data-direction="workbench" role="tab" aria-selected="false">
+          <span class="choice-index">04</span><span><strong>模块工作台</strong><small>范围组织</small></span>
+        </button>
+      </div>
+      <div class="rail-actions">
+        <button class="rail-icon-button" id="themeToggle" title="切换明暗主题" aria-label="切换明暗主题"></button>
+        <button class="rail-icon-button" id="resetPrototype" title="重置模拟数据" aria-label="重置模拟数据"></button>
+      </div>
+    </aside>
+
+    <main class="prototype-stage">
+      <section id="app" class="app-frame" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <script>
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{"direction":"native","theme":"light","density":"comfortable"}/*EDITMODE-END*/;
+  </script>
+  <script src="prototype.js"></script>
+</body>
+</html>

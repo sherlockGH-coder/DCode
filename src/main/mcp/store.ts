@@ -3,7 +3,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, unlinkSync } from '
 import { homedir } from 'node:os';
 import type { McpServerConfig } from '../../shared/types';
 
-const PROJECT_DIR = '.dcode';
+const PROJECT_DIR = '.deepseek';
 const PROJECT_FILE = 'mcp.json';
 
 interface PersistedShape {
@@ -11,7 +11,7 @@ interface PersistedShape {
 }
 
 function userPath(): string {
-  return resolve(homedir(), '.dcode.json');
+  return resolve(homedir(), '.deepseek.json');
 }
 
 function projectPath(projectRoot: string): string {

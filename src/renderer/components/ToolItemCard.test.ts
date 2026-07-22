@@ -36,7 +36,7 @@ describe('ToolItemCard', () => {
       value: { clipboard: { writeText: clipboardWriteText } },
       configurable: true,
     });
-    initPathContext('/Users/conan/Code/10.project/DCode', '/Users/conan');
+    initPathContext('/Users/conan/Code/10.project/DeepSeek-App', '/Users/conan');
     container = window.document.getElementById('root') as HTMLElement;
     root = createRoot(container);
   });
@@ -57,7 +57,7 @@ describe('ToolItemCard', () => {
       kind: 'edit',
       status: 'done',
       timestamp: 0,
-      path: '/Users/conan/Code/10.project/DCode/src/renderer/components/ToolItemCard.tsx',
+      path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/ToolItemCard.tsx',
       linesAdded: 4,
       linesDeleted: 2,
       diff: '@@ -1 +1 @@\n-old\n+new',
@@ -340,7 +340,7 @@ describe('ToolItemCard', () => {
       kind: 'read',
       status: 'done',
       timestamp: 0,
-      path: '/Users/conan/Code/10.project/DCode/src/renderer/components/TerminalPanel.tsx',
+      path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/TerminalPanel.tsx',
       lineCount: 422,
       output: Array.from({ length: 80 }, (_, index) => `line ${index}`).join('\n'),
     };
@@ -497,7 +497,7 @@ describe('ToolItemCard', () => {
       kind: 'edit',
       status: 'done',
       timestamp: 0,
-      path: '/Users/conan/Code/10.project/DCode/src/renderer/components/ToolItemCard.tsx',
+      path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/ToolItemCard.tsx',
       linesAdded: 4,
       linesDeleted: 2,
       diff: '@@ -1,2 +1,2 @@\n-old\n+new',
@@ -535,7 +535,7 @@ describe('ToolItemCard', () => {
       kind: 'write',
       status: 'done',
       timestamp: 0,
-      path: '/Users/conan/Code/10.project/DCode/src/renderer/components/NewFile.tsx',
+      path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/NewFile.tsx',
       isNew: true,
     };
 

@@ -65,13 +65,13 @@ describe('getUserContext - currentDate 缓存稳定性', () => {
 });
 
 describe('getUserContext - 各字段收集', () => {
-  it('dcodeMdSources 注入', () => {
+  it('deepseekMdSources 注入', () => {
     const sources = [
-      { filePath: '/home/.dcode/DCODE.md', contents: '全局规则', scope: 'user' as const },
-      { filePath: '/proj/DCODE.md', contents: '项目规则', scope: 'project' as const },
+      { filePath: '/home/.deepseek/DEEPSEEK.md', contents: '全局规则', scope: 'user' as const },
+      { filePath: '/proj/DEEPSEEK.md', contents: '项目规则', scope: 'project' as const },
     ];
-    const ctx = getUserContext({ dcodeMdSources: sources });
-    expect(ctx.dcodeMdSources).toEqual(sources);
+    const ctx = getUserContext({ deepseekMdSources: sources });
+    expect(ctx.deepseekMdSources).toEqual(sources);
   });
 
   it('memoryContext 注入', () => {
@@ -139,8 +139,8 @@ describe('formatUserContext', () => {
 
   it('包含所有字段时结构完整', () => {
     const ctx = getUserContext({
-      dcodeMdSources: [
-        { filePath: '/proj/DCODE.md', contents: 'MD内容', scope: 'project' },
+      deepseekMdSources: [
+        { filePath: '/proj/DEEPSEEK.md', contents: 'MD内容', scope: 'project' },
       ],
       memoryContext: '记忆',
       enabledSkills: [{ name: 's1', description: 'd1' }],
@@ -149,8 +149,8 @@ describe('formatUserContext', () => {
     });
     const text = formatUserContext(ctx);
     expect(text).toContain('<system-reminder>');
-    expect(text).toContain('DCODE.md instructions');
-    expect(text).toContain('Contents of /proj/DCODE.md');
+    expect(text).toContain('DEEPSEEK.md instructions');
+    expect(text).toContain('Contents of /proj/DEEPSEEK.md');
     expect(text).toContain('# MCP Server Instructions');
     expect(text).not.toContain('# Memory');
     expect(text).not.toContain('# Available Skills');
@@ -181,10 +181,10 @@ describe('formatUserContext', () => {
 
   it('相同稳定输入两次格式化 byte 一致（缓存前缀稳定）', () => {
     const sources = [
-      { filePath: '/proj/DCODE.md', contents: 'MD', scope: 'project' as const },
+      { filePath: '/proj/DEEPSEEK.md', contents: 'MD', scope: 'project' as const },
     ];
     const opts = {
-      dcodeMdSources: sources,
+      deepseekMdSources: sources,
       memoryContext: '记忆',
       enabledSkills: [{ name: 's1', description: 'd1' }],
     };
@@ -195,10 +195,10 @@ describe('formatUserContext', () => {
     expect(text1).not.toContain('# Available Skills');
   });
 
-  it('DCODE.md 用 <INSTRUCTIONS> 包裹', () => {
+  it('DEEPSEEK.md 用 <INSTRUCTIONS> 包裹', () => {
     const ctx = getUserContext({
-      dcodeMdSources: [
-        { filePath: '/p/DCODE.md', contents: '内容', scope: 'project' },
+      deepseekMdSources: [
+        { filePath: '/p/DEEPSEEK.md', contents: '内容', scope: 'project' },
       ],
     });
     const text = formatUserContext(ctx);
@@ -221,8 +221,8 @@ describe('formatTailUserContext', () => {
 
   it('尾部 reminder 包含动态上下文，不包含 DEEPSEEK/MCP 稳定上下文', () => {
     const ctx = getUserContext({
-      dcodeMdSources: [
-        { filePath: '/proj/DCODE.md', contents: 'MD内容', scope: 'project' },
+      deepseekMdSources: [
+        { filePath: '/proj/DEEPSEEK.md', contents: 'MD内容', scope: 'project' },
       ],
       memoryContext: '记忆',
       enabledSkills: [{ name: 's1', description: 'd1' }],
@@ -234,7 +234,7 @@ describe('formatTailUserContext', () => {
     expect(text).toContain('# Available Skills');
     expect(text).toContain('# 附件清单');
     expect(text).toContain('# 当前日期');
-    expect(text).not.toContain('DCODE.md instructions');
+    expect(text).not.toContain('DEEPSEEK.md instructions');
     expect(text).not.toContain('# MCP Server Instructions');
   });
 });

@@ -21,7 +21,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
     if (isOpen) {
       setQuery('');
       setSelectedIndex(0);
-      window.dcodeApi.getConversations().then(data => {
+      window.deepseekApi.getConversations().then(data => {
         setConversations(data as Conversation[]);
       }).catch(err => console.error(err));
 

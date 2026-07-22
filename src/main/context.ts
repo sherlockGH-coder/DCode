@@ -1,5 +1,5 @@
 import { getOSInfo } from './utils/timeUtils';
-import type { DcodeMdSource } from './prompts';
+import type { DeepseekMdSource } from './prompts';
 
 /**
  * 返回「每日稳定」的日期字符串（含时区）。
@@ -59,8 +59,8 @@ export function formatSystemContext(context: SystemContext): string {
 }
 
 export interface UserContext {
-  /** DCODE.md 来源列表（包含文件路径、内容、scope） */
-  dcodeMdSources?: DcodeMdSource[];
+  /** DEEPSEEK.md 来源列表（包含文件路径、内容、scope） */
+  deepseekMdSources?: DeepseekMdSource[];
   /** 当前日期（每次请求时刷新） */
   currentDate?: string;
   /** Memory 上下文（跨对话记忆） */
@@ -78,7 +78,7 @@ export interface UserContext {
  * 稳定信息会作为首条隐藏 user 消息注入；动态/本轮信息会作为尾部隐藏 user 消息注入。
  */
 export function getUserContext(options: {
-  dcodeMdSources?: DcodeMdSource[];
+  deepseekMdSources?: DeepseekMdSource[];
   memoryContext?: string;
   enabledSkills?: Array<{ name: string; description: string }>;
   /** 已连接 MCP server 的使用说明（server 名 → instructions 文本） */
@@ -87,8 +87,8 @@ export function getUserContext(options: {
 }): UserContext {
   const context: UserContext = {};
 
-  if (options.dcodeMdSources && options.dcodeMdSources.length > 0) {
-    context.dcodeMdSources = options.dcodeMdSources;
+  if (options.deepseekMdSources && options.deepseekMdSources.length > 0) {
+    context.deepseekMdSources = options.deepseekMdSources;
   }
 
   context.currentDate = `今天的日期: ${getStableDateString()}`;
@@ -132,8 +132,8 @@ export function getUserContext(options: {
 export function formatUserContext(context: UserContext): string {
   const parts: string[] = [];
 
-  if (context.dcodeMdSources && context.dcodeMdSources.length > 0) {
-    const blocks = context.dcodeMdSources.map((source) => {
+  if (context.deepseekMdSources && context.deepseekMdSources.length > 0) {
+    const blocks = context.deepseekMdSources.map((source) => {
       const scopeLabel =
         source.scope === 'user'
           ? "user's private global instructions for all projects"
@@ -144,7 +144,7 @@ export function formatUserContext(context: UserContext): string {
       return `Contents of ${source.filePath} (${scopeLabel}):\n\n${source.contents}`;
     });
 
-    parts.push(`# DCODE.md instructions\n\n<INSTRUCTIONS>\n${blocks.join('\n\n')}\n</INSTRUCTIONS>`);
+    parts.push(`# DEEPSEEK.md instructions\n\n<INSTRUCTIONS>\n${blocks.join('\n\n')}\n</INSTRUCTIONS>`);
   }
 
   if (context.mcpInstructionsContext) {

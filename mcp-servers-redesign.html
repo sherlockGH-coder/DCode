@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP 服务器 — 原型重设计</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  :root {
+    --bg-page:        #F5F5F7;
+    --bg-sidebar:     #FAFAFA;
+    --bg-card:        #FFFFFF;
+    --border:         #E8E8ED;
+    --border-light:   #F0F0F5;
+    --text-primary:   #1D1D1F;
+    --text-secondary: #6E6E73;
+    --text-tertiary:  #A1A1A6;
+    --accent:         #3B82F6;
+    --accent-hover:   #2563EB;
+    --accent-subtle:  #EFF6FF;
+    --success:        #10B981;
+    --success-subtle: #ECFDF5;
+    --warning:        #F59E0B;
+    --warning-subtle: #FFFBEB;
+    --danger:         #EF4444;
+    --danger-subtle:  #FEF2F2;
+    --radius-sm:      6px;
+    --radius-md:      8px;
+    --radius-lg:      12px;
+    --radius-xl:      16px;
+    --shadow-card:    0 0 0 1px rgba(0,0,0,0.03), 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-card-hover: 0 0 0 1px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
+    --transition:     150ms ease;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== Sidebar ===== */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 12px;
+    gap: 6px;
+  }
+
+  .sidebar-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    margin-bottom: 8px;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+  }
+  .sidebar-back:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+  .sidebar-back svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .sidebar-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    cursor: text;
+  }
+  .sidebar-search svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.5; }
+
+  .sidebar-section {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    padding: 8px 12px 4px;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 450;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+  }
+  .sidebar-item:hover { background: rgba(0,0,0,0.04); color: var(--text-primary); }
+  .sidebar-item.active {
+    background: var(--accent-subtle);
+    color: var(--accent);
+    font-weight: 550;
+  }
+  .sidebar-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  /* ===== Main ===== */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ===== Top Bar ===== */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 32px 0;
+  }
+  .topbar-left h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+  }
+  .topbar-left p {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin-top: 3px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 550;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary svg { width: 16px; height: 16px; }
+
+  /* ===== Stats Bar ===== */
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    padding: 20px 32px 0;
+  }
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    flex: 1;
+    max-width: 200px;
+  }
+  .stat-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .stat-dot.green  { background: var(--success); box-shadow: 0 0 0 3px var(--success-subtle); }
+  .stat-dot.yellow { background: var(--warning); box-shadow: 0 0 0 3px var(--warning-subtle); }
+  .stat-dot.gray   { background: var(--text-tertiary); box-shadow: 0 0 0 3px rgba(0,0,0,0.04); }
+  .stat-info .stat-value { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+  .stat-info .stat-label { font-size: 12px; color: var(--text-tertiary); margin-top: 1px; }
+
+  /* ===== Content Area ===== */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 32px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ===== Server Card ===== */
+  .server-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xl);
+    padding: 20px 24px;
+    transition: all var(--transition);
+    cursor: default;
+  }
+  .server-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--border);
+  }
+
+  .server-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .server-card-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+  .server-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-md);
+    background: #F1F1F3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .server-icon svg { width: 20px; height: 20px; color: #6B7280; }
+
+  .server-meta { min-width: 0; }
+  .server-name-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .server-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+  }
+  .server-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 550;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+  .server-status.connected { color: #059669; background: var(--success-subtle); }
+  .server-status.connected .status-dot { background: var(--success); }
+  .server-status.error { color: #DC2626; background: var(--danger-subtle); }
+  .server-status.error .status-dot { background: var(--danger); }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+
+  .server-command {
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+    background: #F9FAFB;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .server-card-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .tool-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: #F9FAFB;
+    padding: 5px 12px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  /* Toggle Switch */
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .toggle input { display: none; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #D1D5DB;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  .toggle-slider::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform var(--transition);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::after { transform: translateX(20px); }
+
+  .server-actions {
+    display: flex;
+    gap: 2px;
+  }
+  .btn-icon {
+    width: 34px; height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    border-radius: var(--radius-md);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition: all var(--transition);
+    font-family: inherit;
+  }
+  .btn-icon:hover { background: #F3F4F6; color: var(--text-secondary); }
+  .btn-icon.danger:hover { background: var(--danger-subtle); color: var(--danger); }
+  .btn-icon svg { width: 16px; height: 16px; }
+
+  /* ===== Expandable Tools ===== */
+  .server-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-light);
+  }
+  .tool-chip {
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: #F9FAFB;
+    border: 1px solid var(--border-light);
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    transition: all var(--transition);
+  }
+  .tool-chip:hover {
+    background: var(--accent-subtle);
+    border-color: #BFDBFE;
+    color: var(--accent);
+  }
+
+  /* ===== Empty State ===== */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    color: var(--text-tertiary);
+    gap: 16px;
+  }
+  .empty-icon {
+    width: 56px; height: 56px;
+    border-radius: var(--radius-lg);
+    background: #F3F4F6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .empty-icon svg { width: 24px; height: 24px; color: var(--text-tertiary); }
+  .empty-state h3 { font-size: 15px; font-weight: 550; color: var(--text-secondary); }
+  .empty-state p { font-size: 13px; max-width: 280px; text-align: center; line-height: 1.5; }
+
+  /* ===== Scrollbar ===== */
+  .content::-webkit-scrollbar { width: 5px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 100px; }
+  .content::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+
+</style>
+</head>
+<body>
+
+<!-- ===== Sidebar ===== -->
+<aside class="sidebar">
+  <button class="sidebar-back">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m6-6-6 6 6 6"/></svg>
+    返回应用
+  </button>
+
+  <div class="sidebar-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    搜索设置...
+  </div>
+
+  <div class="sidebar-section">个人</div>
+  <button class="sidebar-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+    外观
+  </button>
+  <button class="sidebar-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+    配置
+  </button>
+  <button class="sidebar-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    语音输入
+  </button>
+  <button class="sidebar-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    网络搜索
+  </button>
+
+  <div class="sidebar-section">集成</div>
+  <button class="sidebar-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>
+    技能
+  </button>
+  <button class="sidebar-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    MCP 服务器
+  </button>
+
+  <div class="sidebar-section">控制</div>
+  <button class="sidebar-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    权限控制
+  </button>
+</aside>
+
+<!-- ===== Main Content ===== -->
+<main class="main">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>MCP 服务器</h1>
+      <p>管理工具服务器与连接状态</p>
+    </div>
+    <button class="btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      添加服务器
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <span class="stat-dot green"></span>
+      <div class="stat-info">
+        <div class="stat-value">3</div>
+        <div class="stat-label">已连接</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-dot yellow"></span>
+      <div class="stat-info">
+        <div class="stat-value">0</div>
+        <div class="stat-label">异常</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-dot gray"></span>
+      <div class="stat-info">
+        <div class="stat-value">1</div>
+        <div class="stat-label">已暂停</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Server List -->
+  <div class="content">
+
+    <!-- Server 1: ai-vision-mcp (connected) -->
+    <div class="server-card">
+      <div class="server-card-header">
+        <div class="server-card-left">
+          <div class="server-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2h10v6h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-1v-5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v5H5a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3h2V2Z"/><circle cx="12" cy="11" r="1"/></svg>
+          </div>
+          <div class="server-meta">
+            <div class="server-name-row">
+              <span class="server-name">ai-vision-mcp</span>
+              <span class="server-status connected">
+                <span class="status-dot"></span> 已连接
+              </span>
+            </div>
+            <span class="server-command">npx ai-vision-mcp</span>
+          </div>
+        </div>
+        <div class="server-card-right">
+          <span class="tool-count-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            4 个工具
+          </span>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="server-actions">
+            <button class="btn-icon" title="历史记录">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
+            <button class="btn-icon" title="编辑">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button class="btn-icon danger" title="删除">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="server-tools">
+        <span class="tool-chip">analyze_image</span>
+        <span class="tool-chip">compare_images</span>
+        <span class="tool-chip">detect_objects_in_image</span>
+        <span class="tool-chip">analyze_video</span>
+      </div>
+    </div>
+
+    <!-- Server 2: filesystem (connected) -->
+    <div class="server-card">
+      <div class="server-card-header">
+        <div class="server-card-left">
+          <div class="server-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2h10v6h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-1v-5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v5H5a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3h2V2Z"/><circle cx="12" cy="11" r="1"/></svg>
+          </div>
+          <div class="server-meta">
+            <div class="server-name-row">
+              <span class="server-name">filesystem</span>
+              <span class="server-status connected">
+                <span class="status-dot"></span> 已连接
+              </span>
+            </div>
+            <span class="server-command">npx @modelcontextprotocol/server-filesystem ~/projects</span>
+          </div>
+        </div>
+        <div class="server-card-right">
+          <span class="tool-count-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            6 个工具
+          </span>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="server-actions">
+            <button class="btn-icon" title="历史记录">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
+            <button class="btn-icon" title="编辑">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button class="btn-icon danger" title="删除">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="server-tools">
+        <span class="tool-chip">read_file</span>
+        <span class="tool-chip">write_file</span>
+        <span class="tool-chip">edit_file</span>
+        <span class="tool-chip">create_directory</span>
+        <span class="tool-chip">list_directory</span>
+        <span class="tool-chip">move_file</span>
+      </div>
+    </div>
+
+    <!-- Server 3: github (connected) -->
+    <div class="server-card">
+      <div class="server-card-header">
+        <div class="server-card-left">
+          <div class="server-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2h10v6h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-1v-5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v5H5a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3h2V2Z"/><circle cx="12" cy="11" r="1"/></svg>
+          </div>
+          <div class="server-meta">
+            <div class="server-name-row">
+              <span class="server-name">github</span>
+              <span class="server-status connected">
+                <span class="status-dot"></span> 已连接
+              </span>
+            </div>
+            <span class="server-command">npx @modelcontextprotocol/server-github</span>
+          </div>
+        </div>
+        <div class="server-card-right">
+          <span class="tool-count-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            8 个工具
+          </span>
+          <label class="toggle">
+            <input type="checkbox" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="server-actions">
+            <button class="btn-icon" title="历史记录">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
+            <button class="btn-icon" title="编辑">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button class="btn-icon danger" title="删除">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="server-tools">
+        <span class="tool-chip">search_repositories</span>
+        <span class="tool-chip">create_repository</span>
+        <span class="tool-chip">get_file_contents</span>
+        <span class="tool-chip">push_files</span>
+        <span class="tool-chip">create_issue</span>
+        <span class="tool-chip">create_pull_request</span>
+        <span class="tool-chip">fork_repository</span>
+        <span class="tool-chip">create_branch</span>
+      </div>
+    </div>
+
+    <!-- Server 4: postgres (paused) -->
+    <div class="server-card" style="opacity: 0.65;">
+      <div class="server-card-header">
+        <div class="server-card-left">
+          <div class="server-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2h10v6h2a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-1v-5a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v5H5a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3h2V2Z"/><circle cx="12" cy="11" r="1"/></svg>
+          </div>
+          <div class="server-meta">
+            <div class="server-name-row">
+              <span class="server-name">postgres</span>
+              <span class="server-status" style="color: #6B7280; background: #F3F4F6;">
+                <span class="status-dot" style="background: #9CA3AF;"></span> 已暂停
+              </span>
+            </div>
+            <span class="server-command">npx @modelcontextprotocol/server-postgres postgresql://localhost/mydb</span>
+          </div>
+        </div>
+        <div class="server-card-right">
+          <span class="tool-count-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            3 个工具
+          </span>
+          <label class="toggle">
+            <input type="checkbox">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="server-actions">
+            <button class="btn-icon" title="历史记录">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </button>
+            <button class="btn-icon" title="编辑">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button class="btn-icon danger" title="删除">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="server-tools">
+        <span class="tool-chip">query</span>
+        <span class="tool-chip">list_tables</span>
+        <span class="tool-chip">describe_table</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>

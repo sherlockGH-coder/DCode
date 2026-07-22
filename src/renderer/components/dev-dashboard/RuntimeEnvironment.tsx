@@ -26,12 +26,12 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
   const [error, setError] = React.useState<string | null>(null);
 
   const refresh = React.useCallback(async () => {
-    if (!activeProject || !window.dcodeApi?.gitGetCommitStatus) {
+    if (!activeProject || !window.deepseekApi?.gitGetCommitStatus) {
       setStatus(null);
       return;
     }
     try {
-      setStatus(await window.dcodeApi.gitGetCommitStatus(activeProject));
+      setStatus(await window.deepseekApi.gitGetCommitStatus(activeProject));
     } catch (refreshError) {
       console.error('[RuntimeEnvironment] failed to load git status:', refreshError);
       setStatus(null);
@@ -64,13 +64,13 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
     setBusyAction(pushAfterCommit ? 'commit-push' : 'commit');
     setError(null);
     try {
-      const commitResult = await window.dcodeApi.gitCommit(activeProject, message, includeUnstaged);
+      const commitResult = await window.deepseekApi.gitCommit(activeProject, message, includeUnstaged);
       if (!commitResult.success) {
         setError(commitResult.error || '提交失败。');
         return;
       }
       if (pushAfterCommit) {
-        const pushResult = await window.dcodeApi.gitPush(activeProject);
+        const pushResult = await window.deepseekApi.gitPush(activeProject);
         if (!pushResult.success) {
           await refresh();
           setError(pushResult.error || '提交成功，但推送失败。');
@@ -90,7 +90,7 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
     setBusyAction('push');
     setError(null);
     try {
-      const result = await window.dcodeApi.gitPush(activeProject);
+      const result = await window.deepseekApi.gitPush(activeProject);
       if (!result.success) {
         setError(result.error || '推送失败。');
         return;

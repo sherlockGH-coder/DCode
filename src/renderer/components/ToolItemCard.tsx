@@ -165,7 +165,7 @@ const ToolItemCard: React.FC<ToolItemCardProps> = ({ item, hideIcon = false }) =
     }
     const isHtml = ext === 'html' || ext === 'htm';
     const isMd = ext === 'md' || ext === 'markdown';
-    const result = await window.dcodeApi?.readFileContent(filePath);
+    const result = await window.deepseekApi?.readFileContent(filePath);
     if (result) {
       const langMap: Record<string, string> = {
         ts: 'typescript', tsx: 'tsx', js: 'javascript', jsx: 'jsx',

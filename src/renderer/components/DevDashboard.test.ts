@@ -36,7 +36,7 @@ function task(id: string, title: string, status: Task['status']): Task {
     description: '',
     status,
     scope: 'project',
-    projectPath: '/Users/conan/Code/10.project/DCode',
+    projectPath: '/Users/conan/Code/10.project/DeepSeek-App',
     blockedBy: [],
     blocks: [],
     isBackground: false,
@@ -74,7 +74,7 @@ describe('DevDashboard', () => {
       hasRemote: true,
       hasUpstream: true,
     });
-    (window as any).dcodeApi = {
+    (window as any).deepseekApi = {
       gitGetCommitStatus: taskMocks.gitGetCommitStatus,
       gitCommit: vi.fn(),
       gitPush: vi.fn(),
@@ -103,7 +103,7 @@ describe('DevDashboard', () => {
       kind: 'write',
       status: 'done',
       timestamp: 0,
-      path: '/Users/conan/Code/10.project/DCode/src/renderer/components/ToolItemCard.tsx',
+      path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/ToolItemCard.tsx',
       isNew: false,
       diff: '@@ -1 +1 @@\n-old\n+new',
     };
@@ -130,7 +130,7 @@ describe('DevDashboard', () => {
     act(() => {
       root?.render(React.createElement(DevDashboard, {
         activeConversationId: 'conv_1',
-        activeProject: '/Users/conan/Code/10.project/DCode',
+        activeProject: '/Users/conan/Code/10.project/DeepSeek-App',
         messages,
         onActiveTodoPresenceChange,
       }));
@@ -148,7 +148,7 @@ describe('DevDashboard', () => {
     await act(async () => {
       root?.render(React.createElement(DevDashboard, {
         activeConversationId: 'conv_1',
-        activeProject: '/Users/conan/Code/10.project/DCode',
+        activeProject: '/Users/conan/Code/10.project/DeepSeek-App',
         messages: [],
       }));
       await Promise.resolve();
@@ -171,7 +171,7 @@ describe('DevDashboard', () => {
     const renderDashboard = (messages: Message[]) => {
       root?.render(React.createElement(DevDashboard, {
         activeConversationId: 'conv_1',
-        activeProject: '/Users/conan/Code/10.project/DCode',
+        activeProject: '/Users/conan/Code/10.project/DeepSeek-App',
         messages,
       }));
     };
@@ -191,7 +191,7 @@ describe('DevDashboard', () => {
       kind: 'write',
       status: 'done',
       timestamp: 0,
-      path: '/Users/conan/Code/10.project/DCode/src/new.ts',
+      path: '/Users/conan/Code/10.project/DeepSeek-App/src/new.ts',
       isNew: true,
       diff: '@@ -0,0 +1 @@\n+export {}',
     };
@@ -231,7 +231,7 @@ describe('DevDashboard', () => {
     act(() => {
       root?.render(React.createElement(DevDashboard, {
         activeConversationId: 'conv_1',
-        activeProject: '/Users/conan/Code/10.project/DCode',
+        activeProject: '/Users/conan/Code/10.project/DeepSeek-App',
         messages: [{ id: 'assistant_done', role: 'assistant', content: '', toolItems: [completedPlan] }],
         onActiveTodoPresenceChange,
       }));
@@ -252,7 +252,7 @@ describe('DevDashboard', () => {
       kind: 'write',
       status: 'done',
       timestamp: 0,
-      path: '/Users/conan/Code/10.project/DCode/weather-card.html',
+      path: '/Users/conan/Code/10.project/DeepSeek-App/weather-card.html',
       isNew: false,
       diff: '@@ -1 +1 @@\n-old\n+new',
     };
@@ -268,12 +268,12 @@ describe('DevDashboard', () => {
     act(() => {
       root?.render(React.createElement(DevDashboard, {
         activeConversationId: 'conv_1',
-        activeProject: '/Users/conan/Code/10.project/DCode',
+        activeProject: '/Users/conan/Code/10.project/DeepSeek-App',
         messages,
       }));
     });
 
-    const changedFileButton = container.querySelector('[title="/Users/conan/Code/10.project/DCode/weather-card.html"]');
+    const changedFileButton = container.querySelector('[title="/Users/conan/Code/10.project/DeepSeek-App/weather-card.html"]');
     const fileIconWrapper = changedFileButton?.querySelector('.material-icon')?.parentElement;
 
     expect(fileIconWrapper?.className).toContain('grayscale');

@@ -6,7 +6,7 @@ import { globTool } from './glob';
 import type { ToolExecuteResult, ToolExecutionContext } from './types';
 
 async function withProject<T>(fn: (projectRoot: string) => Promise<T>): Promise<T> {
-  const projectRoot = await mkdtemp(join(tmpdir(), 'dcode-glob-'));
+  const projectRoot = await mkdtemp(join(tmpdir(), 'deepseek-glob-'));
   try {
     return await fn(projectRoot);
   } finally {

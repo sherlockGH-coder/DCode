@@ -24,7 +24,7 @@ export interface ApiProfile extends WithApiKey {
 
 export type ApiProfilePatch = Partial<Omit<ApiProfile, 'apiKeySet'>> & { id: string };
 
-/** 全局应用设置（持久化到 <userData>/dcode-app/settings.json） */
+/** 全局应用设置（持久化到 <userData>/deepseek-app/settings.json） */
 export interface AppSettings {
   schemaVersion: 1;
   /** 当前生效配置的兼容视图；运行时请求仍从这里派生 */

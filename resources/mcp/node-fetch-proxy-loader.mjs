@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const WRAPPER_PREFIX = 'dcode-node-fetch-proxy:';
+const WRAPPER_PREFIX = 'deepseek-node-fetch-proxy:';
 const requireFromCwd = createRequire(pathToFileURL(join(process.cwd(), '__deepseek_mcp_loader__.js')));
 
 export async function resolve(specifier, context, defaultResolve) {

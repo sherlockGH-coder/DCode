@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案一：暗色工业风 · Dark Industrial</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg-root: #0d0d0f;
+    --bg-surface: #141417;
+    --bg-elevated: #1a1a1e;
+    --bg-hover: #222228;
+    --bg-active: #2a2a32;
+    --border-subtle: rgba(255,255,255,0.06);
+    --border-mid: rgba(255,255,255,0.10);
+    --text-primary: #d4d4d8;
+    --text-secondary: #8b8b96;
+    --text-muted: #5c5c66;
+    --accent: #f0a849;
+    --accent-dim: rgba(240,168,73,0.15);
+    --danger: #e0556a;
+    --danger-dim: rgba(224,85,106,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-root);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout chassis ── */
+  .app-frame {
+    width: 900px;
+    max-width: 94vw;
+    height: 600px;
+    max-height: 85vh;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 24px 80px rgba(0,0,0,0.55);
+  }
+
+  /* ── Minimal toolbar ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px 0;
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .toolbar-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    cursor: default;
+  }
+  .toolbar-dot.red  { background: #e0556a; }
+  .toolbar-dot.amber { background: #f0a849; }
+  .toolbar-dot.green { background: #44b678; }
+  .app-frame:hover .toolbar-dot { opacity: 0.85; }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    padding: 6px 16px 0;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .tab-bar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+
+  .tab {
+    position: relative;
+    padding: 8px 18px 10px;
+    font-size: 12.5px;
+    font-weight: 500;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 8px 8px 0 0;
+    transition: color 0.18s, background 0.18s;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+  }
+
+  .tab:hover {
+    color: var(--text-secondary);
+    background: var(--bg-hover);
+  }
+
+  .tab.active {
+    color: var(--accent);
+    background: var(--bg-elevated);
+  }
+
+  .tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 8px;
+    right: 8px;
+    height: 1.5px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+
+  .tab-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    margin-left: 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    color: transparent;
+    transition: color 0.15s, background 0.15s;
+    vertical-align: -1px;
+  }
+  .tab:hover .tab-close,
+  .tab.active .tab-close {
+    color: var(--text-muted);
+  }
+  .tab-close:hover {
+    background: var(--danger-dim);
+    color: var(--danger) !important;
+  }
+
+  .tab-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    margin-left: 4px;
+    margin-bottom: 2px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.18s, background 0.18s;
+    font-size: 15px;
+  }
+  .tab-add:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+  }
+
+  /* ── Terminal body ── */
+  .terminal-stage {
+    flex: 1;
+    min-height: 0;
+    background: var(--bg-elevated);
+    margin: 0;
+    border-radius: 0 0 13px 13px;
+    padding: 14px 20px;
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    position: relative;
+  }
+
+  /* Subtle noise texture overlay */
+  .terminal-stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.025;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  .terminal-line {
+    display: flex;
+    gap: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    min-height: 1.55em;
+  }
+
+  .prompt {
+    color: var(--accent);
+    font-weight: 500;
+    user-select: none;
+    margin-right: 0.5ch;
+  }
+
+  .cmd {
+    color: var(--text-primary);
+  }
+
+  .output {
+    color: var(--text-secondary);
+  }
+
+  .output-dim {
+    color: var(--text-muted);
+  }
+
+  .output-green {
+    color: #44b678;
+  }
+
+  .output-error {
+    color: var(--danger);
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 7.5px;
+    height: 16px;
+    background: var(--accent);
+    vertical-align: -3px;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="app-frame">
+  <!-- Chrome dots -->
+  <div class="toolbar">
+    <span class="toolbar-dot red"></span>
+    <span class="toolbar-dot amber"></span>
+    <span class="toolbar-dot green"></span>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <div class="tab active">
+      zsh
+      <span class="tab-close">✕</span>
+    </div>
+    <div class="tab">
+      server
+      <span class="tab-close">✕</span>
+    </div>
+    <div class="tab">
+      logs
+      <span class="tab-close">✕</span>
+    </div>
+    <div class="tab-add" title="新建终端">+</div>
+  </div>
+
+  <!-- Terminal output -->
+  <div class="terminal-stage">
+    <div class="terminal-line"><span class="output-dim">Last login: Thu Jul 17 14:32:19 on ttys001</span></div>
+    <div class="terminal-line">&nbsp;</div>
+    <div class="terminal-line"><span class="prompt">~</span><span class="cmd">neofetch</span></div>
+    <div class="terminal-line"><span class="output-green">       .---.        </span><span class="output">conan@MacBook-Pro</span></div>
+    <div class="terminal-line"><span class="output-green">      (     )       </span><span class="output-dim">─────────────────</span></div>
+    <div class="terminal-line"><span class="output-green">      (......)      </span><span class="output">OS: macOS 24.3.0 arm64</span></div>
+    <div class="terminal-line"><span class="output-green">       \     /      </span><span class="output">Shell: zsh 5.9</span></div>
+    <div class="terminal-line"><span class="output-green">        ^^^^^       </span><span class="output">Kernel: Darwin 24.3.0</span></div>
+    <div class="terminal-line">&nbsp;</div>
+    <div class="terminal-line"><span class="prompt">~/project</span><span class="cmd">git status</span></div>
+    <div class="terminal-line"><span class="output">On branch main</span></div>
+    <div class="terminal-line"><span class="output">nothing to commit, working tree clean</span></div>
+    <div class="terminal-line">&nbsp;</div>
+    <div class="terminal-line"><span class="prompt">~/project</span><span class="cmd">npm run dev</span></div>
+    <div class="terminal-line"><span class="output-green">  VITE v5.4.2  ready in 328 ms</span></div>
+    <div class="terminal-line"><span class="output-dim">  ➜  Local:   http://localhost:5173/</span></div>
+    <div class="terminal-line"><span class="output-dim">  ➜  Network: http://192.168.1.5:5173/</span></div>
+    <div class="terminal-line">&nbsp;</div>
+    <div class="terminal-line"><span class="prompt">~/project</span><span class="cursor-blink"></span></div>
+  </div>
+</div>
+</body>
+</html>

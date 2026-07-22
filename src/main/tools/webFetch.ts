@@ -92,7 +92,7 @@ async function extractLocally(url: string, signal?: AbortSignal): Promise<Extrac
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; DCodeApp/1.0)',
+        'User-Agent': 'Mozilla/5.0 (compatible; DeepSeekApp/1.0)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
       signal: mergeAbortSignals(signal, AbortSignal.timeout(15000)),

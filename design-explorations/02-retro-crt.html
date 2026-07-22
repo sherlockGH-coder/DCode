@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案二：经典 CRT 绿屏 · Retro Phosphor</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --phosphor: #33ff66;
+    --phosphor-dim: #1a9940;
+    --phosphor-glow: rgba(51,255,102,0.18);
+    --bg-screen: #0a0f0a;
+    --bg-bezel: #2a2824;
+    --bg-bezel-dark: #1e1c18;
+    --bezel-border: #3a3630;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    background: #0d0b09;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+    /* subtle vignette */
+    background: radial-gradient(ellipse at center, #181510 0%, #080604 100%);
+  }
+
+  /* ── CRT Monitor bezel ── */
+  .crt-monitor {
+    width: 920px;
+    max-width: 94vw;
+    background: var(--bg-bezel);
+    border-radius: 18px 18px 12px 12px;
+    padding: 24px 28px 32px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 4px 0 #1a1712,
+      0 8px 0 #14120e,
+      0 12px 24px rgba(0,0,0,0.6),
+      0 32px 64px rgba(0,0,0,0.5);
+    border: 1px solid var(--bezel-border);
+    position: relative;
+  }
+
+  /* Ventilation grill decoration */
+  .crt-monitor::after {
+    content: '';
+    position: absolute;
+    bottom: 10px;
+    left: 28px;
+    right: 28px;
+    height: 6px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--bg-bezel-dark) 0px,
+      var(--bg-bezel-dark) 3px,
+      var(--bg-bezel) 3px,
+      var(--bg-bezel) 6px
+    );
+    border-radius: 2px;
+  }
+
+  .crt-brand {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: #4a453a;
+    margin-bottom: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ── Screen ── */
+  .crt-screen {
+    background: var(--bg-screen);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 520px;
+    max-height: 70vh;
+    position: relative;
+    box-shadow:
+      inset 0 0 80px rgba(51,255,102,0.04),
+      0 0 0 2px #111010;
+    border: 1px solid #1a1a16;
+  }
+
+  /* Scanlines */
+  .crt-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.12) 0px,
+      rgba(0,0,0,0.12) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  /* Screen glow */
+  .crt-screen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 9;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 30%, rgba(51,255,102,0.06) 0%, transparent 70%);
+  }
+
+  /* ── Tab bar: retro toggle switches ── */
+  .crt-tab-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 8px 14px 0;
+    flex-shrink: 0;
+    background: rgba(51,255,102,0.03);
+    border-bottom: 1px solid rgba(51,255,102,0.12);
+    position: relative;
+    z-index: 11;
+  }
+
+  .crt-tab {
+    position: relative;
+    padding: 7px 16px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--phosphor-dim);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    border-radius: 4px 4px 0 0;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+
+  .crt-tab:hover {
+    color: var(--phosphor);
+    background: rgba(51,255,102,0.06);
+  }
+
+  .crt-tab.active {
+    color: var(--phosphor);
+    background: rgba(51,255,102,0.10);
+    text-shadow: 0 0 8px var(--phosphor-glow);
+  }
+
+  .crt-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 6px;
+    right: 6px;
+    height: 2px;
+    background: var(--phosphor);
+    box-shadow: 0 0 6px var(--phosphor), 0 0 12px var(--phosphor-glow);
+  }
+
+  .crt-tab-close {
+    display: inline-block;
+    margin-left: 6px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    font-size: 10px;
+  }
+  .crt-tab:hover .crt-tab-close,
+  .crt-tab.active .crt-tab-close {
+    opacity: 0.6;
+  }
+  .crt-tab-close:hover {
+    opacity: 1 !important;
+    color: #ff4444;
+    text-shadow: 0 0 6px rgba(255,68,68,0.4);
+  }
+
+  .crt-tab-add {
+    margin-left: 4px;
+    padding: 6px 10px;
+    color: var(--phosphor-dim);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .crt-tab-add:hover {
+    color: var(--phosphor);
+    background: rgba(51,255,102,0.08);
+  }
+
+  /* ── Terminal body ── */
+  .crt-body {
+    flex: 1;
+    min-height: 0;
+    padding: 16px 20px;
+    overflow-y: auto;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--phosphor);
+    position: relative;
+    z-index: 11;
+    text-shadow: 0 0 2px rgba(51,255,102,0.3);
+  }
+
+  .crt-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+    min-height: 1.6em;
+  }
+
+  .crt-prompt {
+    color: var(--phosphor);
+    font-weight: 600;
+  }
+
+  .crt-cmd {
+    color: #ccffcc;
+  }
+
+  .crt-dim {
+    color: var(--phosphor-dim);
+    text-shadow: none;
+  }
+
+  .crt-bright {
+    color: #aaffaa;
+    font-weight: 500;
+  }
+
+  .crt-error {
+    color: #ff6644;
+    text-shadow: 0 0 4px rgba(255,102,68,0.3);
+  }
+
+  .crt-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 17px;
+    background: var(--phosphor);
+    vertical-align: -3px;
+    animation: crt-blink 0.9s step-end infinite;
+    box-shadow: 0 0 6px var(--phosphor-glow);
+  }
+
+  @keyframes crt-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+
+  /* Power LED */
+  .power-led {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--phosphor);
+    box-shadow: 0 0 6px var(--phosphor), 0 0 12px var(--phosphor-glow);
+    margin-right: 8px;
+    animation: led-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes led-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+</style>
+</head>
+<body>
+<div class="crt-monitor">
+  <div class="crt-brand">DCODE · Terminal</div>
+
+  <div class="crt-screen">
+    <!-- Tab switches -->
+    <div class="crt-tab-row">
+      <span class="power-led"></span>
+      <div class="crt-tab active">
+        ZSH
+        <span class="crt-tab-close">✕</span>
+      </div>
+      <div class="crt-tab">
+        BUILD
+        <span class="crt-tab-close">✕</span>
+      </div>
+      <div class="crt-tab">
+        SSH
+        <span class="crt-tab-close">✕</span>
+      </div>
+      <div class="crt-tab-add" title="NEW TERM">▸ +</div>
+    </div>
+
+    <!-- Terminal content -->
+    <div class="crt-body">
+      <div class="crt-line"><span class="crt-dim">[SYSTEM] Terminal ready — Thu Jul 17 14:32:19 UTC</span></div>
+      <div class="crt-line"></div>
+      <div class="crt-line"><span class="crt-prompt">~/DCode ▸</span> <span class="crt-cmd">ls -la</span></div>
+      <div class="crt-line"><span class="crt-bright">drwxr-xr-x  22 conan  staff   704 Jul 17 14:30 .</span></div>
+      <div class="crt-line"><span class="crt-bright">drwxr-xr-x   8 conan  staff   256 Jul 15 09:12 ..</span></div>
+      <div class="crt-line">drwxr-xr-x   5 conan  staff   160 Jul 17 10:22 src</div>
+      <div class="crt-line">-rw-r--r--   1 conan  staff  2048 Jul 16 18:45 package.json</div>
+      <div class="crt-line">-rw-r--r--   1 conan  staff  8192 Jul 17 14:28 README.md</div>
+      <div class="crt-line"></div>
+      <div class="crt-line"><span class="crt-prompt">~/DCode ▸</span> <span class="crt-cmd">git log --oneline -3</span></div>
+      <div class="crt-line"><span class="crt-bright">a3f2c1d</span> feat: add terminal panel component</div>
+      <div class="crt-line"><span class="crt-bright">7e8b2f1</span> fix: correct dark mode background</div>
+      <div class="crt-line"><span class="crt-bright">1d4a9e0</span> chore: update dependencies</div>
+      <div class="crt-line"></div>
+      <div class="crt-line"><span class="crt-prompt">~/DCode ▸</span> <span class="crt-cmd">npm test</span></div>
+      <div class="crt-line">  <span class="crt-bright">✓</span> TerminalPanel renders correctly</div>
+      <div class="crt-line">  <span class="crt-bright">✓</span> Tab switching works</div>
+      <div class="crt-line">  <span class="crt-bright">✓</span> Close tab triggers cleanup</div>
+      <div class="crt-line"><span class="crt-dim">  Tests: 3 passed, 3 total</span></div>
+      <div class="crt-line"></div>
+      <div class="crt-line"><span class="crt-prompt">~/DCode ▸</span> <span class="crt-cursor"></span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

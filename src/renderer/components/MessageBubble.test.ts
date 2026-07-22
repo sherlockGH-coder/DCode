@@ -77,7 +77,7 @@ describe('MessageBubble', () => {
       IS_REACT_ACT_ENVIRONMENT: true,
     });
     appContextMocks.setPreview.mockReset();
-    window.dcodeApi = {
+    window.deepseekApi = {
       readFileContent: vi.fn().mockResolvedValue({
         content: 'line one\nline two\nline three\n',
         name: 'example.ts',
@@ -284,7 +284,7 @@ describe('MessageBubble', () => {
       link?.dispatchEvent(new window.Event('click', { bubbles: true, cancelable: true }));
     });
 
-    expect(window.dcodeApi.readFileContent).toHaveBeenCalledWith('/Users/conan/project/src/example.ts');
+    expect(window.deepseekApi.readFileContent).toHaveBeenCalledWith('/Users/conan/project/src/example.ts');
     expect(appContextMocks.setPreview).toHaveBeenCalledWith(expect.objectContaining({
       type: 'code',
       title: 'example.ts',

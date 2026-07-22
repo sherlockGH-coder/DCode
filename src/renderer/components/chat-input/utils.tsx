@@ -37,7 +37,7 @@ export function attachmentWarning(a: Attachment): string | null {
       : `${a.name} 较大 (${formatBytes(a.size)})，可能超出模型上下文。建议改用 grep 检索关键内容`;
   }
   if (a.kind === 'image' || a.kind === 'audio' || a.kind === 'video') {
-    return `当前模型不支持 ${a.kind}，模型只能看到路径与元信息`;
+    return `当前 DeepSeek 模型不支持 ${a.kind}，模型只能看到路径与元信息`;
   }
   return null;
 }

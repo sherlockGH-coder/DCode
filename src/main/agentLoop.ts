@@ -30,7 +30,7 @@ export async function agentLoop(
     attachmentWhitelist,
     enabledSkills,
     systemPrompt,
-    dcodeMdSources,
+    deepseekMdSources,
     signal,
     conversationId = null,
     turnId,
@@ -98,7 +98,7 @@ export async function agentLoop(
   const systemContext = getSystemContext(projectPath);
 
   const userContext = getUserContext({
-    dcodeMdSources,
+    deepseekMdSources,
     memoryContext: config.memoryContext,
     enabledSkills,
     mcpInstructions: config.mcpInstructions,

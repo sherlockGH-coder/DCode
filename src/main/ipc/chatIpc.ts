@@ -3,7 +3,7 @@ import { agentLoop } from '../agentLoop';
 import { toolRegistry } from '../tools';
 import { skillsManager } from '../skills';
 import { settingsManager } from '../settings';
-import { getEffectiveSystemPrompt, loadDcodeMdSources } from '../prompts';
+import { getEffectiveSystemPrompt, loadDeepseekMdSources } from '../prompts';
 import { approvalService } from '../approvalService';
 import { logChatEvent } from '../logger';
 import { compactConversation } from '../compact';
@@ -90,7 +90,7 @@ export function registerChatIpc(): void {
         .getEnabled(projectPath)
         .map((s) => ({ name: s.name, description: s.description }));
 
-      const dcodeMdSources = loadDcodeMdSources(projectPath);
+      const deepseekMdSources = loadDeepseekMdSources(projectPath);
 
       const mcpInstructions = mcpManager
         .getActiveInstructions()
@@ -261,7 +261,7 @@ export function registerChatIpc(): void {
             attachmentWhitelist,
             enabledSkills,
             systemPrompt: getEffectiveSystemPrompt(),
-            dcodeMdSources,
+            deepseekMdSources,
             mcpInstructions,
             signal: controller.signal,
             approvalWebContentsId: event.sender.id,

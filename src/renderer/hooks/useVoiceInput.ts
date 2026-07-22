@@ -88,7 +88,7 @@ export function useVoiceInput(options: UseVoiceInputOptions): UseVoiceInputResul
       cleanupCapture();
 
       const audioBuffer = await blob.arrayBuffer();
-      const result = await window.dcodeApi.transcribeSpeech(audioBuffer, blob.type);
+      const result = await window.deepseekApi.transcribeSpeech(audioBuffer, blob.type);
       transcribedRef.current(result.text);
       setElapsedMs(0);
       setErrorMessage(null);

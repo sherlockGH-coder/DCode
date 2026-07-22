@@ -103,14 +103,7 @@ async function main() {
   console.log('[native-smoke] database, PTY, and document dependencies passed');
 }
 
-function exitAfterFlush(code) {
-  const stream = code === 0 ? process.stdout : process.stderr;
-  stream.write('', () => process.exit(code));
-}
-
-main()
-  .then(() => exitAfterFlush(0))
-  .catch((error) => {
-    console.error('[native-smoke] failed:', error);
-    exitAfterFlush(1);
-  });
+main().catch((error) => {
+  console.error('[native-smoke] failed:', error);
+  process.exitCode = 1;
+});

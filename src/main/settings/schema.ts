@@ -3,7 +3,7 @@ import type { ApiProfile, ApiProtocol, AppSettings, BashExecPolicy, SpeechProvid
 import { env } from '../env';
 
 export const STATE_FILE = 'settings.json';
-export const USER_SETTINGS_DIR = '.dcode';
+export const USER_SETTINGS_DIR = '.deepseek';
 export const SPEECH_MIN_DURATION_SECONDS = 5;
 export const SPEECH_MAX_DURATION_SECONDS = 180;
 export const SPEECH_DEFAULT_DURATION_SECONDS = 60;

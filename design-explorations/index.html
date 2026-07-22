@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>终端面板设计探索 · DCode</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #fafafa;
+    --card-bg: #ffffff;
+    --border: #e8e8ec;
+    --text: #1a1a1e;
+    --text-secondary: #6b6b76;
+    --accent: #3b6cf4;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131316;
+      --card-bg: #1c1c20;
+      --border: #2a2a32;
+      --text: #e4e4ec;
+      --text-secondary: #8e8e9a;
+      --accent: #6b8cff;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 48px 24px 64px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin-bottom: 40px;
+    line-height: 1.5;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  @media (max-width: 800px) {
+    .grid { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .card:hover {
+    border-color: rgba(59,108,244,0.25);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  .card-preview {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .card-preview iframe {
+    width: 200%;
+    height: 200%;
+    border: none;
+    transform: scale(0.5);
+    transform-origin: 0 0;
+    pointer-events: none;
+  }
+
+  .card-info {
+    padding: 18px 20px 20px;
+  }
+
+  .card-info h2 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(59,108,244,0.08);
+    color: var(--accent);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .card-open {
+    margin-top: 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>终端面板 · 设计探索</h1>
+  <p class="subtitle">
+    针对「暗色模式下背景为白色」和「Tab 设计不好看」两个问题，提供四种截然不同的视觉方案。<br>
+    以及一个完整的 DCode 品牌设计系统原型。点击卡片直接打开对应 HTML 页面，直观对比感受。
+  </p>
+
+  <div class="grid">
+    <!-- Card 1 -->
+    <a href="01-dark-industrial.html" class="card" target="_blank">
+      <div class="card-preview">
+        <iframe src="01-dark-industrial.html" loading="lazy"></iframe>
+      </div>
+      <div class="card-info">
+        <span class="card-tag">暗色工业风</span>
+        <h2>Dark Industrial</h2>
+        <p class="card-desc">
+          深色底盘一体化设计，终端与界面无缝融合。Tab 采用「底部高亮条」指示激活态，
+          整体克制、专业，像录音室控制台的质感。琥珀色点缀打破沉闷。
+        </p>
+        <div class="card-open">打开预览 →</div>
+      </div>
+    </a>
+
+    <!-- Card 2 -->
+    <a href="02-retro-crt.html" class="card" target="_blank">
+      <div class="card-preview">
+        <iframe src="02-retro-crt.html" loading="lazy"></iframe>
+      </div>
+      <div class="card-info">
+        <span class="card-tag">经典 CRT</span>
+        <h2>Retro Phosphor</h2>
+        <p class="card-desc">
+          纯黑屏幕 + 绿色荧光字 + 扫描线效果，Tab 模拟老式硬件拨动开关，
+          带电源指示灯。复古极客感强烈，怀旧但不廉价。
+        </p>
+        <div class="card-open">打开预览 →</div>
+      </div>
+    </a>
+
+    <!-- Card 3 -->
+    <a href="03-neo-glass.html" class="card" target="_blank">
+      <div class="card-preview">
+        <iframe src="03-neo-glass.html" loading="lazy"></iframe>
+      </div>
+      <div class="card-info">
+        <span class="card-tag">毛玻璃新拟态</span>
+        <h2>Neo-Glass</h2>
+        <p class="card-desc">
+          磨砂玻璃面板 + backdrop-blur，背景有动态渐变色缓慢流动。
+          Tab 设计为悬浮胶囊，激活态带发光光晕。现代、轻盈、有呼吸感。
+        </p>
+        <div class="card-open">打开预览 →</div>
+      </div>
+    </a>
+
+    <!-- Card 4 -->
+    <a href="04-editor-native.html" class="card" target="_blank">
+      <div class="card-preview">
+        <iframe src="04-editor-native.html" loading="lazy"></iframe>
+      </div>
+      <div class="card-info">
+        <span class="card-tag">编辑器原生</span>
+        <h2>Editor-Native</h2>
+        <p class="card-desc">
+          借鉴 VS Code 面板 Tab 风格：顶部彩色标记激活态、文件类型色点、
+          面包屑路径栏、行悬停高亮。对开发者最直觉、学习成本最低。
+        </p>
+        <div class="card-open">打开预览 →</div>
+      </div>
+    </a>
+
+    <!-- Card 5: Blueprint Design System -->
+    <a href="05-blueprint.html" class="card" target="_blank" style="grid-column: 1 / -1;">
+      <div class="card-preview" style="aspect-ratio: 21 / 9;">
+        <iframe src="05-blueprint.html" loading="lazy"></iframe>
+      </div>
+      <div class="card-info">
+        <span class="card-tag" style="background: rgba(6,182,212,0.12); color: #06b6d4;">设计系统原型</span>
+        <h2>Blueprint — DCode 品牌设计系统</h2>
+        <p class="card-desc">
+          以工程蓝图为概念隐喻的完整设计系统。深色蓝图底色 + 青色网格线 + 工程标注风格。
+          包含侧栏、顶栏、快捷操作瓷砖、输入区域、上下文栏、键盘提示等完整欢迎页。
+          为 DCode 建立独特的品牌视觉语言："你是一个在蓝图上构建软件的工程师。"
+        </p>
+        <div class="card-open">打开预览 →</div>
+      </div>
+    </a>
+
+    <!-- Card 6: Precision Workbench -->
+    <a href="06-workbench.html" class="card" target="_blank" style="grid-column: 1 / -1;">
+      <div class="card-preview" style="aspect-ratio: 21 / 9;">
+        <iframe src="06-workbench.html" loading="lazy"></iframe>
+      </div>
+      <div class="card-info">
+        <span class="card-tag" style="background: rgba(8,145,178,0.10); color: #0891b2;">品牌设计系统 v2</span>
+        <h2>Precision Workbench — 精密工作台</h2>
+        <p class="card-desc">
+          以「工程工作台」为概念隐喻：白色dot-grid工程图纸表面、DM Mono极客字体、仪器氰蓝 accent、校准标记、LED状态指示灯、紧凑工具排列。
+          冷静、克制、紧凑，每一个像素都有工程意图。这是DCode应该成为的样子。
+        </p>
+        <div class="card-open">打开预览 →</div>
+      </div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

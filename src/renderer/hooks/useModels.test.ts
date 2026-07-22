@@ -93,7 +93,7 @@ describe('useModels', () => {
 
     activeModels = [OLD_MODEL];
     settingsChanged = undefined;
-    (window as any).dcodeApi = {
+    (window as any).deepseekApi = {
       getModels: vi.fn(async () => activeModels),
       getSettings: vi.fn(async () => makeSettings(OLD_MODEL, [OLD_MODEL], 'old')),
       patchSettings: vi.fn(),

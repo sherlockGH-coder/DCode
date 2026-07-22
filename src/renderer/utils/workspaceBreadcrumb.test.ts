@@ -4,12 +4,12 @@ describe('workspaceBreadcrumb', () => {
   it('builds real project-relative segments from an absolute file path', () => {
     const segments = buildWorkspaceBreadcrumbSegments({
       title: 'ArtifactPanel.tsx',
-      filePath: '/Users/conan/Code/DCode/src/renderer/components/ArtifactPanel.tsx',
-      projectPath: '/Users/conan/Code/DCode',
+      filePath: '/Users/conan/Code/DeepSeek-App/src/renderer/components/ArtifactPanel.tsx',
+      projectPath: '/Users/conan/Code/DeepSeek-App',
     });
 
     expect(segments.map((segment) => segment.label)).toEqual([
-      'DCode',
+      'DeepSeek-App',
       'src',
       'renderer',
       'components',
@@ -35,7 +35,7 @@ describe('workspaceBreadcrumb', () => {
   it('does not fake a project breadcrumb for previews without a file path', () => {
     const segments = buildWorkspaceBreadcrumbSegments({
       title: 'typescript',
-      projectPath: '/Users/conan/Code/DCode',
+      projectPath: '/Users/conan/Code/DeepSeek-App',
     });
 
     expect(segments.map((segment) => segment.label)).toEqual(['typescript']);
@@ -45,7 +45,7 @@ describe('workspaceBreadcrumb', () => {
     const segments = buildWorkspaceBreadcrumbSegments({
       title: 'report.md',
       filePath: '/tmp/reports/report.md',
-      projectPath: '/Users/conan/Code/DCode',
+      projectPath: '/Users/conan/Code/DeepSeek-App',
     });
 
     expect(segments.map((segment) => segment.label)).toEqual(['tmp', 'reports', 'report.md']);

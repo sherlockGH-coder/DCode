@@ -223,7 +223,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
     setUndoStatus('undoing');
     const success = onUndoChanges
       ? await onUndoChanges()
-      : (await window.dcodeApi.undoChanges(undoEntries)).success;
+      : (await window.deepseekApi.undoChanges(undoEntries)).success;
     if (!isMountedRef.current) return;
     if (success) {
       setUndoStatus('undone');

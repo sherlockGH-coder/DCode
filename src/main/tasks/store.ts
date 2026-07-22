@@ -4,7 +4,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import type { Task } from '../../shared/types';
 
 const USER_FILE = 'tasks.json';
-const PROJECT_DIR = '.dcode';
+const PROJECT_DIR = '.deepseek';
 const PROJECT_FILE = 'tasks.json';
 
 interface PersistedShape {

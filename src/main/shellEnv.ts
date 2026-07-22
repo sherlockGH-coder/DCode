@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { PROXY_ENV_KEYS } from './proxyEnv';
 import { debugLog } from './logger';
 
-const MARKER = '___DCODE_SHELL_ENV_MARKER_97531___';
+const MARKER = '___DEEPSEEK_SHELL_ENV_MARKER_97531___';
 
 const KEYS_TO_MERGE = [
   'PATH',

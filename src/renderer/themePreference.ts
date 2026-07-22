@@ -1,7 +1,7 @@
 export type ThemePreference = 'system' | 'light' | 'dark';
 
-export const THEME_STORAGE_KEY = 'dcode.theme';
-export const THEME_CHANGE_EVENT = 'dcode-theme-change';
+export const THEME_STORAGE_KEY = 'deepseek.theme';
+export const THEME_CHANGE_EVENT = 'deepseek-theme-change';
 
 export function getThemePreference(): ThemePreference {
   const stored = window.localStorage.getItem(THEME_STORAGE_KEY);

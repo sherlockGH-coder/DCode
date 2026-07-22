@@ -38,7 +38,7 @@ function textResponse(text) {
   ]);
 }
 
-const userData = mkdtempSync(join(tmpdir(), 'dcode-plan-shot-'));
+const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-shot-'));
 let count = 0;
 const server = createServer((req, res) => {
   let body = '';
@@ -60,7 +60,7 @@ writeFileSync(join(userData, 'settings.json'), JSON.stringify({
 
 const app = await electron.launch({
   args: [resolve('out/main/index.js')],
-  env: { ...process.env, DCODE_E2E_USER_DATA_DIR: userData },
+  env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
 });
 const page = await app.firstWindow();
 await page.waitForLoadState('domcontentloaded');

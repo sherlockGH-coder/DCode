@@ -16,12 +16,9 @@ function canonicalFilePath(filePath: string): string | null {
 
 function parseLocalFileUrl(requestUrl: string): string | null {
   try {
-    const prefix = 'local-file://';
-    if (!requestUrl.startsWith(prefix)) return null;
-    let pathname = decodeURIComponent(requestUrl.slice(prefix.length));
-    if (process.platform === 'win32' && /^\/[A-Za-z]:[\\/]/.test(pathname)) {
-      pathname = pathname.slice(1);
-    }
+    const url = new URL(requestUrl);
+    if (url.protocol !== 'local-file:') return null;
+    const pathname = decodeURIComponent(url.pathname);
     if (!pathname || pathname.includes('\0')) return null;
     if (!isAbsolute(pathname)) return null;
     return resolve(pathname);

@@ -12,7 +12,7 @@ describe('groupExploration', () => {
         kind: 'read',
         status: 'done',
         timestamp: 0,
-        path: '/Users/conan/Code/10.project/DCode/src/renderer/components/preview/DiffView.tsx',
+        path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/preview/DiffView.tsx',
         lineCount: 520,
       },
       {
@@ -33,7 +33,7 @@ describe('groupExploration', () => {
         kind: 'list_directory',
         status: 'done',
         timestamp: 2,
-        path: '/Users/conan/Code/10.project/DCode/src/renderer/components/preview',
+        path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/preview',
         totalCount: 5,
       },
     ];

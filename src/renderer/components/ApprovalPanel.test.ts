@@ -165,7 +165,7 @@ describe('ApprovalPanel', () => {
     expect(isDenyFeedbackSubmitShortcut({ key: 'Enter', metaKey: false, ctrlKey: true })).toBe(true);
   });
 
-  it('keeps mouse hover selection and mouse click confirmation', () => {
+  it('ignores stationary hover, tracks pointer movement, and confirms mouse clicks', () => {
     const onConfirm = vi.fn();
     const item: ToolItem = {
       id: 'approval-mouse',
@@ -180,9 +180,12 @@ describe('ApprovalPanel', () => {
     act(() => root?.render(React.createElement(ApprovalPanel, { item, onConfirm })));
     const options = [...container.querySelectorAll('[data-testid="approval-option"]')];
     act(() => options[2].dispatchEvent(new window.Event('mouseover', { bubbles: true })));
+    expect(options[0].getAttribute('aria-pressed')).toBe('true');
+
+    act(() => options[2].dispatchEvent(new window.Event('pointermove', { bubbles: true })));
     expect(options[2].getAttribute('aria-pressed')).toBe('true');
 
-    act(() => options[0].dispatchEvent(new window.Event('mouseover', { bubbles: true })));
+    act(() => options[0].dispatchEvent(new window.Event('pointermove', { bubbles: true })));
     expect(options[0].getAttribute('aria-pressed')).toBe('true');
     act(() => options[0].dispatchEvent(new window.Event('click', { bubbles: true })));
     expect(onConfirm).toHaveBeenCalledWith('call_mouse', true, undefined, false, undefined);

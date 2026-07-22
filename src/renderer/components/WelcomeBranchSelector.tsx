@@ -25,7 +25,7 @@ const WelcomeBranchSelector: React.FC<WelcomeBranchSelectorProps> = ({ activePro
     let isMounted = true;
     const fetchGitInfo = async () => {
       try {
-        const info = await window.dcodeApi.gitGetBranches(activeProject);
+        const info = await window.deepseekApi.gitGetBranches(activeProject);
         if (isMounted) {
           setGitInfo(info);
         }
@@ -61,9 +61,9 @@ const WelcomeBranchSelector: React.FC<WelcomeBranchSelectorProps> = ({ activePro
     if (!activeProject || isLoading) return;
     setIsLoading(true);
     try {
-      const res = await window.dcodeApi.gitCheckoutBranch(activeProject, branch);
+      const res = await window.deepseekApi.gitCheckoutBranch(activeProject, branch);
       if (res.success) {
-        const info = await window.dcodeApi.gitGetBranches(activeProject);
+        const info = await window.deepseekApi.gitGetBranches(activeProject);
         setGitInfo(info);
         setIsOpen(false);
       } else {

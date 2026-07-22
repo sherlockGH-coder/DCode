@@ -15,7 +15,7 @@ export function usePlanMode(conversationId: string | null) {
       return;
     }
     let active = true;
-    const api = window.dcodeApi;
+    const api = window.deepseekApi;
     if (!api || typeof api.getConversationModeState !== 'function') return;
     void api.getConversationModeState(conversationId).then((next) => {
       if (active) setState(next);
@@ -33,10 +33,10 @@ export function usePlanMode(conversationId: string | null) {
 
   const setMode = useCallback(async (targetMode: 'execute' | 'plan') => {
     if (!conversationId) throw new Error('Create a conversation before changing mode');
-    const current = state ?? await window.dcodeApi.getConversationModeState(conversationId);
+    const current = state ?? await window.deepseekApi.getConversationModeState(conversationId);
     setIsTransitioning(true);
     try {
-      const next = await window.dcodeApi.setConversationMode({
+      const next = await window.deepseekApi.setConversationMode({
         conversationId,
         targetMode,
         expectedModeRevision: current.modeRevision,
@@ -51,7 +51,7 @@ export function usePlanMode(conversationId: string | null) {
   const decide = useCallback(async (request: PlanDecisionRequest): Promise<PlanDecisionResult> => {
     setIsTransitioning(true);
     try {
-      const result = await window.dcodeApi.decidePlan(request);
+      const result = await window.deepseekApi.decidePlan(request);
       setState(result.state);
       return result;
     } finally {

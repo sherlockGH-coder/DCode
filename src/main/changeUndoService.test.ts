@@ -10,7 +10,7 @@ import { buildAllAddedDiff, buildLineDiff } from './tools/diffUtil';
 let projectRoot = '';
 
 beforeEach(async () => {
-  projectRoot = await mkdtemp(join(tmpdir(), 'dcode-undo-'));
+  projectRoot = await mkdtemp(join(tmpdir(), 'deepseek-undo-'));
   vi.spyOn(projectManager, 'getState').mockReturnValue({
     activeProject: projectRoot,
     projects: [{

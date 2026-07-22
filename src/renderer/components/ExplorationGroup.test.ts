@@ -46,7 +46,7 @@ describe('ExplorationGroup', () => {
         kind: 'read',
         status: 'done',
         timestamp: 0,
-        path: '/Users/conan/Code/10.project/DCode/src/renderer/components/preview/DiffView.tsx',
+        path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/preview/DiffView.tsx',
         lineCount: 520,
         output: Array.from({ length: 80 }, (_, index) => `line ${index}`).join('\n'),
       },
@@ -57,7 +57,7 @@ describe('ExplorationGroup', () => {
         kind: 'list_directory',
         status: 'done',
         timestamp: 1,
-        path: '/Users/conan/Code/10.project/DCode/src/renderer/components/preview',
+        path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/preview',
         totalCount: 5,
       },
       {

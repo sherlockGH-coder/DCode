@@ -18,14 +18,14 @@ export function useSettings(): UseSettingsResult {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    window.dcodeApi.getSettings().then((s) => {
+    window.deepseekApi.getSettings().then((s) => {
       setSettings(s);
       setIsLoading(false);
     }).catch(() => {
       setIsLoading(false);
     });
 
-    const unsub = window.dcodeApi.onSettingsChanged((s) => {
+    const unsub = window.deepseekApi.onSettingsChanged((s) => {
       setSettings(s);
     });
     return unsub;
@@ -33,7 +33,7 @@ export function useSettings(): UseSettingsResult {
 
   const patch = useCallback(async (p: AppSettingsPatch): Promise<AppSettings | undefined> => {
     try {
-      const updated = await window.dcodeApi.patchSettings(p);
+      const updated = await window.deepseekApi.patchSettings(p);
       setSettings(updated);
       return updated;
     } catch (err) {
@@ -44,8 +44,8 @@ export function useSettings(): UseSettingsResult {
 
   const setApiKey = useCallback(async (key: string): Promise<void> => {
     try {
-      await window.dcodeApi.setApiKey(key);
-      const updated = await window.dcodeApi.getSettings();
+      await window.deepseekApi.setApiKey(key);
+      const updated = await window.deepseekApi.getSettings();
       setSettings(updated);
     } catch (err) {
       console.error('[useSettings] setApiKey failed:', err);
@@ -55,8 +55,8 @@ export function useSettings(): UseSettingsResult {
 
   const setApiProfileApiKey = useCallback(async (profileId: string, key: string): Promise<void> => {
     try {
-      await window.dcodeApi.setApiProfileApiKey(profileId, key);
-      const updated = await window.dcodeApi.getSettings();
+      await window.deepseekApi.setApiProfileApiKey(profileId, key);
+      const updated = await window.deepseekApi.getSettings();
       setSettings(updated);
     } catch (err) {
       console.error('[useSettings] setApiProfileApiKey failed:', err);
@@ -66,8 +66,8 @@ export function useSettings(): UseSettingsResult {
 
   const setTavilyApiKey = useCallback(async (key: string): Promise<void> => {
     try {
-      await window.dcodeApi.setTavilyApiKey(key);
-      const updated = await window.dcodeApi.getSettings();
+      await window.deepseekApi.setTavilyApiKey(key);
+      const updated = await window.deepseekApi.getSettings();
       setSettings(updated);
     } catch (err) {
       console.error('[useSettings] setTavilyApiKey failed:', err);
@@ -77,8 +77,8 @@ export function useSettings(): UseSettingsResult {
 
   const setSpeechApiKey = useCallback(async (key: string): Promise<void> => {
     try {
-      await window.dcodeApi.setSpeechApiKey(key);
-      const updated = await window.dcodeApi.getSettings();
+      await window.deepseekApi.setSpeechApiKey(key);
+      const updated = await window.deepseekApi.getSettings();
       setSettings(updated);
     } catch (err) {
       console.error('[useSettings] setSpeechApiKey failed:', err);
@@ -88,8 +88,8 @@ export function useSettings(): UseSettingsResult {
 
   const setVisionApiKey = useCallback(async (key: string): Promise<void> => {
     try {
-      await window.dcodeApi.setVisionApiKey(key);
-      const updated = await window.dcodeApi.getSettings();
+      await window.deepseekApi.setVisionApiKey(key);
+      const updated = await window.deepseekApi.getSettings();
       setSettings(updated);
     } catch (err) {
       console.error('[useSettings] setVisionApiKey failed:', err);
@@ -98,7 +98,7 @@ export function useSettings(): UseSettingsResult {
   }, []);
 
   const reset = useCallback(async (): Promise<void> => {
-    const updated = await window.dcodeApi.resetSettings();
+    const updated = await window.deepseekApi.resetSettings();
     setSettings(updated);
   }, []);
 

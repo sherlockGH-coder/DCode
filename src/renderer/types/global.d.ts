@@ -23,9 +23,9 @@ declare global {
     };
 
     /**
-     * DCode API 接口
+     * DeepSeek API 接口
      */
-    dcodeApi: {
+    deepseekApi: {
 
       sendMessage: (
         messages: Array<{ role: string; content: string }>,

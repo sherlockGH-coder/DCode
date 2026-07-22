@@ -29,7 +29,7 @@ export function ActionButton<A extends string>({ action, variant, title, icon, s
       aria-pressed={selected}
       disabled={disabled}
       onClick={onClick}
-      onMouseEnter={() => onSelect(action)}
+      onPointerMove={() => onSelect(action)}
       onFocus={() => onSelect(action)}
       className={`flex h-9 w-full items-center gap-2.5 rounded-[8px] border px-3 text-left transition-[color,background-color,border-color,box-shadow] duration-150 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${classes}`}
     >

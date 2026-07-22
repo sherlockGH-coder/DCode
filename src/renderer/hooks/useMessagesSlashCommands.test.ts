@@ -29,7 +29,7 @@ describe('useMessages slash command handling', () => {
       },
     });
 
-    (window as any).dcodeApi = {
+    (window as any).deepseekApi = {
       createConversation: vi.fn(async () => 'conv_created'),
       updateConversationTitle: vi.fn(async () => undefined),
       addMessage: vi.fn(async () => 'persisted_user'),
@@ -94,15 +94,15 @@ describe('useMessages slash command handling', () => {
     });
 
     expect(clearListener).not.toHaveBeenCalled();
-    const addMessageCall = (window.dcodeApi.addMessage as any).mock.calls[0];
+    const addMessageCall = (window.deepseekApi.addMessage as any).mock.calls[0];
     expect(addMessageCall.slice(0, 3)).toEqual(['conv_slash_clear', 'user', '/clear']);
     expect(addMessageCall[7]).toEqual([]);
     expect(addMessageCall[12]).toEqual(expect.any(String));
     expect(addMessageCall[13]).toBe(0);
     expect(addMessageCall[14]).toBe(0);
     expect(addMessageCall[15]).toEqual(addMessageCall[12]);
-    expect(window.dcodeApi.sendMessage).toHaveBeenCalledTimes(1);
-    expect((window.dcodeApi.sendMessage as any).mock.calls[0][0]).toEqual([
+    expect(window.deepseekApi.sendMessage).toHaveBeenCalledTimes(1);
+    expect((window.deepseekApi.sendMessage as any).mock.calls[0][0]).toEqual([
       { role: 'user', content: '/clear' },
     ]);
   });
@@ -132,25 +132,25 @@ describe('useMessages slash command handling', () => {
       });
     });
 
-    expect(window.dcodeApi.createConversation).not.toHaveBeenCalled();
-    expect(window.dcodeApi.updateConversationTitle).toHaveBeenCalledWith('conv_empty', '帮我做一个天气卡片');
+    expect(window.deepseekApi.createConversation).not.toHaveBeenCalled();
+    expect(window.deepseekApi.updateConversationTitle).toHaveBeenCalledWith('conv_empty', '帮我做一个天气卡片');
   });
 
   it('keeps multiple tool calls from one assistant response on a single assistant message', async () => {
     const handlers: Record<string, (...args: any[]) => void> = {};
-    (window.dcodeApi.onChunk as any).mockImplementation((callback: (...args: any[]) => void) => {
+    (window.deepseekApi.onChunk as any).mockImplementation((callback: (...args: any[]) => void) => {
       handlers.chunk = callback;
       return vi.fn();
     });
-    (window.dcodeApi.onToolCallStart as any).mockImplementation((callback: (...args: any[]) => void) => {
+    (window.deepseekApi.onToolCallStart as any).mockImplementation((callback: (...args: any[]) => void) => {
       handlers.toolStart = callback;
       return vi.fn();
     });
-    (window.dcodeApi.onToolCallEnd as any).mockImplementation((callback: (...args: any[]) => void) => {
+    (window.deepseekApi.onToolCallEnd as any).mockImplementation((callback: (...args: any[]) => void) => {
       handlers.toolEnd = callback;
       return vi.fn();
     });
-    (window.dcodeApi.onAssistantMessage as any).mockImplementation((callback: (...args: any[]) => void) => {
+    (window.deepseekApi.onAssistantMessage as any).mockImplementation((callback: (...args: any[]) => void) => {
       handlers.assistant = callback;
       return vi.fn();
     });

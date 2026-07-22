@@ -54,7 +54,7 @@ function withNodeFetchProxyLoader(env: Record<string, string>): Record<string, s
   const preloadOption = `--import=${pathToFileURL(preloadPath).href}`;
   return {
     ...env,
-    DCODE_MCP_NODE_FETCH_PROXY: '1',
+    DEEPSEEK_MCP_NODE_FETCH_PROXY: '1',
     NODE_OPTIONS: appendNodeOption(
       appendNodeOption(env.NODE_OPTIONS, loaderOption),
       preloadOption,

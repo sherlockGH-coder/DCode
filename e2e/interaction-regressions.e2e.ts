@@ -75,7 +75,7 @@ async function launchFixture(
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('Fixture server did not start');
 
-  const userData = mkdtempSync(join(tmpdir(), 'dcode-interactions-e2e-'));
+  const userData = mkdtempSync(join(tmpdir(), 'deepseek-interactions-e2e-'));
   writeFileSync(join(userData, 'settings.json'), JSON.stringify({
     schemaVersion: 1,
     apiProfiles: [{
@@ -91,7 +91,7 @@ async function launchFixture(
   }));
   const app = await electron.launch({
     args: [resolve('out/main/index.js')],
-    env: { ...process.env, DCODE_E2E_USER_DATA_DIR: userData },
+    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
   });
   const page = await app.firstWindow();
   await page.waitForLoadState('domcontentloaded');

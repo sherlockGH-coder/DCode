@@ -21,7 +21,7 @@ function planResponse(title: string, summary = 'Implement safely', documentOverr
 }
 
 test('Plan document renders GFM with a fixed approval footer and matches the composer width', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'dcode-plan-layout-e2e-'));
+  const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-layout-e2e-'));
   const server = createServer((request, response) => {
     request.resume();
     request.on('end', () => {
@@ -51,7 +51,7 @@ test('Plan document renders GFM with a fixed approval footer and matches the com
   }));
   const app = await electron.launch({
     args: [resolve('out/main/index.js')],
-    env: { ...process.env, DCODE_E2E_USER_DATA_DIR: userData },
+    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
   });
   try {
     const page = await app.firstWindow();
@@ -124,7 +124,7 @@ function stopServer(server: Server): void {
 }
 
 test('Plan is shown before approval, tools are restricted, and fresh execution starts immediately', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'dcode-plan-e2e-'));
+  const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-e2e-'));
   const requests: any[] = [];
   const server = createServer((request, response) => {
     let body = '';
@@ -151,7 +151,7 @@ test('Plan is shown before approval, tools are restricted, and fresh execution s
   }));
   const app = await electron.launch({
     args: [resolve('out/main/index.js')],
-    env: { ...process.env, DCODE_E2E_USER_DATA_DIR: userData },
+    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
   });
   try {
     const page = await app.firstWindow();
@@ -182,7 +182,7 @@ test('Plan is shown before approval, tools are restricted, and fresh execution s
 });
 
 test('Rejection replans with a new version and same-context approval executes once', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'dcode-plan-replan-e2e-'));
+  const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-replan-e2e-'));
   const requests: any[] = [];
   const server = createServer((request, response) => {
     let body = '';
@@ -205,7 +205,7 @@ test('Rejection replans with a new version and same-context approval executes on
   }));
   const app = await electron.launch({
     args: [resolve('out/main/index.js')],
-    env: { ...process.env, DCODE_E2E_USER_DATA_DIR: userData },
+    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
   });
   try {
     const page = await app.firstWindow();
@@ -238,7 +238,7 @@ test('Rejection replans with a new version and same-context approval executes on
 });
 
 test('Pending plans recover after restart and stale plans cannot be approved', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'dcode-plan-recovery-e2e-'));
+  const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-recovery-e2e-'));
   const server = createServer((request, response) => {
     request.resume();
     request.on('end', () => {
@@ -256,7 +256,7 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
   }));
   const launch = () => electron.launch({
     args: [resolve('out/main/index.js')],
-    env: { ...process.env, DCODE_E2E_USER_DATA_DIR: userData },
+    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
   });
   let app = await launch();
   try {
@@ -266,23 +266,23 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
     await composer.press('Enter');
     await expect(page.getByTestId('plan-approval-panel')).toBeVisible();
     const beforeRestart = await page.evaluate(async () => {
-      const conversations = await window.dcodeApi.getConversations();
+      const conversations = await window.deepseekApi.getConversations();
       const conversationId = conversations[0].id;
-      return window.dcodeApi.getConversationModeState(conversationId);
+      return window.deepseekApi.getConversationModeState(conversationId);
     });
     await stopElectron(app);
 
     app = await launch();
     page = await app.firstWindow();
     const recovered = await page.evaluate(async (conversationId) => (
-      window.dcodeApi.getConversationModeState(conversationId)
+      window.deepseekApi.getConversationModeState(conversationId)
     ), beforeRestart.conversationId);
     expect(recovered.mode).toBe('plan');
     expect(recovered.activePlan?.id).toBe(beforeRestart.activePlan?.id);
 
     const staleDecision = await page.evaluate(async (state) => {
       const plan = state.activePlan!;
-      const grant = await window.dcodeApi.markPlanPresented({
+      const grant = await window.deepseekApi.markPlanPresented({
         conversationId: state.conversationId,
         planId: plan.id,
         version: plan.version,
@@ -291,7 +291,7 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
       });
       let missingTokenRejected = false;
       try {
-        await window.dcodeApi.decidePlan({
+        await window.deepseekApi.decidePlan({
           conversationId: state.conversationId,
           planId: plan.id,
           version: plan.version,
@@ -303,10 +303,10 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
       } catch {
         missingTokenRejected = true;
       }
-      await window.dcodeApi.addMessage(state.conversationId, 'user', 'invalidate the old plan');
-      const invalidated = await window.dcodeApi.getConversationModeState(state.conversationId);
+      await window.deepseekApi.addMessage(state.conversationId, 'user', 'invalidate the old plan');
+      const invalidated = await window.deepseekApi.getConversationModeState(state.conversationId);
       try {
-        await window.dcodeApi.decidePlan({
+        await window.deepseekApi.decidePlan({
           conversationId: state.conversationId,
           planId: plan.id,
           version: plan.version,
@@ -327,63 +327,63 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
     await page.evaluate(async ({ conversationId, contextEpoch }) => {
       const turnId = crypto.randomUUID();
       const content = 'create a branch-sensitive plan';
-      await window.dcodeApi.addMessage(
+      await window.deepseekApi.addMessage(
         conversationId, 'user', content, undefined, undefined, undefined, undefined,
         undefined, undefined, undefined, undefined, undefined, turnId, 0, 0, turnId,
         undefined, contextEpoch, 'chat',
       );
-      await window.dcodeApi.sendMessage(
+      await window.deepseekApi.sendMessage(
         [{ role: 'user', content }], 'e2e-model', conversationId,
         undefined, undefined, turnId, 1,
       );
     }, { conversationId: recovered.conversationId, contextEpoch: recovered.contextEpoch });
     await expect.poll(async () => page.evaluate(async (conversationId) => {
-      const state = await window.dcodeApi.getConversationModeState(conversationId);
+      const state = await window.deepseekApi.getConversationModeState(conversationId);
       return state.activePlan;
     }, recovered.conversationId)).not.toBeNull();
     const branchState = await page.evaluate(async (conversationId) => (
-      window.dcodeApi.getConversationModeState(conversationId)
+      window.deepseekApi.getConversationModeState(conversationId)
     ), recovered.conversationId);
     await page.evaluate(async ({ conversationId, sourceTurnId, nextAttempt }) => {
-      await window.dcodeApi.setActiveAttempts(conversationId, { [sourceTurnId]: nextAttempt });
+      await window.deepseekApi.setActiveAttempts(conversationId, { [sourceTurnId]: nextAttempt });
     }, {
       conversationId: recovered.conversationId,
       sourceTurnId: branchState.activePlan!.sourceTurnId,
       nextAttempt: branchState.activePlan!.sourceAttemptNo + 1,
     });
     const afterBranchSwitch = await page.evaluate(async (conversationId) => (
-      window.dcodeApi.getConversationModeState(conversationId)
+      window.deepseekApi.getConversationModeState(conversationId)
     ), recovered.conversationId);
     expect(afterBranchSwitch.activePlan).toBeNull();
 
     await page.evaluate(async ({ conversationId, contextEpoch }) => {
       const turnId = crypto.randomUUID();
       const content = 'create a truncation-sensitive plan';
-      await window.dcodeApi.addMessage(
+      await window.deepseekApi.addMessage(
         conversationId, 'user', content, undefined, undefined, undefined, undefined,
         undefined, undefined, undefined, undefined, undefined, turnId, 0, 0, turnId,
         undefined, contextEpoch, 'chat',
       );
-      await window.dcodeApi.sendMessage(
+      await window.deepseekApi.sendMessage(
         [{ role: 'user', content }], 'e2e-model', conversationId,
         undefined, undefined, turnId, 1,
       );
     }, { conversationId: recovered.conversationId, contextEpoch: recovered.contextEpoch });
     await expect.poll(async () => page.evaluate(async (conversationId) => {
-      const state = await window.dcodeApi.getConversationModeState(conversationId);
+      const state = await window.deepseekApi.getConversationModeState(conversationId);
       return state.activePlan?.version ?? 0;
     }, recovered.conversationId)).toBeGreaterThan(branchState.activePlan!.version);
     const truncationState = await page.evaluate(async (conversationId) => (
-      window.dcodeApi.getConversationModeState(conversationId)
+      window.deepseekApi.getConversationModeState(conversationId)
     ), recovered.conversationId);
     await page.evaluate(async ({ conversationId, sourceTurnId }) => {
-      await window.dcodeApi.deleteMessagesFromTurn(conversationId, sourceTurnId);
+      await window.deepseekApi.deleteMessagesFromTurn(conversationId, sourceTurnId);
     }, {
       conversationId: recovered.conversationId,
       sourceTurnId: truncationState.activePlan!.sourceTurnId,
     });
     const afterTruncation = await page.evaluate(async (conversationId) => (
-      window.dcodeApi.getConversationModeState(conversationId)
+      window.deepseekApi.getConversationModeState(conversationId)
     ), recovered.conversationId);
     expect(afterTruncation.activePlan).toBeNull();
   } finally {

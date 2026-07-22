@@ -8,7 +8,7 @@ export function truncateToolResult(content: string, toolName: string): string {
   if (content.length <= MAX_TOOL_RESULT_SIZE) return content;
 
   try {
-    const dir = join(tmpdir(), 'dcode-tool-results');
+    const dir = join(tmpdir(), 'deepseek-tool-results');
     mkdirSync(dir, { recursive: true });
     const filename = `${toolName}-${Date.now()}-${randomUUID().slice(0, 8)}.txt`;
     const filepath = join(dir, filename);

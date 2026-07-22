@@ -32,7 +32,7 @@ describe('proxy environment', () => {
       HTTP_PROXY: 'http://127.0.0.1:7890',
       HTTPS_PROXY: 'http://override.proxy:8080',
       VISION_API_KEY: 'secret',
-      DCODE_MCP_NODE_FETCH_PROXY: '1',
+      DEEPSEEK_MCP_NODE_FETCH_PROXY: '1',
     });
     expect(env?.NODE_OPTIONS).toContain('--experimental-loader=');
     expect(env?.NODE_OPTIONS).toContain('node-fetch-proxy-loader.mjs');

@@ -24,12 +24,12 @@ export function useSkills(projectPath: string | null): UseSkillsResult {
   const [isLoading, setIsLoading] = useState(true);
 
   const refresh = useCallback(async () => {
-    if (!window.dcodeApi?.skillsList) {
+    if (!window.deepseekApi?.skillsList) {
       setIsLoading(false);
       return;
     }
     try {
-      const list = await window.dcodeApi.skillsList(projectPath);
+      const list = await window.deepseekApi.skillsList(projectPath);
       setSkills(list);
     } catch (err) {
       console.error('[useSkills] list failed:', err);
@@ -41,35 +41,35 @@ export function useSkills(projectPath: string | null): UseSkillsResult {
   useEffect(() => {
     setIsLoading(true);
     refresh();
-    if (!window.dcodeApi?.onSkillsChanged) return undefined;
-    const unsub = window.dcodeApi.onSkillsChanged(() => {
+    if (!window.deepseekApi?.onSkillsChanged) return undefined;
+    const unsub = window.deepseekApi.onSkillsChanged(() => {
       refresh();
     });
     return unsub;
   }, [refresh]);
 
   const toggle = useCallback(async (name: string, enabled: boolean) => {
-    await window.dcodeApi.skillsToggle(name, enabled);
+    await window.deepseekApi.skillsToggle(name, enabled);
 
   }, []);
 
   const read = useCallback(async (name: string) => {
-    return window.dcodeApi.skillsRead(name, projectPath);
+    return window.deepseekApi.skillsRead(name, projectPath);
   }, [projectPath]);
 
   const write = useCallback(async (
     scope: 'user' | 'project',
     payload: { name: string; description: string; allowedTools?: string[]; body: string },
   ) => {
-    return window.dcodeApi.skillsWrite(scope, payload, projectPath);
+    return window.deepseekApi.skillsWrite(scope, payload, projectPath);
   }, [projectPath]);
 
   const remove = useCallback(async (scope: 'user' | 'project', name: string) => {
-    return window.dcodeApi.skillsDelete(scope, name, projectPath);
+    return window.deepseekApi.skillsDelete(scope, name, projectPath);
   }, [projectPath]);
 
   const openDir = useCallback(async (scope: SkillScope) => {
-    return window.dcodeApi.skillsOpenDir(scope, projectPath);
+    return window.deepseekApi.skillsOpenDir(scope, projectPath);
   }, [projectPath]);
 
   return { skills, isLoading, refresh, toggle, read, write, remove, openDir };
@@ -77,7 +77,7 @@ export function useSkills(projectPath: string | null): UseSkillsResult {
 
 export function useSkillsWatcher(projectPath: string | null): void {
   useEffect(() => {
-    if (!window.dcodeApi?.skillsWatchProject) return;
-    window.dcodeApi.skillsWatchProject(projectPath);
+    if (!window.deepseekApi?.skillsWatchProject) return;
+    window.deepseekApi.skillsWatchProject(projectPath);
   }, [projectPath]);
 }

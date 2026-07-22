@@ -50,7 +50,7 @@ export async function buildPreviewFromPath(
     };
   }
 
-  const result = await window.dcodeApi.readFileContent(filePath);
+  const result = await window.deepseekApi.readFileContent(filePath);
   if (!result) return null;
 
   return {

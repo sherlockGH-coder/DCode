@@ -81,7 +81,7 @@ describe('useVoiceInput', () => {
     window.cancelAnimationFrame = vi.fn();
     window.clearInterval = vi.fn();
     window.setInterval = vi.fn(() => 1 as any);
-    (window as any).dcodeApi = {
+    (window as any).deepseekApi = {
       transcribeSpeech: vi.fn(async () => ({ text: 'hello' })),
     };
 

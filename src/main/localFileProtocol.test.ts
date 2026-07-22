@@ -25,7 +25,7 @@ afterEach(() => {
 
 describe('local-file protocol policy', () => {
   it('serves files inside known project roots', () => {
-    const projectRoot = tempDir('dcode-project-');
+    const projectRoot = tempDir('deepseek-project-');
     const filePath = join(projectRoot, 'asset.png');
     writeFileSync(filePath, 'image');
 
@@ -33,8 +33,8 @@ describe('local-file protocol policy', () => {
   });
 
   it('blocks unregistered files outside known project roots', () => {
-    const projectRoot = tempDir('dcode-project-');
-    const outsideRoot = tempDir('dcode-outside-');
+    const projectRoot = tempDir('deepseek-project-');
+    const outsideRoot = tempDir('deepseek-outside-');
     const filePath = join(outsideRoot, 'secret.txt');
     writeFileSync(filePath, 'secret');
 
@@ -42,8 +42,8 @@ describe('local-file protocol policy', () => {
   });
 
   it('serves explicitly registered attachment paths outside the project', () => {
-    const projectRoot = tempDir('dcode-project-');
-    const outsideRoot = tempDir('dcode-outside-');
+    const projectRoot = tempDir('deepseek-project-');
+    const outsideRoot = tempDir('deepseek-outside-');
     const filePath = join(outsideRoot, 'photo.png');
     writeFileSync(filePath, 'image');
 
@@ -53,8 +53,8 @@ describe('local-file protocol policy', () => {
   });
 
   it('blocks project-local symlinks that resolve outside the project', () => {
-    const projectRoot = tempDir('dcode-project-');
-    const outsideRoot = tempDir('dcode-outside-');
+    const projectRoot = tempDir('deepseek-project-');
+    const outsideRoot = tempDir('deepseek-outside-');
     const outsideFile = join(outsideRoot, 'secret.txt');
     const linkedFile = join(projectRoot, 'linked-secret.txt');
     writeFileSync(outsideFile, 'secret');

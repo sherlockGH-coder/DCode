@@ -84,8 +84,8 @@ export interface AgentLoopConfig {
   enabledSkills?: Array<{ name: string; description: string }>;
   /** 注入到首条 system 消息的正文 — 由调用方（主进程）从 prompts.ts 计算后传入 */
   systemPrompt: string;
-  /** DCODE.md 层级来源（由调用方传入结构化 sources，避免 agentLoop 直接读文件） */
-  dcodeMdSources?: Array<{ filePath: string; contents: string; scope: 'user' | 'project' | 'local' }>;
+  /** DEEPSEEK.md 层级来源（由调用方传入结构化 sources，避免 agentLoop 直接读文件） */
+  deepseekMdSources?: Array<{ filePath: string; contents: string; scope: 'user' | 'project' | 'local' }>;
   /** 跨对话记忆上下文（由调用方从 DB 加载后传入） */
   memoryContext?: string;
   /** 已连接 MCP server 的使用说明（由调用方从 mcpManager 收集后传入） */

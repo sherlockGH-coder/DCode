@@ -176,7 +176,7 @@ export function useMessageStreamEvents({
       setTurnTimers((prev) => (prev[turnId] ? prev : { ...prev, [turnId]: { startedAt: Date.now() } }));
     };
 
-    unsubs.push(window.dcodeApi.onReasoningChunk((conversationId: string, chunk: string) => {
+    unsubs.push(window.deepseekApi.onReasoningChunk((conversationId: string, chunk: string) => {
       const req = activeRequestsRef.current.get(conversationId);
       if (!req) return;
       stampTurnStart(req.turnId);
@@ -185,7 +185,7 @@ export function useMessageStreamEvents({
       scheduleChunkFlush(conversationId);
     }));
 
-    unsubs.push(window.dcodeApi.onChunk((conversationId: string, chunk: string) => {
+    unsubs.push(window.deepseekApi.onChunk((conversationId: string, chunk: string) => {
       const req = activeRequestsRef.current.get(conversationId);
       if (!req) return;
       stampTurnStart(req.turnId);
@@ -194,7 +194,7 @@ export function useMessageStreamEvents({
       scheduleChunkFlush(conversationId);
     }));
 
-    unsubs.push(window.dcodeApi.onToolCallStart((conversationId: string, toolCall) => {
+    unsubs.push(window.deepseekApi.onToolCallStart((conversationId: string, toolCall) => {
       const req = activeRequestsRef.current.get(conversationId);
       if (!req) return;
       stampTurnStart(req.turnId);
@@ -234,7 +234,7 @@ export function useMessageStreamEvents({
       });
     }));
 
-    unsubs.push(window.dcodeApi.onToolCallEnd((conversationId: string, result) => {
+    unsubs.push(window.deepseekApi.onToolCallEnd((conversationId: string, result) => {
       const req = activeRequestsRef.current.get(conversationId);
       if (!req) return;
       flushChunks(conversationId);
@@ -276,7 +276,7 @@ export function useMessageStreamEvents({
       });
     }));
 
-    unsubs.push(window.dcodeApi.onAssistantMessage((conversationId: string, data: any) => {
+    unsubs.push(window.deepseekApi.onAssistantMessage((conversationId: string, data: any) => {
       const req = activeRequestsRef.current.get(conversationId);
       if (!req) return;
       flushChunks(conversationId);
@@ -287,7 +287,7 @@ export function useMessageStreamEvents({
       req.setMessages((prev) => applyAssistantMessageToMessages(prev, req, data));
     }));
 
-    unsubs.push(window.dcodeApi.onToolMessagePersisted((conversationId: string, data) => {
+    unsubs.push(window.deepseekApi.onToolMessagePersisted((conversationId: string, data) => {
       const req = activeRequestsRef.current.get(conversationId);
       if (!req) return;
       req.setMessages((prev) => {
@@ -301,14 +301,14 @@ export function useMessageStreamEvents({
       });
     }));
 
-    unsubs.push(window.dcodeApi.onApprovalRequest((approvalReq) => {
+    unsubs.push(window.deepseekApi.onApprovalRequest((approvalReq) => {
       const req = getOrCreateActiveRequestForApproval(approvalReq);
       if (!req) {
         console.warn('[useMessages] approval request has no matching active conversation:', approvalReq);
         return;
       }
       if (shouldAutoApproveApproval(approvalReq)) {
-        window.dcodeApi.approvalRespond(approvalReq.toolCallId, true).catch((err) => {
+        window.deepseekApi.approvalRespond(approvalReq.toolCallId, true).catch((err) => {
           console.error('[useMessages] session auto-approve 失败:', err);
         });
         return;
@@ -316,7 +316,7 @@ export function useMessageStreamEvents({
       req.setMessages((prev) => applyApprovalToMessages(prev, approvalReq, req));
     }));
 
-    unsubs.push(window.dcodeApi.onDone(async (conversationId: string) => {
+    unsubs.push(window.deepseekApi.onDone(async (conversationId: string) => {
       const req = activeRequestsRef.current.get(conversationId);
       if (!req) return;
       flushChunks(conversationId);
@@ -333,7 +333,7 @@ export function useMessageStreamEvents({
       });
     }));
 
-    unsubs.push(window.dcodeApi.onError((conversationId: string, errorMessage: string) => {
+    unsubs.push(window.deepseekApi.onError((conversationId: string, errorMessage: string) => {
       const req = activeRequestsRef.current.get(conversationId);
       if (!req) return;
       flushChunks(conversationId);
@@ -375,7 +375,7 @@ export function useMessageStreamEvents({
       });
     }));
 
-    unsubs.push(window.dcodeApi.onStreamRetry((conversationId: string, info) => {
+    unsubs.push(window.deepseekApi.onStreamRetry((conversationId: string, info) => {
       if (!activeRequestsRef.current.has(conversationId)) return;
       setRetryInfo({ ...info, startedAt: Date.now() });
     }));

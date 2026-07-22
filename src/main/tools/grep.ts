@@ -96,10 +96,6 @@ function matchesGlobPath(filePath: string, basePath: string, pattern: string): b
   return regex.test(relPath) || (!pattern.includes('/') && regex.test(basename));
 }
 
-function relativeDisplayPath(basePath: string, filePath: string): string {
-  return relative(basePath, filePath).replace(/\\/g, '/');
-}
-
 function matchesType(filePath: string, type: string | undefined): boolean {
   if (!type) return true;
   const normalized = type.toLowerCase().replace(/^\./, '');
@@ -301,10 +297,10 @@ export const grepTool: ToolExecutor = {
           try {
             const content = await readFile(file, 'utf-8');
             if (multiline) {
-              if (regex.test(content)) matchedFiles.push(relativeDisplayPath(searchPath, file));
+              if (regex.test(content)) matchedFiles.push(relative(searchPath, file));
             } else {
               const lines = content.split('\n');
-              if (lines.some((l) => regex.test(l))) matchedFiles.push(relativeDisplayPath(searchPath, file));
+              if (lines.some((l) => regex.test(l))) matchedFiles.push(relative(searchPath, file));
             }
           } catch {          }
         }
@@ -334,7 +330,7 @@ export const grepTool: ToolExecutor = {
               const lines = content.split('\n');
               count = lines.filter((l) => regex.test(l)).length;
             }
-            if (count > 0) counts.push({ file: relativeDisplayPath(searchPath, file), count });
+            if (count > 0) counts.push({ file: relative(searchPath, file), count });
           } catch {          }
         }
         counts.sort((a, b) => b.count - a.count);
@@ -357,7 +353,7 @@ export const grepTool: ToolExecutor = {
         if (BINARY_EXTS.has(ext)) continue;
         try {
           const content = await readFile(file, 'utf-8');
-          const relPath = relativeDisplayPath(searchPath, file);
+          const relPath = relative(searchPath, file);
 
           if (multiline) {
 

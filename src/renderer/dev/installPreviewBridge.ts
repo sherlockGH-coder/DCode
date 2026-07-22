@@ -1,6 +1,6 @@
 import type { AppSettings, Conversation, Message, ProjectState } from '../../shared/types';
 
-const PROJECT_PATH = '/Users/demo/Code/DCode';
+const PROJECT_PATH = '/Users/demo/Code/DeepSeek-App';
 const CONVERSATION_ID = 'preview-conversation';
 const TURN_ID = 'preview-turn';
 
@@ -56,7 +56,7 @@ const previewSettings: AppSettings = {
 const previewProjectState: ProjectState = {
   projects: [{
     path: PROJECT_PATH,
-    name: 'DCode',
+    name: 'DeepSeek-App',
     environment: 'local',
     addedAt: Date.now() - 86400000,
   }],
@@ -200,10 +200,10 @@ const noopSubscription = () => () => undefined;
 
 export function installPreviewBridge(): void {
   const isLocalPreview = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  if (!isLocalPreview || window.dcodeApi) return;
+  if (!isLocalPreview || window.deepseekApi) return;
 
   let settings = structuredClone(previewSettings);
-  const baseApi: Partial<Window['dcodeApi']> = {
+  const baseApi: Partial<Window['deepseekApi']> = {
     getModels: async () => [...settings.api.models],
     getSettings: async () => structuredClone(settings),
     patchSettings: async (patch) => {
@@ -268,14 +268,14 @@ export function installPreviewBridge(): void {
     onCronChanged: noopSubscription,
   };
 
-  window.dcodeApi = new Proxy(baseApi, {
+  window.deepseekApi = new Proxy(baseApi, {
     get(target, property) {
       const existing = target[property as keyof typeof target];
       if (existing) return existing;
       if (typeof property === 'string' && property.startsWith('on')) return noopSubscription;
       return async () => undefined;
     },
-  }) as Window['dcodeApi'];
+  }) as Window['deepseekApi'];
 
   window.conversationsApi = { onChanged: noopSubscription };
   window.electronEnv = {

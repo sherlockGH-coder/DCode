@@ -4,25 +4,25 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { app } from 'electron';
 
-const DCODE_MD_FILENAME = 'DCODE.md';
-const LOCAL_DCODE_MD_FILENAME = 'DCODE.local.md';
-const DCODE_RULES_DIRNAME = 'rules';
-const PROJECT_DCODE_DIR = '.dcode';
+const DEEPSEEK_MD_FILENAME = 'DEEPSEEK.md';
+const LOCAL_DEEPSEEK_MD_FILENAME = 'DEEPSEEK.local.md';
+const DEEPSEEK_RULES_DIRNAME = 'rules';
+const PROJECT_DEEPSEEK_DIR = '.deepseek';
 const PROJECT_ROOT_MARKERS = ['.git'];
-const DEFAULT_DCODE_MD_MAX_BYTES = 32 * 1024;
+const DEFAULT_DEEPSEEK_MD_MAX_BYTES = 32 * 1024;
 
-export interface DcodeMdSource {
+export interface DeepseekMdSource {
   filePath: string;
   contents: string;
   scope: 'user' | 'project' | 'local';
 }
 
-interface ReadDcodeSourceResult {
+interface ReadDeepseekSourceResult {
   contents: string;
   bytesRead: number;
 }
 
-interface LoadDcodeMdOptions {
+interface LoadDeepseekMdOptions {
   userDir?: string;
   maxBytes?: number;
 }
@@ -38,12 +38,12 @@ export function getEffectiveSystemPrompt(): string {
   return override || defaultSystemPrompt;
 }
 
-/** 用户级配置目录：~/.dcode/ */
-function getUserDcodeDir(): string {
-  return join(app.getPath('home'), '.dcode');
+/** 用户级配置目录：~/.deepseek/ */
+function getUserDeepseekDir(): string {
+  return join(app.getPath('home'), '.deepseek');
 }
 
-function readDcodeSource(filePath: string, maxBytes: number): ReadDcodeSourceResult | null {
+function readDeepseekSource(filePath: string, maxBytes: number): ReadDeepseekSourceResult | null {
   try {
     const data = readFileSync(filePath, 'utf-8');
     const byteLength = Buffer.byteLength(data, 'utf-8');
@@ -54,14 +54,14 @@ function readDcodeSource(filePath: string, maxBytes: number): ReadDcodeSourceRes
     }
     return text ? { contents: text, bytesRead: Math.min(byteLength, maxBytes) } : null;
   } catch (err) {
-    console.warn(`[prompts] 读取 DCODE.md 失败: ${filePath}`, err);
+    console.warn(`[prompts] 读取 DEEPSEEK.md 失败: ${filePath}`, err);
     return null;
   }
 }
 
-/** 查找目录下的 DCODE.md（不含 .local） */
-function findDcodeMdInDir(dir: string): string | null {
-  const candidate = join(dir, DCODE_MD_FILENAME);
+/** 查找目录下的 DEEPSEEK.md（不含 .local） */
+function findDeepseekMdInDir(dir: string): string | null {
+  const candidate = join(dir, DEEPSEEK_MD_FILENAME);
   try {
     if (statSync(candidate).isFile()) return candidate;
   } catch {
@@ -70,9 +70,9 @@ function findDcodeMdInDir(dir: string): string | null {
   return null;
 }
 
-/** 查找目录下的 .dcode/DCODE.md */
-function findProjectDcodeMd(dir: string): string | null {
-  const candidate = join(dir, PROJECT_DCODE_DIR, DCODE_MD_FILENAME);
+/** 查找目录下的 .deepseek/DEEPSEEK.md */
+function findProjectDeepseekMd(dir: string): string | null {
+  const candidate = join(dir, PROJECT_DEEPSEEK_DIR, DEEPSEEK_MD_FILENAME);
   try {
     if (statSync(candidate).isFile()) return candidate;
   } catch {
@@ -81,9 +81,9 @@ function findProjectDcodeMd(dir: string): string | null {
   return null;
 }
 
-/** 扫描 .dcode/rules/*.md（按文件名排序） */
+/** 扫描 .deepseek/rules/*.md（按文件名排序） */
 function findRulesInDir(dir: string): string[] {
-  const rulesDir = join(dir, PROJECT_DCODE_DIR, DCODE_RULES_DIRNAME);
+  const rulesDir = join(dir, PROJECT_DEEPSEEK_DIR, DEEPSEEK_RULES_DIRNAME);
   try {
     return readdirSync(rulesDir)
       .filter((name: string) => name.endsWith('.md'))
@@ -130,16 +130,16 @@ function directoriesFromRoot(root: string, leaf: string): string[] {
   return dirs.reverse();
 }
 
-function collectDcodeSources(
+function collectDeepseekSources(
   projectPath: string | null,
-  options: Required<LoadDcodeMdOptions>,
-): DcodeMdSource[] {
-  const sources: DcodeMdSource[] = [];
+  options: Required<LoadDeepseekMdOptions>,
+): DeepseekMdSource[] {
+  const sources: DeepseekMdSource[] = [];
   let remainingBytes = options.maxBytes;
 
-  const userFile = findDcodeMdInDir(options.userDir);
+  const userFile = findDeepseekMdInDir(options.userDir);
   if (userFile) {
-    const loaded = readDcodeSource(userFile, remainingBytes);
+    const loaded = readDeepseekSource(userFile, remainingBytes);
     if (loaded) {
       sources.push({ filePath: userFile, contents: loaded.contents, scope: 'user' });
       remainingBytes = Math.max(0, remainingBytes - loaded.bytesRead);
@@ -153,9 +153,9 @@ function collectDcodeSources(
   for (const dir of directoriesFromRoot(findProjectRoot(projectDir), projectDir)) {
     if (remainingBytes === 0) break;
 
-    const rootMd = findDcodeMdInDir(dir);
+    const rootMd = findDeepseekMdInDir(dir);
     if (rootMd) {
-      const loaded = readDcodeSource(rootMd, remainingBytes);
+      const loaded = readDeepseekSource(rootMd, remainingBytes);
       if (loaded) {
         sources.push({ filePath: rootMd, contents: loaded.contents, scope: 'project' });
         remainingBytes = Math.max(0, remainingBytes - loaded.bytesRead);
@@ -163,9 +163,9 @@ function collectDcodeSources(
     }
     if (remainingBytes === 0) break;
 
-    const projectMd = findProjectDcodeMd(dir);
+    const projectMd = findProjectDeepseekMd(dir);
     if (projectMd) {
-      const loaded = readDcodeSource(projectMd, remainingBytes);
+      const loaded = readDeepseekSource(projectMd, remainingBytes);
       if (loaded) {
         sources.push({ filePath: projectMd, contents: loaded.contents, scope: 'project' });
         remainingBytes = Math.max(0, remainingBytes - loaded.bytesRead);
@@ -176,7 +176,7 @@ function collectDcodeSources(
     const rules = findRulesInDir(dir);
     for (const ruleFile of rules) {
       if (remainingBytes === 0) break;
-      const loaded = readDcodeSource(ruleFile, remainingBytes);
+      const loaded = readDeepseekSource(ruleFile, remainingBytes);
       if (loaded) {
         sources.push({ filePath: ruleFile, contents: loaded.contents, scope: 'project' });
         remainingBytes = Math.max(0, remainingBytes - loaded.bytesRead);
@@ -186,10 +186,10 @@ function collectDcodeSources(
   if (remainingBytes === 0) return sources;
 
   const projectRoot = findProjectRoot(projectDir);
-  const localFile = join(projectRoot, LOCAL_DCODE_MD_FILENAME);
+  const localFile = join(projectRoot, LOCAL_DEEPSEEK_MD_FILENAME);
   try {
     if (statSync(localFile).isFile()) {
-      const loaded = readDcodeSource(localFile, remainingBytes);
+      const loaded = readDeepseekSource(localFile, remainingBytes);
       if (loaded) {
         sources.push({ filePath: localFile, contents: loaded.contents, scope: 'local' });
       }
@@ -202,40 +202,40 @@ function collectDcodeSources(
 }
 
 /**
- * 加载 DCODE.md 配置（多层级）
+ * 加载 DEEPSEEK.md 配置（多层级）
  * 返回结构化的 sources 数组，每个条目包含 filePath / contents / scope
  *
  * 加载顺序：
- * 1. User 层：~/.dcode/DCODE.md（全局私人指令）
+ * 1. User 层：~/.deepseek/DEEPSEEK.md（全局私人指令）
  * 2. Project 层（从仓库根到 projectPath 逐层）：
- *    - DCODE.md（仓库根级别）
- *    - .dcode/DCODE.md
- *    - .dcode/rules/*.md（按文件名排序）
- * 3. Local 层：DCODE.local.md（项目根，不签入代码库）
+ *    - DEEPSEEK.md（仓库根级别）
+ *    - .deepseek/DEEPSEEK.md
+ *    - .deepseek/rules/*.md（按文件名排序）
+ * 3. Local 层：DEEPSEEK.local.md（项目根，不签入代码库）
  */
-export function loadDcodeMdSources(
+export function loadDeepseekMdSources(
   projectPath: string | null,
-  options: LoadDcodeMdOptions = {},
-): DcodeMdSource[] {
-  const resolvedOptions: Required<LoadDcodeMdOptions> = {
-    userDir: options.userDir ?? getUserDcodeDir(),
-    maxBytes: options.maxBytes ?? DEFAULT_DCODE_MD_MAX_BYTES,
+  options: LoadDeepseekMdOptions = {},
+): DeepseekMdSource[] {
+  const resolvedOptions: Required<LoadDeepseekMdOptions> = {
+    userDir: options.userDir ?? getUserDeepseekDir(),
+    maxBytes: options.maxBytes ?? DEFAULT_DEEPSEEK_MD_MAX_BYTES,
   };
-  return collectDcodeSources(projectPath, resolvedOptions);
+  return collectDeepseekSources(projectPath, resolvedOptions);
 }
 
 /**
  * 向后兼容：返回拼接后的单一字符串（旧接口）
  */
-export function loadDcodeMd(
+export function loadDeepseekMd(
   projectPath: string | null,
-  options: LoadDcodeMdOptions = {},
+  options: LoadDeepseekMdOptions = {},
 ): string {
-  const sources = loadDcodeMdSources(projectPath, options);
+  const sources = loadDeepseekMdSources(projectPath, options);
   return sources.map((s) => s.contents).join('\n\n');
 }
 
-export function formatDcodeMdContext(projectPath: string | null, contents: string): string {
-  const directory = projectPath ? resolve(projectPath) : getUserDcodeDir();
-  return `# DCODE.md instructions for ${directory}\n\n<INSTRUCTIONS>\n${contents}\n</INSTRUCTIONS>`;
+export function formatDeepseekMdContext(projectPath: string | null, contents: string): string {
+  const directory = projectPath ? resolve(projectPath) : getUserDeepseekDir();
+  return `# DEEPSEEK.md instructions for ${directory}\n\n<INSTRUCTIONS>\n${contents}\n</INSTRUCTIONS>`;
 }

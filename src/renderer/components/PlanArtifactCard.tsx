@@ -26,7 +26,7 @@ const PlanArtifactCard: React.FC<{ item: PlanArtifactItem }> = ({ item }) => {
   useEffect(() => {
     const planId = item.plan?.id;
     if (!planId) return;
-    const api = window.dcodeApi;
+    const api = window.deepseekApi;
     if (typeof api?.getPlanArtifact !== 'function') return;
     let active = true;
     const refresh = () => {

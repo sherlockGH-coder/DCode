@@ -91,7 +91,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
       return;
     }
 
-    window.dcodeApi
+    window.deepseekApi
       .approvalRespond(item.toolCallId, allowed, reason || undefined, rememberForSession, scope)
       .catch((err) => {
         console.error('[ApprovalPanel]', err);

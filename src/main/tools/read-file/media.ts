@@ -98,7 +98,7 @@ export async function readPdfBlock(filePath: string, originalSize: number, pages
 
 async function readPdfPagesAsImages(filePath: string, originalSize: number, pages: string): Promise<ToolExecuteResult> {
   const { firstPage, lastPage } = parsePdfPageRange(pages);
-  const outputDir = join(tmpdir(), `dcode-pdf-pages-${randomUUID()}`);
+  const outputDir = join(tmpdir(), `deepseek-pdf-pages-${randomUUID()}`);
   await mkdir(outputDir, { recursive: true });
   const prefix = join(outputDir, 'page');
 

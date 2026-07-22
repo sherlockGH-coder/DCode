@@ -12,7 +12,7 @@ export function useProject() {
 
   const loadState = useCallback(async () => {
     try {
-      const state: ProjectState = await window.dcodeApi.projectGetState();
+      const state: ProjectState = await window.deepseekApi.projectGetState();
       applyState(state);
     } catch (err) {
       console.error('[useProject] 加载状态失败:', err);
@@ -21,7 +21,7 @@ export function useProject() {
 
   const addProject = useCallback(async (folderPath?: string) => {
     try {
-      const result = await window.dcodeApi.projectAdd(folderPath);
+      const result = await window.deepseekApi.projectAdd(folderPath);
       if (result) await loadState();
       return result;
     } catch (err) {
@@ -32,7 +32,7 @@ export function useProject() {
 
   const pickProjectParentDirectory = useCallback(async () => {
     try {
-      return await window.dcodeApi.projectPickParentDirectory();
+      return await window.deepseekApi.projectPickParentDirectory();
     } catch (err) {
       console.error('[useProject] 选择项目位置失败:', err);
       return null;
@@ -41,7 +41,7 @@ export function useProject() {
 
   const createProject = useCallback(async (input: ProjectCreateInput) => {
     try {
-      const result = await window.dcodeApi.projectCreate(input);
+      const result = await window.deepseekApi.projectCreate(input);
       await loadState();
       return result;
     } catch (err) {
@@ -52,7 +52,7 @@ export function useProject() {
 
   const removeProject = useCallback(async (folderPath: string) => {
     try {
-      const ok = await window.dcodeApi.projectRemove(folderPath);
+      const ok = await window.deepseekApi.projectRemove(folderPath);
       if (ok) await loadState();
       return ok;
     } catch (err) {
@@ -63,7 +63,7 @@ export function useProject() {
 
   const selectProject = useCallback(async (folderPath: string | null) => {
     try {
-      const ok = await window.dcodeApi.projectSetActive(folderPath);
+      const ok = await window.deepseekApi.projectSetActive(folderPath);
       if (ok) await loadState();
       return ok;
     } catch (err) {
@@ -74,7 +74,7 @@ export function useProject() {
 
   useEffect(() => {
     loadState();
-    const unsub = window.dcodeApi.onProjectChanged(applyState);
+    const unsub = window.deepseekApi.onProjectChanged(applyState);
     return () => unsub();
   }, [loadState, applyState]);
 

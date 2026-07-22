@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案三：毛玻璃新拟态 · Neo-Glass</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+  :root {
+    --glass-bg: rgba(22,22,28,0.72);
+    --glass-border: rgba(255,255,255,0.08);
+    --glass-highlight: rgba(255,255,255,0.04);
+    --text-primary: #e8e8f0;
+    --text-secondary: #9898aa;
+    --text-muted: #5e5e72;
+    --accent: #8b9cf7;
+    --accent-soft: rgba(139,156,247,0.18);
+    --accent-glow: rgba(139,156,247,0.25);
+    --tab-active-bg: rgba(139,156,247,0.12);
+    --tab-hover-bg: rgba(255,255,255,0.05);
+    --danger: #f4878e;
+    --blur-amount: 24px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+    /* Animated gradient ambiance */
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 30%, rgba(139,156,247,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 70%, rgba(180,130,220,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 50% 50%, rgba(100,140,200,0.06) 0%, transparent 70%),
+      #131316;
+    animation: bg-drift 12s ease-in-out infinite alternate;
+  }
+
+  @keyframes bg-drift {
+    0% {
+      background-position: 0% 0%, 100% 100%, 50% 50%;
+    }
+    100% {
+      background-position: 5% -5%, 95% 105%, 45% 55%;
+    }
+  }
+
+  /* ── Main glass panel ── */
+  .glass-panel {
+    width: 920px;
+    max-width: 94vw;
+    height: 560px;
+    max-height: 80vh;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--blur-amount)) saturate(1.4);
+    -webkit-backdrop-filter: blur(var(--blur-amount)) saturate(1.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+      0 4px 0 rgba(255,255,255,0.03) inset,
+      0 1px 0 rgba(255,255,255,0.06) inset,
+      0 24px 64px rgba(0,0,0,0.4),
+      0 4px 16px rgba(0,0,0,0.2);
+  }
+
+  /* ── Top traffic light dots ── */
+  .glass-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px 6px;
+    flex-shrink: 0;
+  }
+
+  .glass-dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .glass-dot:nth-child(1) { background: #f4878e; }
+  .glass-dot:nth-child(2) { background: #f5c470; }
+  .glass-dot:nth-child(3) { background: #63d48b; }
+  .glass-panel:hover .glass-dot {
+    box-shadow: 0 0 8px rgba(255,255,255,0.08);
+  }
+
+  .glass-dot-spacer {
+    flex: 1;
+  }
+
+  .glass-title {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+
+  /* ── Tab bar: floating pills ── */
+  .glass-tab-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px 0;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .glass-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px 7px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 10px;
+    background: transparent;
+    transition: all 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+    user-select: none;
+    position: relative;
+    font-family: 'DM Mono', 'SF Mono', monospace;
+    letter-spacing: -0.01em;
+  }
+
+  .glass-tab:hover {
+    color: var(--text-primary);
+    background: var(--tab-hover-bg);
+  }
+
+  .glass-tab.active {
+    color: #c8d2ff;
+    background: var(--tab-active-bg);
+    box-shadow:
+      0 0 0 1px rgba(139,156,247,0.2) inset,
+      0 0 20px var(--accent-glow);
+  }
+
+  /* Tab icon dot */
+  .glass-tab-icon {
+    width: 7px; height: 7px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+  }
+  .glass-tab.active .glass-tab-icon {
+    opacity: 0.8;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+
+  .glass-tab-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    font-size: 10px;
+    color: transparent;
+    transition: all 0.18s;
+  }
+  .glass-tab:hover .glass-tab-close,
+  .glass-tab.active .glass-tab-close {
+    color: var(--text-muted);
+  }
+  .glass-tab-close:hover {
+    color: #fff !important;
+    background: rgba(244,135,142,0.35);
+    box-shadow: 0 0 8px rgba(244,135,142,0.2);
+  }
+
+  .glass-tab-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 10px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s;
+  }
+  .glass-tab-add:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.08);
+  }
+
+  /* ── Separator line ── */
+  .glass-separator {
+    height: 1px;
+    margin: 6px 18px 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255,255,255,0.06) 20%,
+      rgba(255,255,255,0.08) 50%,
+      rgba(255,255,255,0.06) 80%,
+      transparent 100%
+    );
+    flex-shrink: 0;
+  }
+
+  /* ── Terminal body ── */
+  .glass-terminal {
+    flex: 1;
+    min-height: 0;
+    padding: 16px 22px;
+    overflow-y: auto;
+    font-family: 'DM Mono', 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    position: relative;
+  }
+
+  .glass-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+    min-height: 1.6em;
+  }
+
+  .g-prompt {
+    color: var(--accent);
+    font-weight: 500;
+    text-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  .g-cmd {
+    color: #d8ddf8;
+  }
+
+  .g-out {
+    color: var(--text-secondary);
+  }
+
+  .g-dim {
+    color: var(--text-muted);
+  }
+
+  .g-highlight {
+    color: #63d48b;
+  }
+
+  .g-warn {
+    color: #f5c470;
+  }
+
+  .g-error {
+    color: var(--danger);
+  }
+
+  .g-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 16px;
+    background: var(--accent);
+    vertical-align: -3px;
+    animation: g-blink 1.2s ease-in-out infinite;
+    border-radius: 1px;
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
+  @keyframes g-blink {
+    0%, 40% { opacity: 1; }
+    50%, 90% { opacity: 0.15; }
+    100% { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="glass-panel">
+  <!-- Title bar -->
+  <div class="glass-titlebar">
+    <span class="glass-dot"></span>
+    <span class="glass-dot"></span>
+    <span class="glass-dot"></span>
+    <span class="glass-dot-spacer"></span>
+    <span class="glass-title">Terminal · DCode</span>
+  </div>
+
+  <!-- Tab pills -->
+  <div class="glass-tab-bar">
+    <div class="glass-tab active">
+      <span class="glass-tab-icon"></span>
+      ~/DCode
+      <span class="glass-tab-close">✕</span>
+    </div>
+    <div class="glass-tab">
+      <span class="glass-tab-icon"></span>
+      docker
+      <span class="glass-tab-close">✕</span>
+    </div>
+    <div class="glass-tab">
+      <span class="glass-tab-icon"></span>
+      tests
+      <span class="glass-tab-close">✕</span>
+    </div>
+    <div class="glass-tab-add" title="新建终端">+</div>
+  </div>
+
+  <div class="glass-separator"></div>
+
+  <!-- Terminal content -->
+  <div class="glass-terminal">
+    <div class="glass-line"><span class="g-dim">● terminal session started · 2026-07-17 14:32 UTC</span></div>
+    <div class="glass-line"></div>
+    <div class="glass-line"><span class="g-prompt">❯</span> <span class="g-cmd">pwd</span></div>
+    <div class="glass-line"><span class="g-out">/Users/conan/Code/06-Project/DCode</span></div>
+    <div class="glass-line"></div>
+    <div class="glass-line"><span class="g-prompt">❯</span> <span class="g-cmd">pnpm run build</span></div>
+    <div class="glass-line"><span class="g-dim">  Building for production...</span></div>
+    <div class="glass-line"><span class="g-highlight">  ✓</span><span class="g-out"> main process compiled in 2.4s</span></div>
+    <div class="glass-line"><span class="g-highlight">  ✓</span><span class="g-out"> renderer compiled in 3.1s</span></div>
+    <div class="glass-line"><span class="g-highlight">  ✓</span><span class="g-out"> preload compiled in 0.6s</span></div>
+    <div class="glass-line"><span class="g-dim">  Build complete · 6.2s</span></div>
+    <div class="glass-line"></div>
+    <div class="glass-line"><span class="g-prompt">❯</span> <span class="g-cmd">grep -r "bg-main" src/renderer/</span></div>
+    <div class="glass-line"><span class="g-out">src/renderer/components/TerminalPanel.tsx:</span><span class="g-warn"> background: 'var(--bg-main)'</span></div>
+    <div class="glass-line"><span class="g-out">src/renderer/styles/theme.css:</span><span class="g-dim"> --bg-main: #1e1e20;</span></div>
+    <div class="glass-line"></div>
+    <div class="glass-line"><span class="g-prompt">❯</span> <span class="g-cursor"></span></div>
+  </div>
+</div>
+</body>
+</html>

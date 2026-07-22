@@ -20,7 +20,7 @@ describe('useConversations', () => {
       IS_REACT_ACT_ENVIRONMENT: true,
     });
 
-    (window as any).dcodeApi = {
+    (window as any).deepseekApi = {
       createConversation: vi.fn(async () => 'conv_empty'),
       getConversations: vi.fn(async () => [
         {
@@ -69,8 +69,8 @@ describe('useConversations', () => {
       await current?.handleNewConversation('/project');
     });
 
-    expect(window.dcodeApi.createConversation).toHaveBeenCalledWith('新对话', '/project');
-    expect(window.dcodeApi.getConversations).toHaveBeenCalledTimes(2);
+    expect(window.deepseekApi.createConversation).toHaveBeenCalledWith('新对话', '/project');
+    expect(window.deepseekApi.getConversations).toHaveBeenCalledTimes(2);
     expect(current?.conversationId).toBe('conv_empty');
     expect(current?.messages).toEqual([]);
   });
@@ -104,12 +104,12 @@ describe('useConversations', () => {
       await current?.deleteMessagesFromTurn('conv_empty', 'user_2');
     });
 
-    expect(window.dcodeApi.deleteMessagesFromTurn).toHaveBeenCalledWith('conv_empty', 'user_2');
+    expect(window.deepseekApi.deleteMessagesFromTurn).toHaveBeenCalledWith('conv_empty', 'user_2');
     expect(current?.messages.map((message) => message.id)).toEqual(['user_1', 'assistant_1']);
   });
 
   it('evicts least recently loaded conversation messages beyond the cache limit', async () => {
-    (window.dcodeApi.getMessages as ReturnType<typeof vi.fn>).mockImplementation(async (convId: string) => [
+    (window.deepseekApi.getMessages as ReturnType<typeof vi.fn>).mockImplementation(async (convId: string) => [
       { id: `message_${convId}`, role: 'user', content: convId, turnId: convId, attemptNo: 0 },
     ]);
     const Harness = () => {
@@ -127,12 +127,12 @@ describe('useConversations', () => {
       });
     }
 
-    expect(window.dcodeApi.getMessages).toHaveBeenCalledTimes(6);
+    expect(window.deepseekApi.getMessages).toHaveBeenCalledTimes(6);
 
     await act(async () => {
       current?.handleSelectConversation('conv_1');
     });
 
-    expect(window.dcodeApi.getMessages).toHaveBeenCalledTimes(7);
+    expect(window.deepseekApi.getMessages).toHaveBeenCalledTimes(7);
   });
 });

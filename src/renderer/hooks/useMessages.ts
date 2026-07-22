@@ -63,7 +63,7 @@ export function useMessages() {
   const bindSetMessagesRef = useRef<((convId: string) => (updater: (prev: Message[]) => Message[]) => void) | null>(null);
 
   const abortSend = useCallback((conversationId?: string | null) => {
-    window.dcodeApi.abortChat(conversationId ?? undefined);
+    window.deepseekApi.abortChat(conversationId ?? undefined);
   }, []);
 
   /** 检查指定对话是否有活跃请求 */
@@ -95,12 +95,12 @@ export function useMessages() {
 
   const restorePendingApprovals = useCallback(async () => {
     try {
-      const pendingApprovals = await window.dcodeApi.approvalListPending();
+      const pendingApprovals = await window.deepseekApi.approvalListPending();
       for (const approvalReq of pendingApprovals) {
         const req = getOrCreateActiveRequestForApproval(approvalReq);
         if (!req) continue;
         if (shouldAutoApproveApproval(approvalReq)) {
-          window.dcodeApi.approvalRespond(approvalReq.toolCallId, true).catch((err) => {
+          window.deepseekApi.approvalRespond(approvalReq.toolCallId, true).catch((err) => {
             console.error('[useMessages] restored session auto-approve 失败:', err);
           });
           continue;
@@ -153,10 +153,10 @@ export function useMessages() {
       setIsLoading(true);
       setRetryInfo(null);
       try {
-        const result = await window.dcodeApi.compactConversation(conversationId);
+        const result = await window.deepseekApi.compactConversation(conversationId);
         if (result.compactedCount > 0) {
 
-          const msgs = await window.dcodeApi.getMessages(conversationId);
+          const msgs = await window.deepseekApi.getMessages(conversationId);
           setMessages(() => msgs as Message[]);
           await onConversationsReload?.();
         } else {
@@ -191,12 +191,12 @@ export function useMessages() {
       const title = formatSlashCommandsForTitle(rawTitle).slice(0, 20);
 
       if (!currentConvId) {
-        currentConvId = await window.dcodeApi.createConversation(title, activeProject);
+        currentConvId = await window.deepseekApi.createConversation(title, activeProject);
         onConversationCreated?.(currentConvId!);
         await onConversationsReload?.();
       } else if (isFirstMessageInConversation) {
         try {
-          await window.dcodeApi.updateConversationTitle(currentConvId, title);
+          await window.deepseekApi.updateConversationTitle(currentConvId, title);
           await onConversationsReload?.();
         } catch (err) {
           console.warn('[useMessages] 更新预创建对话标题失败:', err);
@@ -205,8 +205,8 @@ export function useMessages() {
 
       setMessages = bindSetMessages(currentConvId);
 
-      const modeState = typeof window.dcodeApi.getConversationModeState === 'function'
-        ? await window.dcodeApi.getConversationModeState(currentConvId!)
+      const modeState = typeof window.deepseekApi.getConversationModeState === 'function'
+        ? await window.deepseekApi.getConversationModeState(currentConvId!)
         : { contextEpoch: 0 };
       const userMessage: Message | null = isRetry ? null : (() => {
           const uid = planExecution?.executionTurnId ?? crypto.randomUUID();
@@ -262,7 +262,7 @@ export function useMessages() {
       });
 
       if (!isRetry && userMessage) {
-        await window.dcodeApi.addMessage(
+        await window.deepseekApi.addMessage(
           currentConvId!, 'user', userInput,
           undefined, undefined, undefined, undefined, attachments,
           undefined, undefined, undefined, undefined,
@@ -293,7 +293,7 @@ export function useMessages() {
         return apiMsg;
       });
 
-      await window.dcodeApi.sendMessage(
+      await window.deepseekApi.sendMessage(
         apiMessages,
         selectedModel,
         currentConvId,
@@ -331,7 +331,7 @@ export function useMessages() {
       }
       if (currentConvId) {
         try {
-          await window.dcodeApi.addMessage(
+          await window.deepseekApi.addMessage(
             currentConvId, 'assistant', errorContent,
             undefined, undefined, undefined, undefined, undefined,
             undefined, true, undefined, undefined,
@@ -359,7 +359,7 @@ export function useMessages() {
     scope?: { kind: 'outOfScopeDir'; dir: string },
     answers?: Record<string, string>,
   ) => {
-    window.dcodeApi
+    window.deepseekApi
       .approvalRespond(toolCallId, allowed, feedback, rememberForSession, scope, answers)
       .catch((err) => {
         console.error('[useMessages] approvalRespond 失败:', err);

@@ -8,7 +8,7 @@ import { readFileTool } from './readFile';
 
 describe('writeFileTool', () => {
   it('creates a new file with file_path', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-write-file-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-write-file-'));
     try {
       const filePath = join(projectRoot, 'new.txt');
       const result = await writeFileTool.execute(
@@ -24,7 +24,7 @@ describe('writeFileTool', () => {
   });
 
   it('requires reading an existing file before overwriting it', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-write-unread-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-write-unread-'));
     try {
       const filePath = join(projectRoot, 'existing.txt');
       await mkdir(projectRoot, { recursive: true });
@@ -40,7 +40,7 @@ describe('writeFileTool', () => {
   });
 
   it('allows overwriting after a full read', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-write-read-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-write-read-'));
     try {
       const filePath = join(projectRoot, 'existing.txt');
       await mkdir(projectRoot, { recursive: true });
@@ -60,7 +60,7 @@ describe('writeFileTool', () => {
   });
 
   it('rejects legacy path argument', async () => {
-    const projectRoot = mkdtempSync(join(tmpdir(), 'dcode-write-legacy-'));
+    const projectRoot = mkdtempSync(join(tmpdir(), 'deepseek-write-legacy-'));
     try {
       const filePath = join(projectRoot, 'legacy.txt');
 

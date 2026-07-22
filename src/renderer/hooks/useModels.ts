@@ -17,7 +17,7 @@ export function useModels() {
   const lastKeyRef = useRef<string>('');
 
   const fetchModels = useCallback(async (preferredModel?: string) => {
-    const list = await window.dcodeApi.getModels().catch(() => FALLBACK);
+    const list = await window.deepseekApi.getModels().catch(() => FALLBACK);
     const next = preferredModel?.trim() || selectedModelRef.current || list[0] || 'deepseek-chat';
     setModels(withSelectedModel(list, next));
     setSelectedModel(next);
@@ -33,8 +33,8 @@ export function useModels() {
 
     (async () => {
       const [modelList, settings] = await Promise.all([
-        window.dcodeApi.getModels().catch(() => FALLBACK),
-        window.dcodeApi.getSettings().catch(() => null),
+        window.deepseekApi.getModels().catch(() => FALLBACK),
+        window.deepseekApi.getSettings().catch(() => null),
       ]);
 
       if (cancelled) return;
@@ -50,7 +50,7 @@ export function useModels() {
           const legacy = localStorage.getItem('selected-model');
           if (legacy) {
             defaultModel = legacy;
-            await window.dcodeApi.patchSettings({ api: { defaultModel: legacy } });
+            await window.deepseekApi.patchSettings({ api: { defaultModel: legacy } });
           }
         } catch {              }
       }
@@ -66,7 +66,7 @@ export function useModels() {
   }, []);
 
   useEffect(() => {
-    const unsub = window.dcodeApi.onSettingsChanged((s) => {
+    const unsub = window.deepseekApi.onSettingsChanged((s) => {
       const nextKey = `${s.api.baseUrl}|${s.api.apiKeySet}|${s.api.models.join(',')}`;
       if (nextKey !== lastKeyRef.current) {
         lastKeyRef.current = nextKey;
@@ -86,7 +86,7 @@ export function useModels() {
 
   useEffect(() => {
     const handler = () => {
-      window.dcodeApi.getSettings()
+      window.deepseekApi.getSettings()
         .then((settings) => fetchModels(settings.api.defaultModel))
         .catch(() => fetchModels());
     };
@@ -98,7 +98,7 @@ export function useModels() {
     setSelectedModel(model);
     setModels((current) => withSelectedModel(current, model));
 
-    window.dcodeApi.patchSettings({ api: { defaultModel: model } }).catch(() => {});
+    window.deepseekApi.patchSettings({ api: { defaultModel: model } }).catch(() => {});
 
     try { localStorage.setItem('selected-model', model); } catch {              }
   }, []);

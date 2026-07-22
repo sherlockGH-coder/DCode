@@ -131,9 +131,9 @@ const App: React.FC = () => {
   }, [chatProjectPath, conv.conversationId, conv.handleNewConversation]);
 
   const enterPlanMode = React.useCallback(async (conversationId: string) => {
-    const current = await window.dcodeApi.getConversationModeState(conversationId);
+    const current = await window.deepseekApi.getConversationModeState(conversationId);
     if (current.mode === 'plan') return current;
-    return window.dcodeApi.setConversationMode({
+    return window.deepseekApi.setConversationMode({
       conversationId,
       targetMode: 'plan',
       expectedModeRevision: current.modeRevision,
@@ -149,7 +149,7 @@ const App: React.FC = () => {
       const body = planMatch[1]?.trim() ?? '';
       if (!body && attachments.length === 0) return;
       await handleSend(body, attachments, undefined, undefined, conversationId);
-      planMode.setState(await window.dcodeApi.getConversationModeState(conversationId));
+      planMode.setState(await window.deepseekApi.getConversationModeState(conversationId));
       return;
     }
     await handleSend(userInput, attachments);
@@ -157,8 +157,8 @@ const App: React.FC = () => {
 
   const handleModeChange = React.useCallback(async (target: 'execute' | 'plan') => {
     const conversationId = await ensureConversation();
-    const current = await window.dcodeApi.getConversationModeState(conversationId);
-    const next = await window.dcodeApi.setConversationMode({
+    const current = await window.deepseekApi.getConversationModeState(conversationId);
+    const next = await window.deepseekApi.setConversationMode({
       conversationId,
       targetMode: target,
       expectedModeRevision: current.modeRevision,
@@ -221,7 +221,7 @@ const App: React.FC = () => {
         lastUserMessage,
         editedContent,
         editedAttachments,
-        truncateMessages: window.dcodeApi.truncateMessages,
+        truncateMessages: window.deepseekApi.truncateMessages,
         setMessages: (nextMessages) => {
           if (!conv.conversationId) return;
           conv.setMessages(conv.conversationId, () => nextMessages);
@@ -245,7 +245,7 @@ const App: React.FC = () => {
   const handleIndicatorRetry = React.useCallback(() => {
     if (!lastUserMessage?.id) return;
 
-    window.dcodeApi.abortChat(conv.conversationId ?? undefined);
+    window.deepseekApi.abortChat(conv.conversationId ?? undefined);
     orchestratorRetry(lastUserMessage.id);
   }, [lastUserMessage?.id, conv.conversationId, orchestratorRetry]);
   const handleIndicatorAbort = React.useCallback(() => {
@@ -374,7 +374,7 @@ const App: React.FC = () => {
   }, [conv, nav]);
 
   const handleRenameConversation = React.useCallback(async (convId: string, title: string) => {
-    await window.dcodeApi.updateConversationTitle(convId, title);
+    await window.deepseekApi.updateConversationTitle(convId, title);
     await conv.loadConversations();
   }, [conv.loadConversations]);
 
@@ -415,7 +415,7 @@ const App: React.FC = () => {
     const conversationId = conv.conversationId;
     if (!conversationId || entries.length === 0) return false;
     try {
-      const result = await window.dcodeApi.undoChanges(entries);
+      const result = await window.deepseekApi.undoChanges(entries);
       if (!result.success) {
         window.alert(result.error ?? '撤销失败。文件可能已经被后续修改。');
         return false;

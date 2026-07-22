@@ -7,7 +7,7 @@ import type { McpServerConfig, McpStatus, McpToolEntry } from '../../shared/type
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { mergeProxyEnvironment } from '../proxyEnv';
 
-const CLIENT_INFO = { name: 'dcode-app', version: '0.0.1' };
+const CLIENT_INFO = { name: 'deepseek-app', version: '0.1.0' };
 const CONNECT_TIMEOUT_MS = 15000;
 
 export interface McpToolFull extends McpToolEntry {

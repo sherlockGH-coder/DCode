@@ -25,7 +25,7 @@ contextBridge.exposeInMainWorld('electronEnv', {
   },
 });
 
-contextBridge.exposeInMainWorld('dcodeApi', {
+contextBridge.exposeInMainWorld('deepseekApi', {
   ...chatApi,
   ...modelApi,
   ...dbApi,

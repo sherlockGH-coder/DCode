@@ -6,7 +6,7 @@ import { readFileTool } from './readFile';
 import type { ToolExecuteResult, ToolExecutionContext } from './types';
 
 async function withProject<T>(fn: (projectRoot: string) => Promise<T>): Promise<T> {
-  const projectRoot = await mkdtemp(join(tmpdir(), 'dcode-read-file-'));
+  const projectRoot = await mkdtemp(join(tmpdir(), 'deepseek-read-file-'));
   try {
     return await fn(projectRoot);
   } finally {

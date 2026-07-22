@@ -215,7 +215,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     let isMounted = true;
     const fetchGitInfo = async () => {
       try {
-        const info = await window.dcodeApi.gitGetBranches(activeProject);
+        const info = await window.deepseekApi.gitGetBranches(activeProject);
         if (isMounted) {
           setGitInfo(info);
         }
@@ -240,9 +240,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const handleCheckoutBranch = async (branch: string) => {
     if (!activeProject || isLoading) return;
     try {
-      const res = await window.dcodeApi.gitCheckoutBranch(activeProject, branch);
+      const res = await window.deepseekApi.gitCheckoutBranch(activeProject, branch);
       if (res.success) {
-        const info = await window.dcodeApi.gitGetBranches(activeProject);
+        const info = await window.deepseekApi.gitGetBranches(activeProject);
         setGitInfo(info);
         setIsBranchMenuOpen(false);
       } else {
@@ -405,7 +405,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 selectedSlashCommand
                   ? ''
                   : isLoading
-                  ? 'DCode 正在回复…'
+                  ? 'DeepSeek 正在回复…'
                   : placeholder
               }
               value={inputValue}

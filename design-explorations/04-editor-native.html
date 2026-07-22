@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>方案四：编辑器原生风格 · Editor-Native</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600&display=swap');
+
+  :root {
+    --bg-root: #1c1c20;
+    --bg-panel: #232328;
+    --bg-tab-bar: #1f1f24;
+    --bg-tab-active: #232328;
+    --bg-tab-hover: #2a2a30;
+    --border-color: #333338;
+    --border-active: #555560;
+    --text-primary: #cfcfd6;
+    --text-secondary: #878796;
+    --text-muted: #555560;
+    --accent: #5294e2;
+    --accent-dim: rgba(82,148,226,0.15);
+    --file-green: #7ec87b;
+    --file-yellow: #e0b860;
+    --file-red: #e06c6c;
+    --line-highlight: rgba(255,255,255,0.03);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #18181c;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Panel frame ── */
+  .ide-panel {
+    width: 920px;
+    max-width: 94vw;
+    height: 560px;
+    max-height: 80vh;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+      0 8px 40px rgba(0,0,0,0.3),
+      0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  /* ── IDE-style tab bar (like VS Code panel tabs) ── */
+  .ide-tab-bar {
+    display: flex;
+    align-items: stretch;
+    background: var(--bg-tab-bar);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+    min-height: 35px;
+    user-select: none;
+  }
+
+  .ide-tabs-scroll {
+    display: flex;
+    align-items: stretch;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+  }
+  .ide-tabs-scroll::-webkit-scrollbar { height: 0; }
+
+  .ide-tab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 14px;
+    font-size: 12.5px;
+    font-weight: 450;
+    font-family: 'Geist', sans-serif;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-right: 1px solid var(--border-color);
+    background: var(--bg-tab-bar);
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+    position: relative;
+    letter-spacing: -0.008em;
+    min-width: 0;
+  }
+
+  .ide-tab:hover {
+    background: var(--bg-tab-hover);
+    color: var(--text-primary);
+  }
+
+  .ide-tab.active {
+    background: var(--bg-tab-active);
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .ide-tab.active::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  /* File-type icon dot */
+  .ide-tab-dot {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .ide-tab-dot.shell  { background: var(--file-green); }
+  .ide-tab-dot.build  { background: var(--file-yellow); }
+  .ide-tab-dot.remote { background: var(--accent); }
+
+  .ide-tab-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+  }
+
+  .ide-tab-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: transparent;
+    flex-shrink: 0;
+    margin-left: 2px;
+    transition: all 0.1s;
+  }
+  .ide-tab:hover .ide-tab-close,
+  .ide-tab.active .ide-tab-close {
+    color: var(--text-muted);
+  }
+  .ide-tab-close:hover {
+    color: #fff;
+    background: rgba(224,108,108,0.4);
+  }
+
+  /* Tab bar actions (right side) */
+  .ide-tab-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  .ide-tab-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 5px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.12s, background 0.12s;
+    font-size: 14px;
+  }
+  .ide-tab-action:hover {
+    color: var(--text-primary);
+    background: var(--bg-tab-hover);
+  }
+
+  /* Breadcrumb path */
+  .ide-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 5px 16px;
+    font-size: 11.5px;
+    color: var(--text-muted);
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+    font-family: 'Geist Mono', 'SF Mono', monospace;
+  }
+
+  .ide-breadcrumb span {
+    padding: 2px 4px;
+    border-radius: 3px;
+    cursor: default;
+    transition: color 0.12s, background 0.12s;
+  }
+  .ide-breadcrumb span:hover {
+    color: var(--text-primary);
+    background: var(--bg-tab-hover);
+  }
+  .ide-breadcrumb .sep {
+    color: var(--text-muted);
+    margin: 0 1px;
+    cursor: default;
+  }
+  .ide-breadcrumb .sep:hover {
+    background: transparent;
+    color: var(--text-muted);
+  }
+
+  /* ── Terminal body ── */
+  .ide-terminal {
+    flex: 1;
+    min-height: 0;
+    background: var(--bg-panel);
+    padding: 12px 18px;
+    overflow-y: auto;
+    font-family: 'Geist Mono', 'SF Mono', 'Menlo', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+
+  .ide-line {
+    white-space: pre-wrap;
+    word-break: break-all;
+    min-height: 1.6em;
+    padding: 1px 6px;
+    margin: 0 -6px;
+    border-radius: 2px;
+  }
+  .ide-line:hover {
+    background: var(--line-highlight);
+  }
+
+  .i-prompt {
+    color: var(--file-green);
+    font-weight: 500;
+  }
+
+  .i-cmd {
+    color: #d7dae0;
+  }
+
+  .i-out {
+    color: var(--text-secondary);
+  }
+
+  .i-dim {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .i-path {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: rgba(82,148,226,0.3);
+  }
+
+  .i-number {
+    color: #d19a66;
+  }
+
+  .i-keyword {
+    color: #c678dd;
+  }
+
+  .i-success {
+    color: var(--file-green);
+  }
+
+  .i-error {
+    color: var(--file-red);
+  }
+
+  .i-cursor {
+    display: inline-block;
+    width: 1.5px;
+    height: 15px;
+    background: var(--text-primary);
+    vertical-align: -3px;
+    animation: i-blink 1s step-end infinite;
+  }
+
+  @keyframes i-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0.2; }
+  }
+
+  /* Selection style */
+  ::selection {
+    background: rgba(82,148,226,0.3);
+  }
+</style>
+</head>
+<body>
+<div class="ide-panel">
+  <!-- Tab bar -->
+  <div class="ide-tab-bar">
+    <div class="ide-tabs-scroll">
+      <div class="ide-tab active">
+        <span class="ide-tab-dot shell"></span>
+        <span class="ide-tab-label">zsh · ~/DCode</span>
+        <span class="ide-tab-close">✕</span>
+      </div>
+      <div class="ide-tab">
+        <span class="ide-tab-dot build"></span>
+        <span class="ide-tab-label">build:watch</span>
+        <span class="ide-tab-close">✕</span>
+      </div>
+      <div class="ide-tab">
+        <span class="ide-tab-dot remote"></span>
+        <span class="ide-tab-label">ssh:prod</span>
+        <span class="ide-tab-close">✕</span>
+      </div>
+    </div>
+    <div class="ide-tab-actions">
+      <div class="ide-tab-action" title="新建终端 (⌘T)">＋</div>
+      <div class="ide-tab-action" title="拆分面板 (⌘\)">◫</div>
+      <div class="ide-tab-action" title="关闭全部 (⌘W)">✕</div>
+    </div>
+  </div>
+
+  <!-- Breadcrumb -->
+  <div class="ide-breadcrumb">
+    <span>DCode</span><span class="sep">›</span><span>src</span><span class="sep">›</span><span>renderer</span><span class="sep">›</span><span>components</span><span class="sep">›</span><span style="color: var(--text-primary);">TerminalPanel.tsx</span>
+  </div>
+
+  <!-- Terminal -->
+  <div class="ide-terminal">
+    <div class="ide-line"><span class="i-dim">⚡ Terminal ready · PID 42891 · Thu Jul 17 2026</span></div>
+    <div class="ide-line"></div>
+    <div class="ide-line"><span class="i-prompt">~/DCode</span> <span class="i-cmd">ls src/renderer/components/Terminal*</span></div>
+    <div class="ide-line"><span class="i-path">src/renderer/components/TerminalPanel.tsx</span></div>
+    <div class="ide-line"><span class="i-path">src/renderer/components/terminalLayout.ts</span></div>
+    <div class="ide-line"></div>
+    <div class="ide-line"><span class="i-prompt">~/DCode</span> <span class="i-cmd">wc -l src/renderer/components/TerminalPanel.tsx</span></div>
+    <div class="ide-line"><span class="i-number">428</span><span class="i-out"> src/renderer/components/TerminalPanel.tsx</span></div>
+    <div class="ide-line"></div>
+    <div class="ide-line"><span class="i-prompt">~/DCode</span> <span class="i-cmd">pnpm typecheck</span></div>
+    <div class="ide-line"><span class="i-out">  src/renderer/components/TerminalPanel.tsx</span><span class="i-success"> ✓ no errors</span></div>
+    <div class="ide-line"><span class="i-out">  src/renderer/components/terminalLayout.ts</span><span class="i-success"> ✓ no errors</span></div>
+    <div class="ide-line"><span class="i-dim">  Type-check passed in 1.8s</span></div>
+    <div class="ide-line"></div>
+    <div class="ide-line"><span class="i-prompt">~/DCode</span> <span class="i-cursor"></span></div>
+  </div>
+</div>
+</body>
+</html>

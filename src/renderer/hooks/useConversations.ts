@@ -30,7 +30,7 @@ export function useConversations(activeProject: string | null) {
    */
   const loadConversations = useCallback(async () => {
     try {
-      const projConvs = await window.dcodeApi.getConversations();
+      const projConvs = await window.deepseekApi.getConversations();
       setConversations(projConvs as Conversation[]);
     } catch (err) {
       console.error('加载对话列表失败:', err);
@@ -71,9 +71,9 @@ export function useConversations(activeProject: string | null) {
     latestLoadRef.current = convId;
     try {
       const [msgs, attempts, pendingApprovals] = await Promise.all([
-        window.dcodeApi.getMessages(convId),
-        window.dcodeApi.getActiveAttempts(convId),
-        window.dcodeApi.approvalListPending(convId),
+        window.deepseekApi.getMessages(convId),
+        window.deepseekApi.getActiveAttempts(convId),
+        window.deepseekApi.approvalListPending(convId),
       ]);
       if (latestLoadRef.current !== convId) return;
 
@@ -141,7 +141,7 @@ export function useConversations(activeProject: string | null) {
       setActiveAttemptsState((prev) => {
         const next = typeof updater === 'function' ? updater(prev) : updater;
         if (conversationId) {
-          window.dcodeApi.setActiveAttempts(conversationId, next).catch((err) => {
+          window.deepseekApi.setActiveAttempts(conversationId, next).catch((err) => {
             console.error('[useConversations] 持久化 activeAttempts 失败:', err);
           });
         }
@@ -168,7 +168,7 @@ export function useConversations(activeProject: string | null) {
     if (projectPath === undefined) return null;
 
     try {
-      const convId = await window.dcodeApi.createConversation('新对话', projectPath);
+      const convId = await window.deepseekApi.createConversation('新对话', projectPath);
       setMessagesByConv((prev) => {
         touchConversationCache(convId);
         return pruneConversationCache({
@@ -192,7 +192,7 @@ export function useConversations(activeProject: string | null) {
       touchConversationCache(convId);
       setConversationId(convId);
 
-      window.dcodeApi.getActiveAttempts(convId).then((attempts) => {
+      window.deepseekApi.getActiveAttempts(convId).then((attempts) => {
         setActiveAttemptsState(attempts ?? {});
       }).catch(() => {});
       return;
@@ -202,7 +202,7 @@ export function useConversations(activeProject: string | null) {
 
   const handleDeleteConversation = useCallback(async (convId: string) => {
     try {
-      await window.dcodeApi.deleteConversation(convId);
+      await window.deepseekApi.deleteConversation(convId);
       if (convId === conversationId) {
         setConversationId(null);
         setActiveAttemptsState({});
@@ -221,7 +221,7 @@ export function useConversations(activeProject: string | null) {
   }, [conversationId, loadConversations]);
 
   const deleteMessagesFromTurn = useCallback(async (convId: string, turnId: string) => {
-    await window.dcodeApi.deleteMessagesFromTurn(convId, turnId);
+    await window.deepseekApi.deleteMessagesFromTurn(convId, turnId);
     setMessagesByConv((prev) => {
       const current = prev[convId] ?? [];
       const startIndex = current.findIndex((message) => message.turnId === turnId);

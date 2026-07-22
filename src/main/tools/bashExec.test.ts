@@ -33,12 +33,6 @@ function context(policy: ToolExecutionContext['approvalPolicy'] = 'auto-approve'
 }
 
 describe('bashExecTool', () => {
-  const cwdCommand = process.platform === 'win32' ? 'cd' : 'pwd';
-  const failureCommand = process.platform === 'win32'
-    ? 'echo failure 1>&2 & exit /b 7'
-    : 'printf failure >&2; exit 7';
-  const backgroundCommand = 'echo bg-ok';
-
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(projectManager.getCwdForProject).mockReturnValue(null);
@@ -63,14 +57,14 @@ describe('bashExecTool', () => {
 
   it('executes a foreground command with auto-approve without requesting approval', async () => {
     const result = await bashExecTool.execute(
-      { command: cwdCommand },
+      { command: 'pwd' },
       context(),
     );
 
     expect(result.content.trim()).toBe(process.cwd());
     expect(result.metadata).toMatchObject({
       kind: 'exec',
-      command: cwdCommand,
+      command: 'pwd',
       exitCode: 0,
     });
     expect(approvalService.request).not.toHaveBeenCalled();
@@ -80,7 +74,7 @@ describe('bashExecTool', () => {
     vi.mocked(projectManager.getCwdForProject).mockReturnValue(process.cwd());
 
     const result = await bashExecTool.execute(
-      { command: cwdCommand },
+      { command: 'pwd' },
       { ...context(), projectPath: process.cwd() },
     );
 
@@ -91,7 +85,7 @@ describe('bashExecTool', () => {
 
   it('returns exec metadata when a command exits non-zero', async () => {
     const result = await bashExecTool.execute(
-      { command: failureCommand },
+      { command: 'printf failure >&2; exit 7' },
       context(),
     );
 
@@ -99,14 +93,14 @@ describe('bashExecTool', () => {
     expect(result.content).toContain('failure');
     expect(result.metadata).toMatchObject({
       kind: 'exec',
-      command: failureCommand,
+      command: 'printf failure >&2; exit 7',
       exitCode: 7,
     });
   });
 
   it('starts background commands immediately and writes a log file', async () => {
     const result = await bashExecTool.execute(
-      { command: backgroundCommand, run_in_background: true },
+      { command: 'printf bg-ok', run_in_background: true },
       context(),
     );
 
@@ -115,17 +109,17 @@ describe('bashExecTool', () => {
     const outputFile = result.content.match(/^output_file: (.+)$/m)?.[1];
     expect(outputFile).toBeTruthy();
     expect(existsSync(outputFile!)).toBe(true);
-    expect(readFileSync(outputFile!, 'utf-8')).toContain(`Command: ${backgroundCommand}`);
+    expect(readFileSync(outputFile!, 'utf-8')).toContain('Command: printf bg-ok');
     expect(result.metadata).toMatchObject({
       kind: 'exec',
-      command: backgroundCommand,
+      command: 'printf bg-ok',
       exitCode: 0,
     });
   });
 
   it('auto-denies bash when the execution context requires it', async () => {
     const result = await bashExecTool.execute(
-      { command: cwdCommand },
+      { command: 'pwd' },
       context('auto-deny'),
     );
 

@@ -1,0 +1,120 @@
+# Project-scoped command policy for trusted DCode development.
+
+prefix_rule(
+    pattern = ["pnpm", "test:e2e"],
+    decision = "allow",
+    justification = "Run the trusted DCode Electron E2E suite.",
+    match = ["pnpm test:e2e"],
+    not_match = [
+        "pnpm test",
+        "pnpm add -D @playwright/test",
+    ],
+)
+
+prefix_rule(
+    pattern = ["pnpm", "exec", "playwright", "test"],
+    decision = "allow",
+    justification = "Run Playwright tests from the trusted DCode repository.",
+    match = [
+        "pnpm exec playwright test",
+        "pnpm exec playwright test e2e/plan-mode.e2e.ts --reporter=line",
+    ],
+    not_match = [
+        "pnpm exec playwright install",
+        "pnpm exec vitest run",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        "node",
+        "/Users/conan/.codex/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",
+    ],
+    decision = "allow",
+    justification = "Fetch the official Codex manual with the fixed OpenAI docs helper.",
+)
+
+prefix_rule(
+    pattern = [
+        "python3",
+        "/Users/conan/.codex/skills/wechat-article-search/scripts/sogou_search.py",
+    ],
+    decision = "allow",
+    justification = "Run the fixed WeChat article search helper.",
+)
+
+prefix_rule(
+    pattern = ["ps", "-axo", "pid,ppid,stat,etime,command"],
+    decision = "allow",
+    justification = "Inspect local process metadata without modifying processes.",
+)
+
+prefix_rule(
+    pattern = [
+        "git", "clone", "--depth", "1",
+        "https://github.com/openai/codex.git",
+        "/private/tmp/research-openai-codex",
+    ],
+    decision = "allow",
+    justification = "Shallow-clone public Codex sources to a fixed temporary path.",
+)
+
+prefix_rule(
+    pattern = [
+        "git", "clone", "--depth", "1",
+        "https://github.com/cline/cline.git",
+        "/private/tmp/research-cline",
+    ],
+    decision = "allow",
+    justification = "Shallow-clone public Cline sources to a fixed temporary path.",
+)
+
+prefix_rule(
+    pattern = [
+        "git", "clone", "--depth", "1",
+        "https://github.com/RooCodeInc/Roo-Code.git",
+        "/private/tmp/research-roo-code",
+    ],
+    decision = "allow",
+    justification = "Shallow-clone public Roo Code sources to a fixed temporary path.",
+)
+
+prefix_rule(
+    pattern = [
+        "git", "clone", "--depth", "1",
+        "https://github.com/Aider-AI/aider.git",
+        "/private/tmp/research-aider",
+    ],
+    decision = "allow",
+    justification = "Shallow-clone public Aider sources to a fixed temporary path.",
+)
+
+prefix_rule(
+    pattern = [
+        "git", "clone", "--depth", "1", "--filter=blob:none",
+        "https://github.com/openai/codex.git",
+        "/tmp/research-openai-codex",
+    ],
+    decision = "allow",
+    justification = "Filtered shallow-clone of public Codex sources to a fixed temporary path.",
+)
+
+prefix_rule(
+    pattern = [
+        "git", "clone", "--depth", "1", "--filter=blob:none",
+        "https://github.com/cline/cline.git",
+        "/tmp/research-cline",
+    ],
+    decision = "allow",
+    justification = "Filtered shallow-clone of public Cline sources to a fixed temporary path.",
+)
+
+prefix_rule(
+    pattern = [
+        "git", "clone", "--depth", "1", "--filter=blob:none",
+        "https://github.com/RooCodeInc/Roo-Code.git",
+        "/tmp/research-roo-code",
+    ],
+    decision = "allow",
+    justification = "Filtered shallow-clone of public Roo Code sources to a fixed temporary path.",
+)

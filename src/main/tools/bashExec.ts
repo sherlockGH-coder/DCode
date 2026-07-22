@@ -12,7 +12,7 @@ import { debugLog } from '../logger';
 const DEFAULT_TIMEOUT_MS = 120_000;
 const MAX_TIMEOUT_MS = 600_000;
 const MAX_OUTPUT_BYTES = 10 * 1024 * 1024;
-const BACKGROUND_OUTPUT_DIR = join(tmpdir(), 'dcode-bash-background');
+const BACKGROUND_OUTPUT_DIR = join(tmpdir(), 'deepseek-bash-background');
 
 const DANGEROUS_PATTERNS: RegExp[] = [
   /\brm\s+(-[a-zA-Z]*r[a-zA-Z]*f|--recursive\s+--force|-[a-zA-Z]*f[a-zA-Z]*r)\b/i,

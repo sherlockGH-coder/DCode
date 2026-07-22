@@ -20,8 +20,8 @@ afterEach(() => {
 
 describe('resolveInside', () => {
   it('resolves the deepest existing ancestor so nested missing paths cannot escape through symlinks', () => {
-    const projectRoot = tempDir('dcode-project-');
-    const outsideRoot = tempDir('dcode-outside-');
+    const projectRoot = tempDir('deepseek-project-');
+    const outsideRoot = tempDir('deepseek-outside-');
     mkdirSync(join(outsideRoot, 'nested'), { recursive: true });
     symlinkSync(join(outsideRoot, 'nested'), join(projectRoot, 'linked'), 'dir');
 

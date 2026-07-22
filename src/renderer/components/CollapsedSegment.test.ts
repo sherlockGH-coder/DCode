@@ -52,7 +52,7 @@ describe('CollapsedSegment', () => {
           kind: 'edit',
           status: 'done',
           timestamp: 0,
-          path: '/Users/conan/Code/10.project/DCode/src/renderer/components/ToolItemCard.tsx',
+          path: '/Users/conan/Code/10.project/DeepSeek-App/src/renderer/components/ToolItemCard.tsx',
           linesAdded: 4,
           linesDeleted: 2,
           diff: '@@ -1 +1 @@\n-old\n+new',
@@ -97,7 +97,7 @@ describe('CollapsedSegment', () => {
           kind: 'read',
           status: 'done',
           timestamp: 0,
-          path: '/Users/conan/Code/10.project/DCode/mcp.json',
+          path: '/Users/conan/Code/10.project/DeepSeek-App/mcp.json',
         },
       },
     ];

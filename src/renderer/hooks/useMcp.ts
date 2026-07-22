@@ -23,7 +23,7 @@ export function useMcp(projectPath: string | null): UseMcpResult {
 
   const refresh = useCallback(async () => {
     try {
-      const list = await window.dcodeApi.mcpListStatus();
+      const list = await window.deepseekApi.mcpListStatus();
       setServers(list);
     } catch (err) {
       console.error('[useMcp] list failed:', err);
@@ -35,7 +35,7 @@ export function useMcp(projectPath: string | null): UseMcpResult {
   useEffect(() => {
     setIsLoading(true);
     refresh();
-    const unsub = window.dcodeApi.onMcpChanged(() => {
+    const unsub = window.deepseekApi.onMcpChanged(() => {
       refresh();
     });
     return unsub;
@@ -43,31 +43,31 @@ export function useMcp(projectPath: string | null): UseMcpResult {
 
   const add = useCallback(
     async (scope: McpScope, name: string, config: McpServerConfig) => {
-      return window.dcodeApi.mcpAdd(scope, name, config, projectPath);
+      return window.deepseekApi.mcpAdd(scope, name, config, projectPath);
     },
     [projectPath],
   );
 
   const update = useCallback(
     async (scope: McpScope, name: string, config: McpServerConfig) => {
-      return window.dcodeApi.mcpUpdate(scope, name, config, projectPath);
+      return window.deepseekApi.mcpUpdate(scope, name, config, projectPath);
     },
     [projectPath],
   );
 
   const remove = useCallback(
     async (scope: McpScope, name: string) => {
-      return window.dcodeApi.mcpRemove(scope, name, projectPath);
+      return window.deepseekApi.mcpRemove(scope, name, projectPath);
     },
     [projectPath],
   );
 
   const toggle = useCallback(async (scope: McpScope, name: string, enabled: boolean) => {
-    return window.dcodeApi.mcpToggle(scope, name, enabled);
+    return window.deepseekApi.mcpToggle(scope, name, enabled);
   }, []);
 
   const restart = useCallback(async (scope: McpScope, name: string) => {
-    return window.dcodeApi.mcpRestart(scope, name);
+    return window.deepseekApi.mcpRestart(scope, name);
   }, []);
 
   return { servers, isLoading, refresh, add, update, remove, toggle, restart };

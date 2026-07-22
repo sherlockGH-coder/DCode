@@ -4,11 +4,11 @@ const AboutSection: React.FC = () => {
   const [dbPath, setDbPath] = useState('');
 
   useEffect(() => {
-    window.dcodeApi.getDbPath().then(setDbPath).catch(() => setDbPath('未知'));
+    window.deepseekApi.getDbPath().then(setDbPath).catch(() => setDbPath('未知'));
   }, []);
 
   const handleOpenDir = () => {
-    window.dcodeApi.openDbDir().catch(console.error);
+    window.deepseekApi.openDbDir().catch(console.error);
   };
 
   return (
@@ -22,7 +22,7 @@ const AboutSection: React.FC = () => {
       {          }
       <section className="mb-8 pb-6 border-b border-black/[0.05] dark:border-white/[0.05]">
         <h3 className="text-[14px] font-bold text-text-primary mb-1">版本</h3>
-        <p className="text-[13px] text-text-secondary font-semibold mt-1.5">DCode 0.0.1</p>
+        <p className="text-[13px] text-text-secondary font-semibold mt-1.5">DeepSeek-App 0.1.0</p>
       </section>
 
       {           }
