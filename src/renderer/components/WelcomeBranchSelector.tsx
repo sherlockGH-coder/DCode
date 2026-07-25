@@ -81,18 +81,17 @@ const WelcomeBranchSelector: React.FC<WelcomeBranchSelectorProps> = ({ activePro
   const hasMultipleBranches = gitInfo.branches.length > 1;
 
   return (
-    <div className="relative flex items-center" ref={containerRef}>
-      <span className="text-text-tertiary mx-1 select-none">·</span>
+    <div className="relative flex items-center ml-1.5" ref={containerRef}>
       <button
         type="button"
         disabled={!hasMultipleBranches || isLoading}
         onClick={() => setIsOpen(!isOpen)}
-        className={`inline-flex items-center gap-1 px-1.5 py-0.5 -mx-0.5 rounded-[5px] text-[14px] text-text-tertiary hover:text-text-secondary transition-colors cursor-pointer border-none bg-transparent select-none group ${
+        className={`inline-flex items-center gap-1 px-1.5 py-0.5 -mx-0.5 rounded-[5px] text-[14px] text-text-secondary hover:text-text-primary transition-colors cursor-pointer border-none bg-transparent select-none group ${
           hasMultipleBranches && !isLoading ? '' : 'cursor-default'
         }`}
       >
-        <IconBranch size={15} className="text-text-tertiary shrink-0" />
-        <span className="font-normal max-w-[80px] xs:max-w-[120px] sm:max-w-[160px] truncate">
+        <IconBranch size={15} className="text-text-secondary group-hover:text-text-primary shrink-0 transition-colors" />
+        <span className="font-medium text-text-secondary group-hover:text-text-primary transition-colors max-w-[80px] xs:max-w-[120px] sm:max-w-[160px] truncate">
           {gitInfo.currentBranch}
         </span>
         {hasMultipleBranches && (

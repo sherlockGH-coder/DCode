@@ -95,12 +95,12 @@ const ModelSelector: React.FC<{
           className="absolute bottom-full right-full z-50 mb-1.5 mr-1.5 overflow-visible"
           onMouseLeave={() => setSubmenu(null)}
         >
-          <div className="w-[200px] overflow-hidden rounded-[8px] border border-hairline bg-bg-main p-1 shadow-floating animate-[menu-in_150ms_ease-out]">
+          <div className="w-[200px] overflow-hidden rounded-[12px] border border-hairline bg-bg-main p-1.5 shadow-floating animate-[menu-in_150ms_ease-out]">
             <button
               type="button"
               aria-label="选择具体模型"
               aria-expanded={submenu === 'model'}
-              className={`flex h-9 w-full items-center gap-2.5 rounded-[6px] border-none px-2.5 text-left text-[13px] transition-colors ${submenu === 'model' ? 'bg-bg-hover' : 'bg-transparent hover:bg-bg-hover'}`}
+              className={`flex h-9 w-full items-center gap-2.5 rounded-[8px] border-none px-2.5 text-left text-[13px] transition-colors ${submenu === 'model' ? 'bg-bg-hover' : 'bg-transparent hover:bg-bg-hover'}`}
               onMouseEnter={() => setSubmenu('model')}
               onFocus={() => setSubmenu('model')}
             >
@@ -112,7 +112,7 @@ const ModelSelector: React.FC<{
               type="button"
               aria-label="选择推理强度"
               aria-expanded={submenu === 'effort'}
-              className={`flex h-9 w-full items-center gap-2.5 rounded-[6px] border-none px-2.5 text-left text-[13px] transition-colors ${submenu === 'effort' ? 'bg-bg-hover' : 'bg-transparent hover:bg-bg-hover'}`}
+              className={`flex h-9 w-full items-center gap-2.5 rounded-[8px] border-none px-2.5 text-left text-[13px] transition-colors ${submenu === 'effort' ? 'bg-bg-hover' : 'bg-transparent hover:bg-bg-hover'}`}
               onMouseEnter={() => setSubmenu('effort')}
               onFocus={() => setSubmenu('effort')}
             >
@@ -125,7 +125,7 @@ const ModelSelector: React.FC<{
           {submenu === 'model' && (
             <div
               data-testid="model-submenu"
-              className="absolute bottom-0 left-full w-[200px] overflow-hidden rounded-[8px] border border-hairline bg-bg-main p-1 shadow-floating animate-[menu-in_150ms_ease-out]"
+              className="absolute bottom-0 left-full ml-0.5 w-[200px] overflow-hidden rounded-[12px] border border-hairline bg-bg-main p-1.5 shadow-floating animate-[menu-in_150ms_ease-out]"
             >
               <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                 {models.map((model) => {
@@ -135,7 +135,7 @@ const ModelSelector: React.FC<{
                       key={model}
                       type="button"
                       data-selected={selected}
-                      className={`flex h-8 w-full items-center gap-2.5 rounded-[5px] border-none px-2.5 text-left text-[13px] transition-colors ${selected ? 'bg-accent-bg font-medium text-text-primary' : 'bg-transparent text-text-primary hover:bg-bg-hover'}`}
+                      className={`flex h-8 w-full items-center gap-2.5 rounded-[7px] border-none px-2.5 text-left text-[13px] transition-colors ${selected ? 'bg-accent-bg font-medium text-text-primary' : 'bg-transparent text-text-primary hover:bg-bg-hover'}`}
                       onClick={() => {
                         onModelChange(model);
                         closeMenu();
@@ -155,7 +155,7 @@ const ModelSelector: React.FC<{
           {submenu === 'effort' && (
             <div
               data-testid="effort-submenu"
-              className="absolute bottom-0 left-full w-[180px] overflow-hidden rounded-[8px] border border-hairline bg-bg-main p-1 shadow-floating animate-[menu-in_150ms_ease-out]"
+              className="absolute bottom-0 left-full ml-0.5 w-[180px] overflow-hidden rounded-[12px] border border-hairline bg-bg-main p-1.5 shadow-floating animate-[menu-in_150ms_ease-out]"
             >
               {([
                 ['Off', undefined],
@@ -168,7 +168,7 @@ const ModelSelector: React.FC<{
                     key={label}
                     type="button"
                     data-selected={selected}
-                    className={`flex h-8 w-full items-center gap-2.5 rounded-[5px] border-none px-2.5 text-left text-[13px] transition-colors ${selected ? 'bg-accent-bg font-medium text-text-primary' : 'bg-transparent text-text-primary hover:bg-bg-hover'}`}
+                    className={`flex h-8 w-full items-center gap-2.5 rounded-[7px] border-none px-2.5 text-left text-[13px] transition-colors ${selected ? 'bg-accent-bg font-medium text-text-primary' : 'bg-transparent text-text-primary hover:bg-bg-hover'}`}
                     onClick={() => {
                       onReasoningEffortChange(value);
                       closeMenu();

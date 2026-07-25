@@ -173,8 +173,14 @@
 }
 
 .sidebar-surface {
-  background: var(--bg-sidebar);
+  background: rgba(245, 245, 247, 0.82);
   box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.dark .sidebar-surface {
+  background: rgba(35, 35, 38, 0.85);
 }
 
 .right-panel-card {
@@ -272,14 +278,20 @@
 .welcome-stage {
   position: relative;
   isolation: isolate;
-  background-color: #fbfcfe;
+  background-color: transparent;
   scrollbar-gutter: stable;
 }
 
-.welcome-stage::before {
+.has-welcome-stage {
+  position: relative;
+  isolation: isolate;
+  background-color: #fbfcfe;
+}
+
+.has-welcome-stage::before {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: 0;
   content: '';
   pointer-events: none;
   background-image: radial-gradient(circle, rgba(106, 116, 139, 0.2) 0.7px, transparent 0.9px);
@@ -287,13 +299,18 @@
   background-position: 0 0;
 }
 
-.welcome-stage::after {
+.has-welcome-stage::after {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   content: '';
   pointer-events: none;
   background: radial-gradient(ellipse at 50% 42%, rgba(251, 252, 254, 0) 38%, rgba(251, 252, 254, 0.75) 100%);
+}
+
+.has-welcome-stage .app-main-shell,
+.has-welcome-stage .app-primary-surface {
+  background: transparent;
 }
 
 .welcome-layout {
@@ -316,8 +333,10 @@
 
 .welcome-hero {
   display: flex;
+  width: 90%;
   flex-direction: column;
   align-items: center;
+  margin-inline: auto;
   text-align: center;
 }
 
@@ -332,7 +351,7 @@
 }
 
 .welcome-title-accent {
-  color: #5648f5;
+  color: #5265b4;
 }
 
 .welcome-hero p {
@@ -345,42 +364,42 @@
 
 .welcome-actions {
   display: grid;
-  width: 752px;
-  grid-template-columns: repeat(4, 179px);
+  width: 676.8px;
+  grid-template-columns: repeat(4, 160.2px);
   gap: 12px;
   margin: clamp(22px, 3vh, 30px) auto 0;
 }
 
 .welcome-action-wrap {
   min-width: 0;
-  --welcome-action: #1583e8;
-  --welcome-action-soft: #edf6ff;
-  --welcome-action-shadow: rgba(21, 131, 232, 0.18);
+  --welcome-action: #3979b9;
+  --welcome-action-soft: #eff5fa;
+  --welcome-action-shadow: rgba(57, 121, 185, 0.14);
 }
 
 .welcome-action-violet {
-  --welcome-action: #6751ea;
-  --welcome-action-soft: #f2efff;
-  --welcome-action-shadow: rgba(103, 81, 234, 0.18);
+  --welcome-action: #6f68a8;
+  --welcome-action-soft: #f2f1f7;
+  --welcome-action-shadow: rgba(111, 104, 168, 0.14);
 }
 
 .welcome-action-orange {
-  --welcome-action: #e87219;
-  --welcome-action-soft: #fff4e9;
-  --welcome-action-shadow: rgba(232, 114, 25, 0.18);
+  --welcome-action: #b96e38;
+  --welcome-action-soft: #f8f2ed;
+  --welcome-action-shadow: rgba(185, 110, 56, 0.14);
 }
 
 .welcome-action-green {
-  --welcome-action: #12a45a;
-  --welcome-action-soft: #ecfbf2;
-  --welcome-action-shadow: rgba(18, 164, 90, 0.18);
+  --welcome-action: #3b8a63;
+  --welcome-action-soft: #edf5f0;
+  --welcome-action-shadow: rgba(59, 138, 99, 0.14);
 }
 
 .welcome-action-card {
   position: relative;
   display: flex;
   width: 100%;
-  min-width: 179px;
+  min-width: 160.2px;
   min-height: 118px;
   flex-direction: column;
   align-items: flex-start;
@@ -480,8 +499,8 @@
 }
 
 .welcome-action-art .welcome-action-icon {
-  width: 21px;
-  height: 21px;
+  width: 18px;
+  height: 18px;
   filter: none;
 }
 
@@ -495,6 +514,8 @@
   right: -1px;
   bottom: 1px;
   z-index: 2;
+  width: 13px;
+  height: 13px;
   padding: 2px;
   border-radius: 50%;
   background: var(--welcome-action-soft);
@@ -506,7 +527,7 @@
   position: relative;
   z-index: 1;
   color: var(--welcome-action);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 650;
   line-height: 1.2;
   letter-spacing: -0.02em;
@@ -526,7 +547,7 @@
 }
 
 .welcome-composer {
-  width: min(800px, calc(100% - 32px));
+  width: min(750px, calc(90% - 28.8px));
   flex-shrink: 0;
   margin-top: 16px;
   margin-inline: auto;
@@ -547,15 +568,15 @@
   background: rgba(245, 246, 248, 0.96);
 }
 
-.dark .welcome-stage {
+.dark .has-welcome-stage {
   background-color: #202126;
 }
 
-.dark .welcome-stage::before {
+.dark .has-welcome-stage::before {
   background-image: radial-gradient(circle, rgba(226, 229, 242, 0.16) 0.7px, transparent 0.9px);
 }
 
-.dark .welcome-stage::after {
+.dark .has-welcome-stage::after {
   background: radial-gradient(ellipse at 50% 42%, rgba(32, 33, 38, 0) 38%, rgba(32, 33, 38, 0.72) 100%);
 }
 
@@ -604,8 +625,8 @@
 
 @container app-primary (max-width: 784px) {
   .welcome-actions {
-    width: 561px;
-    grid-template-columns: repeat(3, 179px);
+    width: 504.9px;
+    grid-template-columns: repeat(3, 160.3px);
   }
 
   .welcome-action-wrap:nth-child(4) {
@@ -615,8 +636,8 @@
 
 @container app-primary (max-width: 593px) {
   .welcome-actions {
-    width: 370px;
-    grid-template-columns: repeat(2, 179px);
+    width: 333px;
+    grid-template-columns: repeat(2, 160.5px);
   }
 
   .welcome-action-wrap:nth-child(3),
@@ -646,8 +667,8 @@
 
 @container app-primary (max-width: 426px) {
   .welcome-actions {
-    width: 179px;
-    grid-template-columns: 179px;
+    width: 161.1px;
+    grid-template-columns: 161.1px;
   }
 
   .welcome-action-wrap:nth-child(2),
@@ -1172,6 +1193,22 @@
   overflow-anchor: none;
 }
 
+.chat-top-fade {
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 20px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--bg-main) 0%,
+    color-mix(in srgb, var(--bg-main) 72%, transparent) 45%,
+    transparent 100%
+  );
+}
+
 .sidebar-scroll {
   scrollbar-gutter: stable;
 }
@@ -1273,7 +1310,14 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: rgba(117, 124, 143, 0.07);
+  background: transparent;
+}
+
+.welcome-input-footer button[aria-label="附加选项"]:hover,
+.welcome-input-footer button[aria-label="附加选项"]:focus-visible,
+.welcome-input-footer button[aria-label="语音输入"]:hover,
+.welcome-input-footer button[aria-label="语音输入"]:focus-visible {
+  background-color: rgba(117, 124, 143, 0.07) !important;
 }
 
 .welcome-input-footer button[aria-label="语音输入"] {
@@ -1299,7 +1343,9 @@
 
 .welcome-model-selector {
   height: 32px;
+  border-radius: 7px;
   background: transparent;
+  transition: background-color 0.15s ease;
 }
 
 .welcome-model-selector:hover {
@@ -1310,6 +1356,7 @@
   width: auto;
   height: 32px;
   font-size: 13px;
+  border-radius: 7px;
 }
 
 .welcome-project-panel {

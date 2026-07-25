@@ -169,7 +169,6 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
     <div className="pb-10">
       <SettingsPageHeader
         title="配置"
-        description="管理 Anthropic-compatible 端点、默认模型与 API 密钥"
         action={
           <div className="flex items-center gap-2">
             <SavePill state={saveState} error={error} />

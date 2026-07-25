@@ -181,8 +181,8 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
         >
           {activeProject ? (
             <>
-              <IconFolderCode size={16} className="text-text-secondary group-hover:text-text-primary shrink-0 transition-colors" />
-              <span className="font-medium text-text-secondary group-hover:text-text-primary transition-colors max-w-[100px] xs:max-w-[150px] sm:max-w-[200px] truncate ml-[4px]">
+              <IconFolderSoft size={16} className="text-text-secondary group-hover:text-text-primary shrink-0 transition-colors" />
+              <span className="font-medium text-text-secondary group-hover:text-text-primary transition-colors max-w-[100px] xs:max-w-[150px] sm:max-w-[200px] truncate ml-[2px]">
                 {currentProjectName}
               </span>
             </>
@@ -202,7 +202,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-1.5 px-3 h-[28px] rounded-[8px] text-[13px] bg-bg-chip hover:bg-bg-hover text-text-secondary hover:text-text-primary transition-all font-medium cursor-pointer border-0 select-none"
         >
-          <IconFolderCode size={15} className="text-text-secondary shrink-0" />
+          <IconFolderSoft size={15} className="text-text-secondary shrink-0" />
           <span className="max-w-[150px] truncate leading-normal">
             {currentProjectName}
           </span>
@@ -213,13 +213,11 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
         </button>
       )}
 
-      {            }
       {isOpen && (
           <div
             data-testid="folder-selector-menu"
-            className={`${menuPositionClass} min-w-[240px] max-w-[320px] bg-bg-main border border-hairline rounded-[14px] shadow-floating overflow-hidden py-1 animate-[menu-in_150ms_ease-out]`}
+            className={`${menuPositionClass} min-w-[240px] max-w-[320px] bg-bg-main border border-hairline rounded-[14px] shadow-floating overflow-visible py-1 animate-[menu-in_150ms_ease-out]`}
           >
-            {         }
             <div className="flex items-center gap-1.5 px-3 py-2 border-b border-hairline">
               <IconSearch size={14} className="text-text-tertiary shrink-0" />
               <input
@@ -232,8 +230,8 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
               />
             </div>
 
-            {          }
-            <div className="max-h-[220px] overflow-y-auto py-1 custom-scrollbar">
+            {/* Project list */}
+            <div className="max-h-[220px] overflow-y-auto p-1 custom-scrollbar">
               {filteredProjects.length > 0 ? (
                 filteredProjects.map((p) => {
                   const isSelected = p.path === activeProject;
@@ -241,8 +239,9 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                     <button
                       key={p.path}
                       type="button"
+                      onMouseEnter={() => setShowSubmenu(false)}
                       onClick={() => handleSelect(p.path)}
-                      className={`w-full flex items-center justify-between px-3.5 py-2 text-left text-[13px] transition-colors border-none bg-transparent cursor-pointer ${
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[7px] text-left text-[13px] transition-colors border-none bg-transparent cursor-pointer ${
                         isSelected
                           ? 'text-accent bg-accent-bg font-medium'
                           : 'text-text-primary hover:bg-bg-hover'
@@ -269,15 +268,19 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
               )}
             </div>
 
-            {         }
+            {/* Separator */}
             <div className="border-t border-hairline my-1" />
 
-            {                 }
-            <div className="relative">
+            {/* Submenu Trigger: Add new project (Hover Side Flyout) */}
+            <div
+              className="relative px-1"
+              onMouseEnter={() => setShowSubmenu(true)}
+              onMouseLeave={() => setShowSubmenu(false)}
+            >
               <button
                 type="button"
                 onClick={() => setShowSubmenu((current) => !current)}
-                className={`w-full flex items-center justify-between px-3.5 py-2 text-left text-[13px] cursor-pointer border-none bg-transparent transition-colors ${
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[7px] text-left text-[13px] cursor-pointer border-none bg-transparent transition-colors ${
                   showSubmenu
                     ? 'text-accent bg-accent-bg'
                     : 'text-text-primary hover:bg-bg-hover'
@@ -289,51 +292,52 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                 </div>
                 <IconChevronRight
                   size={12}
-                  className={`text-text-tertiary shrink-0 transition-transform duration-150 ${showSubmenu ? 'rotate-90 text-accent' : ''}`}
+                  className={`text-text-tertiary shrink-0 transition-colors ${showSubmenu ? 'text-accent' : ''}`}
                 />
               </button>
 
               {showSubmenu && (
-                  <div
-                    className="overflow-hidden border-y border-hairline bg-bg-block"
+                <div
+                  className="absolute left-full top-[-4px] ml-0.5 w-[180px] overflow-hidden rounded-[12px] border border-hairline bg-bg-main p-1.5 shadow-floating z-50 animate-[menu-in_150ms_ease-out]"
+                >
+                  <button
+                    type="button"
+                    onClick={handleOpenCreateProject}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[7px] text-left text-[12.5px] text-text-primary hover:bg-bg-hover cursor-pointer border-none bg-transparent transition-colors"
                   >
-                    <button
-                      type="button"
-                      onClick={handleOpenCreateProject}
-                      className="w-full flex items-center gap-2 px-6 py-2 text-left text-[12.5px] text-text-primary hover:bg-bg-hover cursor-pointer border-none bg-transparent transition-colors"
-                    >
-                      <IconPlus size={13} className="text-text-tertiary shrink-0" />
-                      <span>新建空白项目</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleAddExistingProject}
-                      disabled={isAddingExisting}
-                      className="w-full flex items-center gap-2 px-6 py-2 text-left text-[12.5px] text-text-primary hover:bg-bg-hover cursor-pointer border-none bg-transparent transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <IconFolderSoft size={13} className="text-text-tertiary shrink-0" />
-                      <span>使用现有文件夹</span>
-                    </button>
-                  </div>
+                    <IconPlus size={13} className="text-text-tertiary shrink-0" />
+                    <span>新建空白项目</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddExistingProject}
+                    disabled={isAddingExisting}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[7px] text-left text-[12.5px] text-text-primary hover:bg-bg-hover cursor-pointer border-none bg-transparent transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <IconFolderSoft size={13} className="text-text-tertiary shrink-0" />
+                    <span>使用现有文件夹</span>
+                  </button>
+                </div>
               )}
             </div>
-
-            {                 }
-            <button
-              type="button"
-              onClick={() => handleSelect(null)}
-              className={`w-full flex items-center justify-between px-3.5 py-2 text-left text-[13px] transition-colors border-none bg-transparent cursor-pointer ${
-                activeProject === null
-                  ? 'text-accent bg-accent-bg font-medium'
-                  : 'text-text-primary hover:bg-bg-hover'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <IconFolderX size={15} className={activeProject === null ? 'text-accent' : 'text-text-tertiary'} />
-                <span>不使用项目</span>
-              </div>
-              {activeProject === null && <IconCheck size={14} className="text-accent shrink-0" />}
-            </button>
+            <div className="px-1 pt-0.5 pb-1">
+              <button
+                type="button"
+                onMouseEnter={() => setShowSubmenu(false)}
+                onClick={() => handleSelect(null)}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-[7px] text-left text-[13px] transition-colors border-none bg-transparent cursor-pointer ${
+                  activeProject === null
+                    ? 'text-accent bg-accent-bg font-medium'
+                    : 'text-text-primary hover:bg-bg-hover'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <IconFolderX size={15} className={activeProject === null ? 'text-accent' : 'text-text-tertiary'} />
+                  <span>不使用项目</span>
+                </div>
+                {activeProject === null && <IconCheck size={14} className="text-accent shrink-0" />}
+              </button>
+            </div>
           </div>
       )}
 

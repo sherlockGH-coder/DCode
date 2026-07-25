@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DCode Welcome 配色方向</title>
+  <style>
+    /*
+      System: SF/PingFang type stack; 4/8px spacing rhythm; #fff + near-white surfaces;
+      one hairline and one restrained shadow depth. Layout and copy are fixed across variants.
+    */
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-synthesis: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: #e9eaec;
+      color: #18191d;
+      letter-spacing: 0;
+    }
+
+    button, textarea { font: inherit; }
+
+    .canvas-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      min-height: 64px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 12px clamp(18px, 3vw, 44px);
+      border-bottom: 1px solid rgba(20, 22, 28, 0.12);
+      background: rgba(244, 245, 246, 0.94);
+      backdrop-filter: blur(18px);
+    }
+
+    .canvas-title { min-width: 0; }
+    .canvas-title h1 { margin: 0; font-size: 15px; font-weight: 650; line-height: 1.3; }
+    .canvas-title p { margin: 3px 0 0; color: #70737b; font-size: 12px; line-height: 1.4; }
+
+    .direction-nav {
+      display: flex;
+      flex: 0 0 auto;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid rgba(20, 22, 28, 0.1);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(20, 22, 28, 0.04);
+    }
+
+    .direction-nav a {
+      display: inline-flex;
+      min-height: 32px;
+      align-items: center;
+      padding: 0 12px;
+      border-radius: 6px;
+      color: #555860;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .direction-nav a:hover,
+    .direction-nav a:focus-visible { background: #eff0f2; color: #17181c; outline: none; }
+
+    .canvas {
+      display: grid;
+      gap: 48px;
+      width: min(1560px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 40px 0 72px;
+    }
+
+    .direction { scroll-margin-top: 84px; }
+
+    .direction-label {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      margin: 0 2px 12px;
+    }
+
+    .direction-index {
+      display: grid;
+      width: 38px;
+      height: 28px;
+      place-items: center;
+      border: 1px solid rgba(20, 22, 28, 0.14);
+      border-radius: 6px;
+      background: #f7f7f8;
+      color: #3e4148;
+      font: 650 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    .direction-copy h2 { margin: 0; font-size: 15px; font-weight: 650; line-height: 1.3; }
+    .direction-copy p { margin: 3px 0 0; color: #72757d; font-size: 12px; line-height: 1.45; }
+
+    .palette { display: flex; gap: 6px; }
+    .palette i { width: 15px; height: 15px; border: 1px solid rgba(0,0,0,.08); border-radius: 50%; background: var(--swatch); }
+
+    .preview-shell {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      border: 1px solid rgba(20, 22, 28, 0.18);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 18px 50px rgba(28, 31, 38, 0.13);
+    }
+
+    .app {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1600px;
+      height: 1000px;
+      overflow: hidden;
+      transform-origin: top left;
+      background: var(--main-bg);
+      color: #17181c;
+      user-select: none;
+    }
+
+    .app[data-variant="a"] {
+      --main-bg: #fbfcfd;
+      --sidebar-bg: #f3f4f6;
+      --sidebar-border: rgba(36, 40, 50, 0.12);
+      --sidebar-active: #e8edf6;
+      --sidebar-active-text: #375d94;
+      --headline-accent: #5265b4;
+      --input-accent: #6676c8;
+      --explore: #3979b9;
+      --build: #6f68a8;
+      --fix: #b96e38;
+      --review: #3b8a63;
+      --dot: rgba(113, 125, 150, 0.17);
+      --card-shadow: 0 8px 22px rgba(43, 53, 72, 0.055), 0 1px 3px rgba(43, 53, 72, 0.05);
+    }
+
+    .app[data-variant="b"] {
+      --main-bg: #fbfcfe;
+      --sidebar-bg: #f1f3f6;
+      --sidebar-border: rgba(31, 42, 62, 0.13);
+      --sidebar-active: #e5ebf5;
+      --sidebar-active-text: #245e9e;
+      --headline-accent: #2c68ad;
+      --input-accent: #3479c5;
+      --explore: #3479c5;
+      --build: #3479c5;
+      --fix: #b86232;
+      --review: #32845c;
+      --dot: rgba(76, 111, 151, 0.16);
+      --card-shadow: 0 8px 22px rgba(35, 69, 108, 0.06), 0 1px 3px rgba(35, 69, 108, 0.055);
+    }
+
+    .app[data-variant="c"] {
+      --main-bg: #fcfcfc;
+      --sidebar-bg: #f2f2f2;
+      --sidebar-border: rgba(20, 20, 20, 0.14);
+      --sidebar-active: #e4e4e4;
+      --sidebar-active-text: #171717;
+      --headline-accent: #171717;
+      --input-accent: #202124;
+      --explore: #26282c;
+      --build: #26282c;
+      --fix: #26282c;
+      --review: #26282c;
+      --dot: rgba(32, 34, 38, 0.12);
+      --card-shadow: 0 7px 18px rgba(18, 18, 18, 0.045), 0 1px 2px rgba(18, 18, 18, 0.04);
+    }
+
+    .app[data-variant="d"] {
+      --main-bg: #fbfcfd;
+      --sidebar-bg: #f3f4f6;
+      --sidebar-border: rgba(36, 40, 50, 0.12);
+      --sidebar-active: #e8edf6;
+      --sidebar-active-text: #375d94;
+      --headline-accent: #17181c;
+      --input-accent: #6676c8;
+      --explore: #3979b9;
+      --build: #6f68a8;
+      --fix: #b96e38;
+      --review: #3b8a63;
+      --dot: rgba(113, 125, 150, 0.17);
+      --card-shadow: 0 8px 22px rgba(43, 53, 72, 0.055), 0 1px 3px rgba(43, 53, 72, 0.05);
+    }
+
+    .app-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); width: 100%; height: 100%; }
+
+    .sidebar-wrap { height: 100%; padding: 12px 0 12px 12px; background: var(--main-bg); }
+    .sidebar {
+      display: flex;
+      height: 100%;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--sidebar-border);
+      border-radius: 16px;
+      background: var(--sidebar-bg);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .sidebar-top { display: flex; height: 66px; align-items: center; gap: 8px; padding: 0 18px; }
+    .lights { display: flex; gap: 10px; margin-right: 32px; }
+    .lights i { width: 16px; height: 16px; border-radius: 50%; }
+    .lights i:nth-child(1) { background: #ff605c; }
+    .lights i:nth-child(2) { background: #ffbd44; }
+    .lights i:nth-child(3) { background: #00ca4e; }
+
+    .search-box {
+      display: flex;
+      height: 32px;
+      min-width: 0;
+      flex: 1;
+      align-items: center;
+      gap: 8px;
+      padding: 0 9px;
+      border-radius: 7px;
+      background: rgba(255,255,255,.36);
+      color: #777b84;
+      font-size: 14px;
+    }
+
+    .search-box kbd { margin-left: auto; padding: 2px 5px; border: 1px solid rgba(0,0,0,.08); border-radius: 5px; font: 12px/1.2 ui-monospace, monospace; }
+    .top-icon { display: grid; width: 32px; height: 32px; place-items: center; color: #646871; }
+    .icon { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+    .new-chat { display: flex; height: 52px; align-items: center; gap: 11px; padding: 0 25px; color: #303238; font-size: 16px; }
+    .sidebar-scroll { min-height: 0; flex: 1; padding: 22px 22px 10px; }
+    .group-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; color: #888c95; font-size: 13px; }
+    .project-list, .chat-list { display: grid; gap: 8px; }
+    .project-row, .chat-row { display: flex; height: 36px; align-items: center; border-radius: 7px; color: #33363c; font-size: 15px; }
+    .project-row { gap: 10px; padding: 0 4px; }
+    .project-row.active { margin-inline: -8px; padding-inline: 12px; background: var(--sidebar-active); color: var(--sidebar-active-text); font-weight: 550; }
+    .project-row .icon { width: 18px; height: 18px; color: #737780; }
+    .project-row.active .icon { color: currentColor; }
+    .chat-section { margin-top: 28px; }
+    .chat-row { justify-content: space-between; color: #686c74; }
+    .chat-row span:first-child { max-width: 208px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chat-row time { color: #8a8e97; font-size: 13px; }
+
+    .settings { display: flex; height: 54px; align-items: center; gap: 11px; margin: 0 14px 8px; padding: 0 10px; border-radius: 7px; color: #666a72; font-size: 15px; }
+    .settings:hover { background: rgba(0,0,0,.045); color: #24262a; }
+
+    .main { position: relative; min-width: 0; overflow: hidden; background: var(--main-bg); }
+    .main-top { position: absolute; top: 0; right: 0; left: 0; z-index: 2; display: flex; height: 58px; align-items: center; justify-content: flex-end; gap: 18px; padding: 0 25px; color: #62666f; }
+    .main-top .icon { width: 18px; height: 18px; }
+
+    .workspace {
+      position: absolute;
+      inset: 58px 0 0;
+      overflow: hidden;
+      background-color: var(--main-bg);
+      background-image: radial-gradient(circle, var(--dot) 0.75px, transparent 0.9px);
+      background-size: 18px 18px;
+    }
+
+    .welcome { position: absolute; top: 258px; left: 50%; width: 830px; transform: translateX(-50%); text-align: center; }
+    .welcome h3 { margin: 0; color: #17181c; font-size: 42px; font-weight: 680; line-height: 1.12; }
+    .welcome h3 strong { color: var(--headline-accent); font-weight: inherit; }
+    .welcome > p { margin: 13px 0 0; color: #7e838d; font-size: 15px; line-height: 1.5; }
+
+    .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 32px; }
+    .action {
+      position: relative;
+      display: flex;
+      height: 150px;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 18px 20px;
+      overflow: hidden;
+      border: 1px solid rgba(36, 42, 54, 0.11);
+      border-radius: 12px;
+      background: rgba(255,255,255,.92);
+      box-shadow: var(--card-shadow);
+      color: var(--action);
+      cursor: pointer;
+      text-align: left;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .action:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--action) 28%, rgba(36,42,54,.11)); box-shadow: 0 13px 26px color-mix(in srgb, var(--action) 10%, transparent); }
+    .action:focus-visible { outline: 2px solid color-mix(in srgb, var(--action) 50%, white); outline-offset: 2px; }
+    .action.explore { --action: var(--explore); }
+    .action.build { --action: var(--build); }
+    .action.fix { --action: var(--fix); }
+    .action.review { --action: var(--review); }
+    .action .icon { width: 21px; height: 21px; }
+    .action-dots { position: absolute; top: 20px; right: 18px; display: flex; gap: 5px; }
+    .action-dots i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .45; }
+    .action-dots i:nth-child(2) { opacity: .7; }
+    .action-dots i:nth-child(3) { opacity: .95; }
+    .action-title { margin-top: 25px; font-size: 14px; font-weight: 650; }
+    .action-copy { margin-top: 8px; color: #7e838d; font-size: 13px; line-height: 1.55; }
+    .app[data-variant="c"] .action-dots i:nth-child(1) { background: #377db6; }
+    .app[data-variant="c"] .action-dots i:nth-child(2) { background: #ba7142; }
+    .app[data-variant="c"] .action-dots i:nth-child(3) { background: #478768; }
+
+    .composer-wrap { position: absolute; right: 70px; bottom: 26px; left: 70px; }
+    .project-bar {
+      display: flex;
+      width: calc(100% - 44px);
+      height: 48px;
+      align-items: center;
+      gap: 12px;
+      margin: 0 auto -6px;
+      padding: 0 22px 5px;
+      border: 1px solid rgba(35, 40, 51, .12);
+      border-bottom: 0;
+      border-radius: 16px 16px 0 0;
+      background: rgba(245,246,248,.96);
+      color: #6c7079;
+      font-size: 14px;
+    }
+    .project-bar .icon { width: 17px; height: 17px; }
+    .project-bar .branch { display: inline-flex; align-items: center; gap: 7px; }
+    .project-bar .chev { color: #9a9da4; }
+
+    .composer {
+      position: relative;
+      height: 168px;
+      overflow: hidden;
+      border: 1px solid rgba(35, 40, 51, .12);
+      border-radius: 18px;
+      background: rgba(255,255,255,.97);
+      box-shadow: 0 8px 30px rgba(40, 47, 62, .08), 0 1px 3px rgba(40,47,62,.06);
+    }
+    .composer textarea { display: block; width: 100%; height: 95px; resize: none; padding: 24px 24px; border: 0; outline: 0; background: transparent; color: #34373e; font-size: 15px; line-height: 1.5; }
+    .composer textarea::placeholder { color: #8a8e97; opacity: 1; }
+    .composer-tools { display: flex; height: 62px; align-items: center; gap: 8px; padding: 0 20px; }
+    .tool-button { display: grid; width: 42px; height: 42px; place-items: center; border: 0; border-radius: 9px; background: #f3f4f6; color: #6c7078; cursor: pointer; }
+    .tool-button:hover { background: #e9ebee; color: #25272c; }
+    .tool-button .icon { width: 19px; height: 19px; }
+    .model { display: flex; align-items: center; gap: 8px; margin-left: auto; color: #686c75; font-size: 14px; }
+    .spark { color: var(--input-accent); font-size: 22px; line-height: 1; }
+    .send { display: grid; width: 42px; height: 42px; margin-left: 10px; place-items: center; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--input-accent) 18%, white); color: var(--input-accent); cursor: pointer; }
+    .send:hover { background: var(--input-accent); color: #fff; }
+    .send .icon { width: 18px; height: 18px; }
+
+    @media (max-width: 760px) {
+      .canvas-header { position: static; align-items: flex-start; flex-direction: column; gap: 10px; }
+      .direction-nav { width: 100%; overflow-x: auto; }
+      .direction-nav a { flex: 1 0 auto; justify-content: center; }
+      .canvas { width: calc(100% - 20px); padding-top: 20px; gap: 34px; }
+      .direction-label { grid-template-columns: 38px minmax(0, 1fr); }
+      .palette { display: none; }
+      .preview-shell { border-radius: 5px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .action { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+    <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M12 3C6.5 3 2 6.8 2 11.5c0 2.4 1.1 4.5 2.9 5.9l-1.1 3.3 4.5-1.2c1.2.6 2.4 1 3.7 1 5.5 0 10-3.8 10-8.5S17.5 3 12 3Z"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5h6l2 2h10v9.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M3 10h18"/></symbol>
+    <symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M3 7.5h6l2 2h10v9.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M3 10h18M15 14v5m-2.5-2.5h5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-7"/><path d="m9 15 1-4 8.4-8.4a2.1 2.1 0 0 1 3 3L13 14Z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 9-3 3 3 3m8-6 3 3-3 3"/><path d="m14 5-4 14"/></symbol>
+    <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="18" cy="6" r="2"/><path d="M6 7v10m2-8h4a6 6 0 0 0 6-1"/></symbol>
+    <symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9M8 5.3l8 4.5"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4.5 4.5 0 0 0-5.9 5.9L3 18a2.1 2.1 0 0 0 3 3l5.8-5.8a4.5 4.5 0 0 0 5.9-5.9l-2.8 2.8-3-3Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 7v5c0 5-3.4 8.1-8 9-4.6-.9-8-4-8-9V7Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21m-3 0h6"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="m6 10 6-6 6 6M12 4v16"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3m5 0h5"/></symbol>
+  </svg>
+
+  <header class="canvas-header">
+    <div class="canvas-title">
+      <h1>DCode · Welcome 配色方向</h1>
+      <p>固定布局与文案，只比较侧边栏和主体之间的颜色关系</p>
+    </div>
+    <nav class="direction-nav" aria-label="跳转到配色方向">
+      <a href="#direction-a">A 柔化四色</a>
+      <a href="#direction-b">B 蓝色主轴</a>
+      <a href="#direction-c">C 黑白工具感</a>
+      <a href="#direction-d">D 黑色标题 + 柔化四色</a>
+    </nav>
+  </header>
+
+  <main class="canvas" id="canvas"></main>
+
+  <template id="app-template">
+    <div class="app-grid">
+      <div class="sidebar-wrap">
+        <aside class="sidebar">
+          <div class="sidebar-top">
+            <span class="lights"><i></i><i></i><i></i></span>
+            <div class="search-box"><svg class="icon"><use href="#i-search"/></svg><span>搜索</span><kbd>⌘K</kbd></div>
+            <span class="top-icon"><svg class="icon"><use href="#i-panel"/></svg></span>
+          </div>
+          <div class="new-chat"><svg class="icon"><use href="#i-chat"/></svg><span>开启新对话</span></div>
+          <div class="sidebar-scroll">
+            <div class="group-title"><span>项目</span><svg class="icon"><use href="#i-folder-plus"/></svg></div>
+            <div class="project-list">
+              <div class="project-row"><svg class="icon"><use href="#i-folder"/></svg><span>DeepSeek-App</span></div>
+              <div class="project-row"><svg class="icon"><use href="#i-folder"/></svg><span>OS</span></div>
+              <div class="project-row"><svg class="icon"><use href="#i-folder"/></svg><span>langchain</span></div>
+              <div class="project-row"><svg class="icon"><use href="#i-folder"/></svg><span>DeepSeek-App</span></div>
+              <div class="project-row active"><svg class="icon"><use href="#i-folder"/></svg><span>DCode</span></div>
+            </div>
+            <div class="chat-section">
+              <div class="group-title"><span>对话</span><svg class="icon"><use href="#i-edit"/></svg></div>
+              <div class="chat-list">
+                <div class="chat-row"><span>这是什么？</span><time>6d</time></div>
+                <div class="chat-row"><span>执行已批准计划 v1</span><time>8d</time></div>
+                <div class="chat-row"><span>图中是什么？</span><time>26d</time></div>
+                <div class="chat-row"><span>图中展示了什么？</span><time>26d</time></div>
+                <div class="chat-row"><span>图中是什么？</span><time>26d</time></div>
+                <div class="chat-row"><span>对这串：WTNkQ2NrRk...</span><time>1mo</time></div>
+              </div>
+            </div>
+          </div>
+          <div class="settings"><svg class="icon"><use href="#i-gear"/></svg><span>系统设置</span></div>
+        </aside>
+      </div>
+      <section class="main">
+        <div class="main-top"><svg class="icon"><use href="#i-panel"/></svg><svg class="icon"><use href="#i-terminal"/></svg></div>
+        <div class="workspace">
+          <div class="welcome">
+            <h3>准备<strong>构建</strong>什么？</h3>
+            <p>从想法到实现，AI 与你一起完成</p>
+            <div class="actions">
+              <button class="action explore" data-command="/explore "><svg class="icon"><use href="#i-search"/></svg><span class="action-dots"><i></i><i></i><i></i></span><span class="action-title">探索</span><span class="action-copy">探索和理解代码库<br>或产品文档</span></button>
+              <button class="action build" data-command="/build "><svg class="icon"><use href="#i-cube"/></svg><span class="action-dots"><i></i><i></i><i></i></span><span class="action-title">构建</span><span class="action-copy">构建新功能、应用<br>或工具</span></button>
+              <button class="action fix" data-command="/fix "><svg class="icon"><use href="#i-wrench"/></svg><span class="action-dots"><i></i><i></i><i></i></span><span class="action-title">修复</span><span class="action-copy">调试错误、优化代码<br>或修复问题</span></button>
+              <button class="action review" data-command="/review "><svg class="icon"><use href="#i-shield"/></svg><span class="action-dots"><i></i><i></i><i></i></span><span class="action-title">审查</span><span class="action-copy">审查代码变更并提供<br>改进建议</span></button>
+            </div>
+          </div>
+          <div class="composer-wrap">
+            <div class="project-bar"><svg class="icon"><use href="#i-code"/></svg><span>DCode</span><span class="chev">⌄</span><span>·</span><span class="branch"><svg class="icon"><use href="#i-branch"/></svg>deepseek-app-rebrand</span><span class="chev">⌄</span></div>
+            <div class="composer">
+              <textarea aria-label="任务描述" placeholder="描述任务、问题或想要修改的内容..."></textarea>
+              <div class="composer-tools">
+                <button class="tool-button" aria-label="添加"><span style="font-size:28px;line-height:1">+</span></button>
+                <button class="tool-button" aria-label="语音输入"><svg class="icon"><use href="#i-mic"/></svg></button>
+                <span class="model"><span class="spark">ϟ</span>deepseek-v4-flash⌄</span>
+                <button class="send" aria-label="发送"><svg class="icon"><use href="#i-arrow-up"/></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </template>
+
+  <script>
+    const directions = [
+      {
+        id: 'a',
+        title: '柔化四色',
+        description: '保留动作识别优势，但整体降低饱和度和紫色存在感。',
+        swatches: ['#3979b9', '#6f68a8', '#b96e38', '#3b8a63'],
+      },
+      {
+        id: 'b',
+        title: '蓝色主轴',
+        description: '侧边栏、标题、探索与构建共享冷蓝主轴，修复和审查保留克制语义色。',
+        swatches: ['#3479c5', '#b86232', '#32845c', '#f1f3f6'],
+      },
+      {
+        id: 'c',
+        title: '黑白工具感',
+        description: '去掉紫色和大面积彩色，仅用微小状态点提示动作差异。',
+        swatches: ['#26282c', '#377db6', '#ba7142', '#478768'],
+      },
+      {
+        id: 'd',
+        title: '黑色标题 + 柔化四色',
+        description: '标题完全回归黑色，四张卡片继续使用 A 版的低饱和语义色。',
+        swatches: ['#17181c', '#3979b9', '#6f68a8', '#b96e38', '#3b8a63'],
+      },
+    ];
+
+    const canvas = document.querySelector('#canvas');
+    const template = document.querySelector('#app-template');
+
+    for (const direction of directions) {
+      const section = document.createElement('section');
+      section.className = 'direction';
+      section.id = `direction-${direction.id}`;
+      section.innerHTML = `
+        <header class="direction-label">
+          <span class="direction-index">${direction.id.toUpperCase()}</span>
+          <div class="direction-copy"><h2>${direction.title}</h2><p>${direction.description}</p></div>
+          <span class="palette" aria-label="配色色板">${direction.swatches.map((color) => `<i style="--swatch:${color}"></i>`).join('')}</span>
+        </header>
+        <div class="preview-shell"><div class="app" data-variant="${direction.id}"></div></div>`;
+      section.querySelector('.app').append(template.content.cloneNode(true));
+      canvas.append(section);
+    }
+
+    function scaleApps() {
+      document.querySelectorAll('.preview-shell').forEach((shell) => {
+        const app = shell.querySelector('.app');
+        app.style.transform = `scale(${shell.clientWidth / 1600})`;
+      });
+    }
+
+    document.querySelectorAll('.action').forEach((button) => {
+      button.addEventListener('click', () => {
+        const app = button.closest('.app');
+        const textarea = app.querySelector('textarea');
+        textarea.value = button.dataset.command;
+        textarea.focus();
+      });
+    });
+
+    window.addEventListener('resize', scaleApps);
+    scaleApps();
+  </script>
+</body>
+</html>

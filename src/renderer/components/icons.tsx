@@ -116,6 +116,14 @@ export const IconChat: React.FC<IconProps> = ({ size = 14, className = 'shrink-0
   </svg>
 );
 
+export const IconChatPlus: React.FC<IconProps> = ({ size = 16, className = 'shrink-0' }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 3C6.48 3 2 6.8 2 11.5C2 13.86 3.1 15.96 4.9 17.42L3.8 20.72C3.66 21.14 4.14 21.52 4.54 21.32L8.3 19.82C9.46 20.22 10.72 20.5 12 20.5C17.52 20.5 22 16.7 22 12C22 7.3 17.52 3 12 3Z" />
+    <line x1="12" y1="8.5" x2="12" y2="14.5" />
+    <line x1="9" y1="11.5" x2="15" y2="11.5" />
+  </svg>
+);
+
 export const IconCode: React.FC<IconProps> = ({ size = 18, className }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <polyline points="7.5 8.5 4 12 7.5 15.5" />
@@ -190,8 +198,8 @@ export const IconFolder: React.FC<IconProps> = ({ size = 16, className = 'shrink
 );
 
 export const IconFolderSoft: React.FC<IconProps> = ({ size = 16, className = 'shrink-0 text-text-secondary' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M3 8a2 2 0 0 1 2-2h4.17a2 2 0 0 1 1.41.59l1.24 1.23A2 2 0 0 0 13.23 8.4H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M3.75 7.5A2.25 2.25 0 0 1 6 5.25h3.691a2.25 2.25 0 0 1 1.591.659l1.118 1.118a.75.75 0 0 0 .53.22H18A2.25 2.25 0 0 1 20.25 9.5v8A2.25 2.25 0 0 1 18 19.75H6A2.25 2.25 0 0 1 3.75 17.5v-10Z" />
   </svg>
 );
 

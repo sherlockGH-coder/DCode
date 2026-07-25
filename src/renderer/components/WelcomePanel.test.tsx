@@ -36,21 +36,21 @@ describe('WelcomePanel', () => {
     expect(container.textContent).toContain('准备构建什么？');
     expect(container.textContent).toContain('从想法到实现，AI 与你一起完成');
     expect(container.querySelectorAll('.welcome-action-card')).toHaveLength(4);
-    expect(container.querySelector('button[aria-label="探索：/explore"]')).not.toBeNull();
-    expect(container.querySelector('button[aria-label="构建：/build"]')).not.toBeNull();
-    expect(container.querySelector('button[aria-label="修复：/fix"]')).not.toBeNull();
-    expect(container.querySelector('button[aria-label="审查：/review"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="探索：帮我探索和分析当前代码库的架构与核心实现"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="构建：帮我构建一个新的功能模块："]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="修复：帮我检查并修复代码中的问题："]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="审查：帮我审查最近的代码变更并给出改进建议"]')).not.toBeNull();
     expect(container.textContent).not.toContain('DCode Workbench');
     expect(container.textContent).not.toContain('Enter 执行');
   });
 
-  it('passes the selected command to the composer integration', () => {
+  it('passes the selected prompt to the composer integration', () => {
     const onQuickAction = vi.fn();
     act(() => root?.render(<WelcomePanel onQuickAction={onQuickAction} />));
 
-    const buildButton = container.querySelector('button[aria-label="构建：/build"]') as HTMLButtonElement;
+    const buildButton = container.querySelector('button[aria-label="构建：帮我构建一个新的功能模块："]') as HTMLButtonElement;
     act(() => buildButton.dispatchEvent(new window.Event('click', { bubbles: true })));
 
-    expect(onQuickAction).toHaveBeenCalledWith('/build');
+    expect(onQuickAction).toHaveBeenCalledWith('帮我构建一个新的功能模块：');
   });
 });

@@ -150,7 +150,6 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
     <div className="pb-10">
       <SettingsPageHeader
         title="语音输入"
-        description="配置麦克风录音的转写服务"
         action={<SavePill state={saveState} error={error} />}
       />
 

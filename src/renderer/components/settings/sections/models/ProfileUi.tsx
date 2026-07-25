@@ -1,19 +1,13 @@
 import React from 'react';
-import { IconCheck, IconInfo, IconKey } from '../../../icons';
+import { IconInfo, IconKey } from '../../../icons';
 import type { ApiProfile } from '../../../../../shared/types';
 import { type SaveState } from './profileDraft';
 
 export const PANEL_CLASS = 'rounded-lg border border-black/[0.07] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.025)] dark:border-white/[0.08] dark:bg-[#1E1E20]';
 
-export const SaveIndicator: React.FC<{ state: SaveState; error: string | null }> = ({ state, error }) => (
+export const SaveIndicator: React.FC<{ state: SaveState; error: string | null }> = ({ error }) => (
   <div className="min-h-5 text-right text-[11.5px] font-medium">
     {error && <span className="text-red-500">{error}</span>}
-    {!error && state === 'saving' && <span className="text-text-tertiary">保存中...</span>}
-    {!error && state === 'saved' && (
-      <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-500">
-        <IconCheck size={12} className="text-current" />已保存
-      </span>
-    )}
   </div>
 );
 

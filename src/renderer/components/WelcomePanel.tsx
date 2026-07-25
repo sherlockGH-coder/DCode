@@ -12,7 +12,7 @@ interface WelcomePanelProps {
 }
 
 type WelcomeAction = {
-  command: string;
+  prompt: string;
   title: string;
   description: string[];
   accent: 'blue' | 'violet' | 'orange' | 'green';
@@ -21,28 +21,28 @@ type WelcomeAction = {
 
 const actions: WelcomeAction[] = [
   {
-    command: '/explore',
+    prompt: '帮我探索和分析当前代码库的架构与核心实现',
     title: '探索',
     description: ['探索和理解代码库', '或产品文档'],
     accent: 'blue',
     icon: <IconSearch size={42} className="welcome-action-icon" />,
   },
   {
-    command: '/build',
+    prompt: '帮我构建一个新的功能模块：',
     title: '构建',
     description: ['构建新功能、应用', '或工具'],
     accent: 'violet',
     icon: <IconCube size={44} className="welcome-action-icon" />,
   },
   {
-    command: '/fix',
+    prompt: '帮我检查并修复代码中的问题：',
     title: '修复',
     description: ['调试错误、优化代码', '或修复问题'],
     accent: 'orange',
     icon: <IconWrench size={43} className="welcome-action-icon" />,
   },
   {
-    command: '/review',
+    prompt: '帮我审查最近的代码变更并给出改进建议',
     title: '审查',
     description: ['审查代码变更并提供', '改进建议'],
     accent: 'green',
@@ -68,12 +68,12 @@ const WelcomePanel: React.FC<WelcomePanelProps> = ({ onQuickAction }) => (
 
     <div className="welcome-actions" role="list" aria-label="快捷开始">
       {actions.map((action) => (
-        <div key={action.command} role="listitem" className={`welcome-action-wrap welcome-action-${action.accent}`}>
+        <div key={action.title} role="listitem" className={`welcome-action-wrap welcome-action-${action.accent}`}>
           <button
             type="button"
             className="welcome-action-card"
-            onClick={() => onQuickAction(action.command)}
-            aria-label={`${action.title}：${action.command}`}
+            onClick={() => onQuickAction(action.prompt)}
+            aria-label={`${action.title}：${action.prompt}`}
           >
             <span className="welcome-action-dots" aria-hidden="true">
               <i />

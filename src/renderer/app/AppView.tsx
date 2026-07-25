@@ -122,8 +122,8 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({
 }) => {
   const [quickAction, setQuickAction] = React.useState<{ command: string; revision: number } | null>(null);
 
-  const handleQuickAction = React.useCallback((command: string) => {
-    setQuickAction((current) => ({ command: `${command} `, revision: (current?.revision ?? 0) + 1 }));
+  const handleQuickAction = React.useCallback((text: string) => {
+    setQuickAction((current) => ({ command: text, revision: (current?.revision ?? 0) + 1 }));
   }, []);
 
   const clearQuickAction = React.useCallback(() => {
@@ -210,8 +210,10 @@ const AppView: React.FC<AppViewProps> = ({
   planModeState,
   planModeTransitioning,
   handlers,
-}) => (
-  <div className="app-stage flex flex-row h-screen w-full bg-transparent relative overflow-hidden">
+}) => {
+  const isWelcomeMode = chatItems.length === 0 && view !== 'settings';
+  return (
+    <div className={`app-stage flex flex-row h-screen w-full bg-transparent relative overflow-hidden ${isWelcomeMode ? 'has-welcome-stage' : ''}`}>
     <div
       className="contents"
       inert={view === 'settings' ? true : undefined}
@@ -305,11 +307,18 @@ const AppView: React.FC<AppViewProps> = ({
               ) : (
                 <div className="relative flex flex-1 min-h-0 min-w-0 overflow-hidden">
                   <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-                    <ChatPanel
-                      items={chatItems}
-                      contentVersion={chatContentVersion}
-                      bottomPadding={20}
-                    />
+                    <div className="relative flex min-h-0 min-w-0 flex-1">
+                      <ChatPanel
+                        items={chatItems}
+                        contentVersion={chatContentVersion}
+                        bottomPadding={20}
+                      />
+                      <div
+                        className="chat-top-fade"
+                        data-testid="chat-top-fade"
+                        aria-hidden="true"
+                      />
+                    </div>
                     <div className="chat-input-dock shrink-0 relative z-20 px-4 md:px-8">
                       <div className="animate-[content-fade-in_180ms_cubic-bezier(0.32,0.72,0,1)_both]">
                         <ChatInput
@@ -453,6 +462,7 @@ const AppView: React.FC<AppViewProps> = ({
       isMacOS={isMacOS}
     />
   </div>
-);
+  );
+};
 
 export default AppView;

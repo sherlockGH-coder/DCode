@@ -3,7 +3,7 @@ import type { Conversation, Project } from '../../shared/types';
 import {
   IconSearch,
   IconPanels,
-  IconChat,
+  IconChatPlus,
   IconGear,
 } from './icons';
 import ProjectSwitcher from './ProjectSwitcher';
@@ -93,14 +93,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {                               }
-        <div className="shrink-0 pt-2 px-2 pb-1">
+        <div className="shrink-0 pt-2 px-2 pb-1.5">
           <button
             type="button"
-            className="flex items-center gap-2 w-full py-1.5 px-2 border-0 rounded-[7px] text-[13.5px] bg-transparent hover:bg-bg-hover transition-colors duration-150 text-text-primary cursor-pointer shrink-0 group"
+            className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-[11px] border border-black/[0.09] bg-white text-[13.5px] font-semibold text-text-primary shadow-[0_1.5px_4px_rgba(0,0,0,0.035)] transition-all duration-150 hover:bg-bg-hover hover:border-black/[0.14] hover:shadow-[0_2px_6px_rgba(0,0,0,0.06)] active:scale-[0.99] cursor-pointer dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-none dark:hover:bg-white/[0.1]"
             onClick={onNewConversation}
           >
-            <IconChat size={15} className="text-text-secondary shrink-0" />
-            <span className="text-[13.5px]">开启新对话</span>
+            <IconChatPlus size={16} className="text-text-primary shrink-0" />
+            <span>开启新对话</span>
           </button>
         </div>
 

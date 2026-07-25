@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { McpScope, McpServerStatus, McpStatus } from '../../../shared/types';
+import type { McpScope, McpServerStatus } from '../../../shared/types';
 import { IconEdit, IconTrash, IconHistory, IconChevronDown } from '../icons';
 import { ToggleSwitch } from '../settings/SettingsPrimitives';
 
@@ -11,14 +11,6 @@ interface Props {
   onRestart: () => void;
   extraContent?: React.ReactNode;
 }
-
-const STATUS_DOT: Record<McpStatus, string> = {
-  idle: 'bg-[#B8B8BE]',
-  starting: 'bg-amber-500 animate-[thinking-pulse_1.6s_ease-in-out_infinite]',
-  connected: 'bg-emerald-500',
-  error: 'bg-red-500',
-  stopped: 'bg-[#B8B8BE]',
-};
 
 const ScopeBadge: React.FC<{ scope: McpScope }> = ({ scope }) => {
   const isProject = scope === 'project';
@@ -53,7 +45,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
         server.enabled ? '' : 'opacity-50'
       }`}
     >
-      <div className="grid grid-cols-[20px_8px_minmax(0,1fr)_auto_auto] items-center gap-2.5">
+      <div className="grid grid-cols-[20px_minmax(0,1fr)_auto_auto] items-center gap-2.5">
         <button
           type="button"
           className="flex h-6 w-full cursor-pointer items-center justify-center rounded-md border-none bg-transparent text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-secondary"
@@ -62,11 +54,6 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
         >
           <IconChevronDown size={13} className={`transition-transform duration-150 ${expanded ? 'rotate-0' : '-rotate-90'}`} />
         </button>
-
-        <span
-          className={`h-2 w-2 rounded-full ${STATUS_DOT[server.status]}`}
-          title={server.status}
-        />
 
         <div className="min-w-0">
           <div className="flex items-center gap-2">
@@ -93,7 +80,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
             onClick={onRestart}
-            title="重启"
+            title="重连"
           >
             <IconHistory size={14} className="text-current" />
           </button>
@@ -101,7 +88,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
             onClick={onEdit}
-            title="编辑"
+            title="设置"
           >
             <IconEdit size={15} />
           </button>
@@ -109,7 +96,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-rose-500/[0.08] hover:text-rose-600 dark:hover:text-rose-300"
             onClick={onDelete}
-            title="移除"
+            title="删除"
           >
             <IconTrash size={15} />
           </button>

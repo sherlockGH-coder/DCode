@@ -15,13 +15,6 @@ interface Props {
   activeProject: string | null;
 }
 
-const StatusChip: React.FC<{ dot?: string; label: string }> = ({ dot, label }) => (
-  <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-bg-chip px-2.5 text-[12px] font-medium text-text-secondary">
-    {dot && <span className={`h-[6px] w-[6px] rounded-full ${dot}`} />}
-    {label}
-  </span>
-);
-
 const PluginsPage: React.FC<Props> = ({ activeProject }) => {
   const { servers, isLoading, add, update, remove, toggle, restart } = useMcp(activeProject);
   const [editor, setEditor] = useState<{ scope: McpScope; initial: McpServerStatus | null } | null>(null);
@@ -29,12 +22,6 @@ const PluginsPage: React.FC<Props> = ({ activeProject }) => {
 
   const sortedServers = useMemo(() => {
     return [...servers].sort((a, b) => a.name.localeCompare(b.name));
-  }, [servers]);
-
-  const statusSummary = useMemo(() => {
-    const counts: Record<string, number> = { connected: 0, starting: 0, error: 0, idle: 0, stopped: 0 };
-    for (const s of servers) counts[s.status] = (counts[s.status] ?? 0) + 1;
-    return counts;
   }, [servers]);
 
   const handleSave = async (scope: McpScope, name: string, config: McpServerConfig): Promise<boolean> => {
@@ -51,11 +38,10 @@ const PluginsPage: React.FC<Props> = ({ activeProject }) => {
   };
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto bg-bg-body text-text-primary">
+    <div className="flex-1 min-h-0 overflow-y-auto bg-[#F7F8FA] text-text-primary dark:bg-zinc-950">
       <div className="mx-auto w-full max-w-[980px] px-6 py-9 sm:px-10">
         <SettingsPageHeader
           title="MCP 服务器"
-          description="管理工具服务器和连接状态"
           action={
             <PrimaryButton
             type="button"
@@ -66,19 +52,6 @@ const PluginsPage: React.FC<Props> = ({ activeProject }) => {
             </PrimaryButton>
           }
         />
-
-        {!isLoading && sortedServers.length > 0 && (
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <StatusChip dot="bg-emerald-500" label={`${statusSummary.connected} 已连接`} />
-            {statusSummary.starting > 0 && (
-              <StatusChip dot="bg-amber-500 animate-[thinking-pulse_1.6s_ease-in-out_infinite]" label={`${statusSummary.starting} 启动中`} />
-            )}
-            {statusSummary.error > 0 && (
-              <StatusChip dot="bg-red-500" label={`${statusSummary.error} 错误`} />
-            )}
-            <StatusChip label={`共 ${sortedServers.length} 台`} />
-          </div>
-        )}
 
         {isLoading ? (
           <SettingsGroup className="flex min-h-[220px] items-center justify-center">

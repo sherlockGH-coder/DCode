@@ -97,12 +97,9 @@ export const StatusPill: React.FC<{ tone?: Tone; label: string }> = ({ tone = 'n
 };
 
 export const SavePill: React.FC<{ state: 'idle' | 'saving' | 'saved'; error?: string | null }> = ({
-  state,
   error,
 }) => {
   if (error) return <StatusPill tone="red" label={error} />;
-  if (state === 'saving') return <StatusPill tone="neutral" label="保存中..." />;
-  if (state === 'saved') return <StatusPill tone="green" label="已保存" />;
   return null;
 };
 

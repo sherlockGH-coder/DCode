@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>消息区顶部边缘效果对比</title>
+  <style>
+    /*
+      System: 12/14/18px type scale; 4/8/12/16/24px spacing rhythm;
+      neutral app surfaces sampled from the existing DCode theme vocabulary;
+      fixed 44px header and a restrained 20px top-edge treatment.
+    */
+    :root {
+      color-scheme: light;
+      --canvas: #eef0f3;
+      --surface: #fbfcfe;
+      --surface-raised: rgba(251, 252, 254, 0.92);
+      --text: #20242c;
+      --text-secondary: #6c7380;
+      --hairline: rgba(31, 36, 45, 0.1);
+      --user-bg: #edf0f4;
+      --accent: #2563eb;
+      --shadow: 0 16px 36px rgba(25, 30, 39, 0.1);
+      --edge-height: 20px;
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --canvas: #111318;
+      --surface: #191c22;
+      --surface-raised: rgba(25, 28, 34, 0.92);
+      --text: #ecedf0;
+      --text-secondary: #969da9;
+      --hairline: rgba(255, 255, 255, 0.09);
+      --user-bg: #272b33;
+      --accent: #7da4ff;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--canvas);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      transition: background-color 180ms ease, color 180ms ease;
+    }
+
+    button { font: inherit; }
+
+    .prototype-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      min-height: 52px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px clamp(16px, 4vw, 36px);
+      border-bottom: 1px solid var(--hairline);
+      background: color-mix(in srgb, var(--canvas) 88%, transparent);
+      backdrop-filter: blur(14px);
+    }
+
+    .prototype-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .toolbar-actions { display: flex; align-items: center; gap: 8px; }
+
+    .toggle {
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--hairline);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .toggle:hover { background: var(--user-bg); }
+    .toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .canvas {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 24px clamp(16px, 4vw, 36px) 36px;
+    }
+
+    .variant { min-width: 0; }
+
+    .variant-label {
+      min-height: 64px;
+      padding: 0 2px 12px;
+    }
+
+    .variant-label h2 {
+      margin: 0 0 5px;
+      font-size: 14px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .variant-label p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 1.45;
+      text-wrap: pretty;
+    }
+
+    .app-frame {
+      position: relative;
+      height: min(650px, calc(100vh - 166px));
+      min-height: 420px;
+      overflow: hidden;
+      border: 1px solid var(--hairline);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .app-header {
+      position: relative;
+      z-index: 3;
+      display: flex;
+      height: 44px;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      background: var(--surface);
+    }
+
+    .header-button {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--text-secondary);
+    }
+
+    .header-button::before {
+      width: 13px;
+      height: 11px;
+      content: "";
+      border: 1.5px solid currentColor;
+      border-left-width: 4px;
+      border-radius: 2px;
+    }
+
+    .app-title {
+      min-width: 0;
+      overflow: hidden;
+      font-size: 14px;
+      font-weight: 550;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .edge-effect {
+      position: absolute;
+      z-index: 2;
+      top: 44px;
+      right: 0;
+      left: 0;
+      height: var(--edge-height);
+      pointer-events: none;
+    }
+
+    .variant-fade .edge-effect {
+      background: linear-gradient(to bottom, var(--surface) 0%, color-mix(in srgb, var(--surface) 72%, transparent) 45%, transparent 100%);
+    }
+
+    .variant-blur .edge-effect {
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+      -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.68) 52%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.68) 52%, transparent 100%);
+    }
+
+    .variant-hybrid .edge-effect {
+      background: linear-gradient(to bottom, color-mix(in srgb, var(--surface) 78%, transparent) 0%, color-mix(in srgb, var(--surface) 34%, transparent) 58%, transparent 100%);
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+      -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.82) 45%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.82) 45%, transparent 100%);
+    }
+
+    .messages {
+      position: absolute;
+      inset: 44px 0 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+    }
+
+    .messages:hover { scrollbar-color: color-mix(in srgb, var(--text) 18%, transparent) transparent; }
+
+    .message-list {
+      display: flex;
+      width: min(100% - 32px, 520px);
+      min-height: 100%;
+      margin: 0 auto;
+      padding: 24px 0 34px;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .message {
+      font-size: 13px;
+      line-height: 1.62;
+      text-wrap: pretty;
+    }
+
+    .message p { margin: 0 0 10px; }
+    .message p:last-child { margin-bottom: 0; }
+
+    .message.user {
+      max-width: 86%;
+      align-self: flex-end;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: var(--user-bg);
+    }
+
+    .message.assistant { color: var(--text); }
+
+    .code-line {
+      display: block;
+      margin: 10px 0;
+      padding: 10px 12px;
+      overflow: hidden;
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      background: color-mix(in srgb, var(--surface) 70%, var(--user-bg));
+      color: var(--text-secondary);
+      font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .scroll-hint {
+      color: var(--text-secondary);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .canvas { grid-template-columns: 1fr; max-width: 620px; }
+      .app-frame { height: min(600px, calc(100vh - 170px)); }
+      .variant-label { min-height: auto; }
+    }
+
+    @media (max-width: 520px) {
+      .prototype-toolbar { align-items: flex-start; flex-direction: column; gap: 8px; }
+      .toolbar-actions { width: 100%; }
+      .toggle { flex: 1; }
+      .canvas { padding-top: 18px; }
+      .app-frame { min-height: 390px; }
+      .message-list { width: calc(100% - 24px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="prototype-toolbar">
+    <h1 class="prototype-title">消息区顶部边缘效果</h1>
+    <div class="toolbar-actions">
+      <button class="toggle" id="theme-toggle" type="button">切换深色</button>
+      <button class="toggle" id="sync-toggle" type="button" aria-pressed="true">同步滚动：开</button>
+    </div>
+  </header>
+
+  <main class="canvas">
+    <section class="variant variant-fade">
+      <div class="variant-label">
+        <h2>A · 透明渐隐</h2>
+        <p>文字靠近 header 时逐渐被背景盖住，边界柔和，但文字本身不会失焦。</p>
+      </div>
+      <div class="app-frame">
+        <header class="app-header"><button class="header-button" type="button" aria-label="显示侧栏"></button><span class="app-title">DCode / 顶部滚动边界</span></header>
+        <div class="edge-effect"></div>
+        <div class="messages" tabindex="0" aria-label="透明渐隐示例消息"></div>
+      </div>
+    </section>
+
+    <section class="variant variant-blur">
+      <div class="variant-label">
+        <h2>B · 纯模糊</h2>
+        <p>文字经过边界时仍保持亮度，但轮廓逐渐失焦，像滑到一层薄玻璃后面。</p>
+      </div>
+      <div class="app-frame">
+        <header class="app-header"><button class="header-button" type="button" aria-label="显示侧栏"></button><span class="app-title">DCode / 顶部滚动边界</span></header>
+        <div class="edge-effect"></div>
+        <div class="messages" tabindex="0" aria-label="纯模糊示例消息"></div>
+      </div>
+    </section>
+
+    <section class="variant variant-hybrid">
+      <div class="variant-label">
+        <h2>C · 轻模糊 + 渐隐</h2>
+        <p>同时稍微失焦和退色，边界最明确；强度仍控制在 20px 的轻量范围。</p>
+      </div>
+      <div class="app-frame">
+        <header class="app-header"><button class="header-button" type="button" aria-label="显示侧栏"></button><span class="app-title">DCode / 顶部滚动边界</span></header>
+        <div class="edge-effect"></div>
+        <div class="messages" tabindex="0" aria-label="混合效果示例消息"></div>
+      </div>
+    </section>
+  </main>
+
+  <template id="message-template">
+    <div class="message-list">
+      <div class="scroll-hint">向上、向下滚动观察消息经过顶部边界</div>
+      <div class="message user">消息框上面有一个 header，滚动时我希望消息像往上退掉，而不是突然被截断。</div>
+      <div class="message assistant">
+        <p>现在消息区与 header 的分界是硬切的。可以在滚动区域顶部增加一段很短的视觉过渡，让内容接近边界时逐渐离开视线。</p>
+        <span class="code-line">top edge: 20px / always visible / theme aware</span>
+        <p>这一段内容故意稍长，用来观察文字的笔画经过顶部区域时，是逐渐变淡、逐渐失焦，还是两种变化同时发生。</p>
+      </div>
+      <div class="message user">效果不要太大，尤其要照顾小屏幕。</div>
+      <div class="message assistant">
+        <p>示例把范围固定在 20px，不占用布局空间，只覆盖消息区最上沿。桌面和窄屏使用同样的物理高度，因此不会因为窗口变窄而扩大。</p>
+        <p>继续滚动这段消息，让每一行文字依次经过 header 下方，就能直接比较三种处理的差别。</p>
+      </div>
+      <div class="message user">浅色和深色都要适配。</div>
+      <div class="message assistant">
+        <p>右上角可切换主题。透明渐隐会跟随背景色；模糊依靠真实的背景采样，因此也能自然适配不同主题。</p>
+        <span class="code-line">background → fade → transparent</span>
+        <p>最后这一段用于提供足够的滚动距离。将内容停在顶部边缘附近，再切换主题，可以更容易观察遮罩是否显得突兀。</p>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const root = document.documentElement;
+    const messageTemplate = document.querySelector('#message-template');
+    const scrollers = [...document.querySelectorAll('.messages')];
+    const themeToggle = document.querySelector('#theme-toggle');
+    const syncToggle = document.querySelector('#sync-toggle');
+    let syncing = false;
+    let syncEnabled = true;
+
+    scrollers.forEach((scroller) => {
+      scroller.append(messageTemplate.content.cloneNode(true));
+      scroller.scrollTop = 64;
+      scroller.addEventListener('scroll', () => {
+        if (!syncEnabled || syncing) return;
+        syncing = true;
+        const max = scroller.scrollHeight - scroller.clientHeight;
+        const progress = max > 0 ? scroller.scrollTop / max : 0;
+        scrollers.forEach((peer) => {
+          if (peer === scroller) return;
+          peer.scrollTop = progress * (peer.scrollHeight - peer.clientHeight);
+        });
+        requestAnimationFrame(() => { syncing = false; });
+      }, { passive: true });
+    });
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = root.dataset.theme === 'dark';
+      root.dataset.theme = isDark ? 'light' : 'dark';
+      themeToggle.textContent = isDark ? '切换深色' : '切换浅色';
+    });
+
+    syncToggle.addEventListener('click', () => {
+      syncEnabled = !syncEnabled;
+      syncToggle.setAttribute('aria-pressed', String(syncEnabled));
+      syncToggle.textContent = `同步滚动：${syncEnabled ? '开' : '关'}`;
+    });
+  </script>
+</body>
+</html>

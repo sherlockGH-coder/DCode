@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconExternalOpen, IconGlobe, IconKey, IconSearch } from '../../icons';
+import { IconExternalOpen, IconGlobe, IconKey } from '../../icons';
 import {
   PrimaryButton,
   SavePill,
@@ -71,24 +71,21 @@ const SearchSection: React.FC<Props> = ({ tavilyApiKeySet, setTavilyApiKey }) =>
     <div className="pb-10">
       <SettingsPageHeader
         title="网络搜索"
-        description="为对话启用联网搜索与网页读取能力"
         action={<SavePill state={saveState} error={error} />}
       />
 
       <div className="space-y-9">
         <section>
-          <SectionTitle
-            aside={<StatusPill tone={tavilyApiKeySet ? 'blue' : 'neutral'} label={tavilyApiKeySet ? '搜索已就绪' : '未配置密钥'} />}
-          >
-            连接状态
-          </SectionTitle>
+          <SectionTitle>连接状态</SectionTitle>
           <SettingsGroup>
             <SettingsRow
               title={tavilyApiKeySet ? '联网搜索已启用' : '联网搜索未启用'}
               description={tavilyApiKeySet ? 'AI 可以在对话中实时搜索网络并读取网页内容。' : '配置 Tavily API Key 后即可启用 web_search 工具。'}
               icon={<IconGlobe size={15} className="text-current" />}
             >
-              <StatusPill tone={tavilyApiKeySet ? 'blue' : 'amber'} label={tavilyApiKeySet ? '可用' : '需要密钥'} />
+              <div className="flex justify-end">
+                <StatusPill tone={tavilyApiKeySet ? 'blue' : 'amber'} label={tavilyApiKeySet ? '可用' : '需要密钥'} />
+              </div>
             </SettingsRow>
           </SettingsGroup>
         </section>
@@ -135,35 +132,17 @@ const SearchSection: React.FC<Props> = ({ tavilyApiKeySet, setTavilyApiKey }) =>
               </div>
             </SettingsRow>
             <SettingsRow title="获取密钥" description="打开 Tavily 控制台创建或管理搜索 API Key">
-              <a
-                href="https://tavily.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-8 items-center justify-end gap-1.5 text-[13px] font-semibold text-[#147CE5] transition-colors hover:text-[#0A66C2]"
-              >
-                Tavily 控制台
-                <IconExternalOpen size={12} className="text-current" />
-              </a>
-            </SettingsRow>
-          </SettingsGroup>
-        </section>
-
-        <section>
-          <SectionTitle>可用工具</SectionTitle>
-          <SettingsGroup>
-            <SettingsRow
-              title="web_search"
-              description="联网搜索并返回相关网页的标题、链接与内容摘要"
-              icon={<IconSearch size={15} className="text-current" />}
-            >
-              <StatusPill tone={tavilyApiKeySet ? 'green' : 'amber'} label={tavilyApiKeySet ? '已启用' : '需要密钥'} />
-            </SettingsRow>
-            <SettingsRow
-              title="web_fetch"
-              description="读取指定网页并按提示返回 Markdown 内容，优先使用 Tavily"
-              icon={<IconGlobe size={15} className="text-current" />}
-            >
-              <StatusPill tone="green" label="开箱可用" />
+              <div className="flex justify-end">
+                <a
+                  href="https://tavily.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-8 items-center justify-end gap-1.5 text-[13px] font-semibold text-[#147CE5] transition-colors hover:text-[#0A66C2]"
+                >
+                  Tavily 控制台
+                  <IconExternalOpen size={12} className="text-current" />
+                </a>
+              </div>
             </SettingsRow>
           </SettingsGroup>
         </section>

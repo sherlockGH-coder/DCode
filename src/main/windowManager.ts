@@ -2,7 +2,7 @@ import { app, BrowserWindow, nativeImage } from 'electron';
 import { join } from 'node:path';
 
 const WINDOW_CONFIG = {
-  DEFAULT_WIDTH: 1000,
+  DEFAULT_WIDTH: 1125,
   DEFAULT_HEIGHT: 800,
   TITLE: 'DeepSeek',
 } as const;

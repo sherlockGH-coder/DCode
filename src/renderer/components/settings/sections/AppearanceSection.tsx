@@ -33,7 +33,7 @@ const AppearanceSection: React.FC = () => {
 
   return (
     <>
-      <SettingsPageHeader title="外观" description="选择应用界面的主题；更改会立即生效" />
+      <SettingsPageHeader title="外观" />
       <SectionTitle>主题</SectionTitle>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="应用主题">
         {OPTIONS.map((option) => {

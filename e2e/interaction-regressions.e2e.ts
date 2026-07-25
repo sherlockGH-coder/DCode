@@ -331,3 +331,33 @@ test('streaming does not pull the viewport back down after the user scrolls up',
     stopServer(fixture.server);
   }
 });
+
+test('chat messages fade beneath the header edge in light and dark themes', async () => {
+  const longReply = Array.from({ length: 80 }, (_, index) => `Fade boundary line ${index}`).join('\n\n');
+  const fixture = await launchFixture(() => textResponse(longReply));
+
+  try {
+    const { page } = fixture;
+    await sendMessage(page, 'Generate enough content to scroll beneath the header');
+    const panel = page.locator('.chat-panel');
+    await expect.poll(() => panel.evaluate((element) => element.scrollHeight - element.clientHeight)).toBeGreaterThan(300);
+    await panel.evaluate((element) => {
+      element.dispatchEvent(new WheelEvent('wheel', { deltaY: -60 }));
+      element.scrollBy(0, -60);
+    });
+
+    const fade = page.getByTestId('chat-top-fade');
+    await expect(fade).toBeVisible();
+    await expect(fade).toHaveCSS('height', '20px');
+    await expect(fade).toHaveCSS('pointer-events', 'none');
+    await expect(fade).toHaveCSS('background-image', /linear-gradient/);
+    await captureVisualQa(page, 'chat-top-fade-light');
+
+    await page.evaluate(() => document.documentElement.classList.add('dark'));
+    await expect(fade).toHaveCSS('background-image', /linear-gradient/);
+    await captureVisualQa(page, 'chat-top-fade-dark');
+  } finally {
+    await stopElectron(fixture.app);
+    stopServer(fixture.server);
+  }
+});
