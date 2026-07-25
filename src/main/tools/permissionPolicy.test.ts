@@ -103,7 +103,7 @@ describe('ToolRegistry file permission policy', () => {
   });
 
   it('allows an explicitly attached file in an unscoped conversation', async () => {
-    const filePath = '/tmp/attached-notes.md';
+    const filePath = join(tmpdir(), 'attached-notes.md');
     const result = await registry().execute(
       toolCall('read_file', { file_path: filePath }),
       {

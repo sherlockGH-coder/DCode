@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { join } from 'node:path';
 import { resolveBuiltinSkillsDir } from './manager';
 
 describe('resolveBuiltinSkillsDir', () => {
@@ -7,7 +8,7 @@ describe('resolveBuiltinSkillsDir', () => {
       false,
       '/workspace/deepseek-app',
       '/Applications/DeepSeek.app/Contents/Resources',
-    )).toBe('/workspace/deepseek-app/resources/skills');
+    )).toBe(join('/workspace/deepseek-app', 'resources', 'skills'));
   });
 
   it('uses the unpacked extraResources directory when packaged', () => {
@@ -15,6 +16,6 @@ describe('resolveBuiltinSkillsDir', () => {
       true,
       '/Applications/DeepSeek.app/Contents/Resources/app.asar',
       '/Applications/DeepSeek.app/Contents/Resources',
-    )).toBe('/Applications/DeepSeek.app/Contents/Resources/skills');
+    )).toBe(join('/Applications/DeepSeek.app/Contents/Resources', 'skills'));
   });
 });
