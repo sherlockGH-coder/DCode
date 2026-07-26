@@ -5,7 +5,7 @@ import { homedir } from 'node:os';
 import { resolveInside } from '../pathSandbox';
 import { buildLineDiff } from './diffUtil';
 import { getFullReadFileState, rememberFileMutation } from './readFile';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 
 export const editFileTool: ToolExecutor = {
   definition: {

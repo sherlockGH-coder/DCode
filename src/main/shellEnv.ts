@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { app } from 'electron';
 import { PROXY_ENV_KEYS } from './proxyEnv';
-import { debugLog } from './logger';
+import { debugLog } from './debug';
 import { computeSignature, readCache, writeCache } from './shell-env/cache';
 
 const MARKER = '___DEEPSEEK_SHELL_ENV_MARKER_97531___';

@@ -7,7 +7,7 @@ import { resolveInside } from '../pathSandbox';
 import { isParsableDocument, parseDocument } from '../docParser';
 import { isImageFile, isPdfFile, readImageBlock, readPdfBlock } from './read-file/media';
 import { renderNotebook } from './read-file/notebook';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 
 const FAST_TEXT_READ_MAX_BYTES = 10 * 1024 * 1024;
 const READ_FILE_STATE_MAX = 200;

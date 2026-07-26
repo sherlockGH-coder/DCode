@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { Message, ToolCall } from '../../shared/types';
-import { buildAnthropicMessagesUrl, streamAnthropicMessages } from '../anthropicStreamClient';
-import { logChatEvent } from '../logger';
+import { streamAnthropicMessages } from '../anthropicStreamClient';
 import {
   MAX_STREAM_RETRIES,
   MAX_STREAM_RETRY_ATTEMPTS,
@@ -47,9 +46,6 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
     signal,
     callbacks,
     config,
-    traceId,
-    conversationId,
-    roundCount,
     roundStart,
     finalContent,
     log,
@@ -90,21 +86,6 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
   } else {
     requestParams.thinking = { type: 'disabled' };
   }
-  const requestUrl = buildAnthropicMessagesUrl(baseUrl);
-
-  logChatEvent('round_request', {
-    traceId,
-    conversationId,
-    round: roundCount,
-    url: requestUrl,
-    model,
-    maxTokens: requestParams.max_tokens,
-    messageCount: anthropicMessages.length,
-    systemBlockCount: combinedSystem.length,
-    toolNames: anthropicTools.map((tool) => tool.name),
-    thinkingEnabled: !!reasoningEffort,
-  });
-
   const STREAM_IDLE_TIMEOUT_MS = 90_000;
   const idleController = new AbortController();
   const requestSignal = mergeAbortSignals(signal, idleController.signal);
@@ -155,13 +136,6 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
       }
 
       logErr(`✗ 请求失败:`, e.message);
-      logChatEvent('error', {
-        traceId,
-        conversationId,
-        round: roundCount,
-        stage: 'fetch',
-        message: e.message,
-      });
       callbacks.onError(e instanceof Error ? e : new Error(String(e)));
       return { status: 'return', finalContent };
     }
@@ -307,18 +281,6 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
         if (reasoningContent) partial.reasoning_content = reasoningContent;
         callbacks.onAssistantMessage?.(partial);
       }
-      logChatEvent('round_response', {
-        traceId,
-        conversationId,
-        round: roundCount,
-        finishReason: stopReason ?? 'aborted',
-        chunkCount,
-        assistantContentLength: assistantContent.length,
-        reasoningContentLength: reasoningContent.length,
-        usage: lastUsage,
-        aborted: true,
-        durationMs: Date.now() - roundStart,
-      });
       return { status: 'break', finalContent: assistantContent };
     }
 
@@ -343,19 +305,6 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
       if (reasoningContent) partial.reasoning_content = reasoningContent;
       callbacks.onAssistantMessage?.(partial);
     }
-    logChatEvent('error', {
-      traceId,
-      conversationId,
-      round: roundCount,
-      stage: 'stream',
-      message: e.message,
-      cause: e.cause?.message ?? null,
-      eventName: (e as any).eventName ?? null,
-      payloadLength: (e as any).payloadLength ?? null,
-      chunkCount,
-      assistantContentLength: assistantContent.length,
-      reasoningContentLength: reasoningContent.length,
-    });
     const surfaced = new Error(`[流式中断] ${e.message}（已接收 ${chunkCount} 个 chunk）`);
     callbacks.onError(surfaced);
     return { status: 'return', finalContent };

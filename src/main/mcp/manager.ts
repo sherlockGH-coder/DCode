@@ -4,7 +4,7 @@ import { McpClient } from './client';
 import { bridgeMcpTool } from './toolBridge';
 import { toolRegistry } from '../tools';
 import { IPC_EVENTS } from '../../shared/types';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 import type {
   McpScope, McpServerConfig, McpServerStatus, McpToolEntry,
 } from '../../shared/types';

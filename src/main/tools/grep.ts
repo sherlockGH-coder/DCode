@@ -2,7 +2,7 @@ import { ToolExecutor, ToolExecuteResult } from './types';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, relative } from 'node:path';
 import { resolveInside } from '../pathSandbox';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 import { createGlobMatcher } from './globMatch';
 import { createIgnoreFilter, type IgnoreFilter } from './ignoreFilter';
 import { DEFAULT_IO_CONCURRENCY } from '../utils/concurrency';

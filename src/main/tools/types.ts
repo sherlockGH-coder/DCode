@@ -43,7 +43,7 @@ export interface ToolExecutionContext {
   toolCallId: string;
   /** 本回合用户附件 — key 是绝对路径，value 携带 mimeType / kind 等元数据 */
   attachmentWhitelist?: Map<string, Attachment>;
-  /** 日志追踪 ID */
+  /** 当前运行的追踪 ID；用于关联控制台调试输出和审批请求。 */
   traceId?: string;
   conversationId?: string | null;
   turnId?: string;

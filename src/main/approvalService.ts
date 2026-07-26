@@ -1,5 +1,4 @@
 import { BrowserWindow, ipcMain } from 'electron';
-import { logChatEvent } from './logger';
 import { addAllowedDirToSession } from './pathAllowList';
 import type { PendingApprovalRequest } from '../shared/types';
 
@@ -65,17 +64,6 @@ class ApprovalService {
     ) {
       addAllowedDirToSession(entry.req.conversationId, decision.scope.dir);
     }
-
-    logChatEvent('approval', {
-      traceId: entry.req.traceId ?? 'unknown',
-      conversationId: entry.req.conversationId ?? null,
-      toolCallId,
-      kind: entry.req.kind,
-      allowed: decision.allowed,
-      reason: decision.reason,
-      rememberForSession: decision.rememberForSession,
-      outOfScope: !!entry.req.outOfScope,
-    });
 
     entry.resolve(decision);
     return true;

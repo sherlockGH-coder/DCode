@@ -1,6 +1,5 @@
 import type { AgentLoopCallbacks, ToolCall } from '../../shared/types';
 import type { ToolExecutionContext, ToolRegistry } from '../tools/types';
-import { logChatEvent } from '../logger';
 
 interface ToolExecutionPair {
   toolCall: ToolCall;
@@ -23,9 +22,6 @@ export async function executeToolCallsParallel(
   callbacks: AgentLoopCallbacks,
   signal?: AbortSignal,
   log?: (...args: unknown[]) => void,
-  traceId?: string,
-  conversationId?: string | null,
-  roundNumber?: number,
 ): Promise<ToolExecutionPair[]> {
   if (toolCalls.length === 0) return [];
 
@@ -48,31 +44,6 @@ export async function executeToolCallsParallel(
     const aborted = signal?.aborted === true;
     const status = aborted ? '⏹ 中止' : result.error ? '✗ 失败' : '✓ 成功';
     if (log) log(`  ← 工具完成 ${result.name} | ${status} | 耗时=${Date.now() - toolStart}ms`);
-
-    if (traceId) {
-      logChatEvent('tool_call', {
-        traceId,
-        conversationId: conversationId ?? null,
-        round: roundNumber,
-        name: toolCall.function.name,
-        toolCallId: toolCall.id,
-        argumentKeys: (() => {
-          try {
-            const parsed = JSON.parse(toolCall.function.arguments);
-            return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
-              ? Object.keys(parsed)
-              : [];
-          } catch {
-            return [];
-          }
-        })(),
-        contentLength: typeof result.content === 'string' ? result.content.length : 0,
-        error: !!result.error,
-        aborted,
-        durationMs: Date.now() - toolStart,
-        metadataKind: result.metadata?.kind ?? null,
-      });
-    }
 
     return { toolCall, result };
   };

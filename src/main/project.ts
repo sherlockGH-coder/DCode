@@ -3,7 +3,7 @@ import { resolve, sep } from 'node:path';
 import { mkdir, stat } from 'node:fs/promises';
 import { existsSync, readFileSync, writeFileSync, renameSync, unlinkSync } from 'node:fs';
 import type { Project, ProjectCreateInput, ProjectState } from '../shared/types';
-import { debugLog } from './logger';
+import { debugLog } from './debug';
 
 const STATE_FILE = 'projects-state.json';
 const LEGACY_STATE_FILE = 'workspace-state.json';

@@ -6,7 +6,7 @@ import { resolveInside } from '../pathSandbox';
 import { buildLineDiff, buildAllAddedDiff } from './diffUtil';
 import { skillsManager } from '../skills/manager';
 import { getFullReadFileState, rememberFileMutation } from './readFile';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 
 function isENOENT(error: unknown): boolean {
   return typeof error === 'object' && error !== null && (error as NodeJS.ErrnoException).code === 'ENOENT';

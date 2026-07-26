@@ -4,7 +4,7 @@ import { Readability } from '@mozilla/readability';
 import TurndownService from 'turndown';
 import { settingsManager } from '../settings';
 import { mergeAbortSignals } from '../agent-loop/signals';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
 const MAX_CONTENT_CHARS = 50000;

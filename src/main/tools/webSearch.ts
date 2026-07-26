@@ -1,7 +1,7 @@
 import { ToolExecutor, ToolExecuteResult } from './types';
 import { settingsManager } from '../settings';
 import { mergeAbortSignals } from '../agent-loop/signals';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 
 interface TavilyResult {
   title: string;

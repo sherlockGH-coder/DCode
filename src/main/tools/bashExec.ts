@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { projectManager } from '../project';
 import { approvalService } from '../approvalService';
 import { settingsManager } from '../settings';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 
 const DEFAULT_TIMEOUT_MS = 120_000;
 const MAX_TIMEOUT_MS = 600_000;

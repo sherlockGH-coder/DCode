@@ -10,7 +10,7 @@ import { settingsManager } from '../settings';
 import { parseFrontmatter, stringifyFrontmatter } from './parser';
 import type { Skill, SkillScope, SkillSummary } from '../../shared/types';
 import { IPC_EVENTS } from '../../shared/types';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 
 const SKILL_FILE_RE = /\.md$/i;
 const NAME_SAFE_RE = /[^\w-]/g;

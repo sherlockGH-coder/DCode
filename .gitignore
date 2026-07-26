@@ -3,7 +3,6 @@ dist/
 out/
 .env
 *.log
-logs/
 test-results/
 benchmark/jobs/
 *.rdb

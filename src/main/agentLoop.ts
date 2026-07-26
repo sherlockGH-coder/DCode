@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import type { AgentLoopCallbacks, AgentLoopConfig, Message } from '../shared/types';
 import type { ToolExecutionContext, ToolRegistry } from './tools/types';
 import { shouldAutoCompact, pruneWithSummary } from './compact';
-import { debugLog, logChatEvent } from './logger';
+import { debugLog } from './debug';
 import * as db from './database';
 import { getSystemContext, getUserContext, formatSystemContext, formatUserContext, formatTailUserContext } from './context';
 import { DEFAULT_BASE_URL, DEFAULT_MAX_AGENT_ROUNDS } from './agent-loop/constants';
@@ -211,8 +211,6 @@ Return a concise structured result with:
       signal,
       callbacks,
       config,
-      traceId,
-      conversationId,
       roundCount,
       roundStart,
       finalContent,
@@ -240,22 +238,6 @@ Return a concise structured result with:
     } = roundResult;
 
     log(`✓ 本轮完成 | stop_reason=${stopReason ?? 'N/A'} | chunks=${chunkCount} | 文本=${assistantContent.length}字 | 思维=${reasoningContent.length}字 | 耗时=${Date.now() - roundStart}ms`);
-
-    logChatEvent('round_response', {
-      traceId,
-      conversationId,
-      round: roundCount,
-      finishReason: stopReason ?? null,
-      chunkCount,
-      assistantContentLength: assistantContent.length,
-      reasoningContentLength: reasoningContent.length,
-      toolCalls: toolCalls.map((tc) => ({
-        id: tc.id,
-        name: tc.function.name,
-      })),
-      usage: lastUsage,
-      durationMs: Date.now() - roundStart,
-    });
 
     if (lastUsage) {
       const hitTokens = lastUsage.prompt_cache_hit_tokens ?? 0;
@@ -297,7 +279,6 @@ Return a concise structured result with:
 
       const toolResults = await executeToolCallsParallel(
         toolCalls, toolRegistry, toolCtx, callbacks, signal, log,
-        traceId, conversationId, roundCount,
       );
 
       for (const { toolCall, result } of toolResults) {
@@ -365,14 +346,6 @@ Return a concise structured result with:
   }
 
   log(`■ 结束 | 总轮次=${roundCount} | 最终输出=${finalContent.length}字${signal?.aborted ? ' | 被中断' : ''}`);
-
-  logChatEvent('chat_done', {
-    traceId,
-    conversationId,
-    totalRounds: roundCount,
-    finalContentLength: finalContent.length,
-    aborted: !!signal?.aborted,
-  });
 
   callbacks.onDone(finalContent);
   return finalContent;

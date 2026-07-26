@@ -94,13 +94,13 @@ export interface AgentLoopConfig {
   mcpInstructions?: Array<{ serverName: string; instructions: string }>;
   /** 中断信号 — 触发后 fetch 立即报错、循环跳出；不调 onError 而是走 onDone */
   signal?: AbortSignal;
-  /** 调试日志关联的对话 ID（可选；用于 logs/chat-*.jsonl 上下文） */
+  /** 当前运行关联的对话 ID；用于上下文、审批和工具调用路由。 */
   conversationId?: string | null;
   /** 当前用户回合 ID；用于 renderer 重挂载后恢复挂起审批 UI。 */
   turnId?: string;
   /** 当前回合的 attempt 序号；用于 renderer 重挂载后恢复挂起审批 UI。 */
   attemptNo?: number;
-  /** 调试日志的追踪 ID — 由调用方生成并与 chat_request 事件对齐 */
+  /** 当前运行的追踪 ID；用于关联控制台调试输出和审批请求。 */
   traceId?: string;
   /** 发起本轮对话的窗口 webContents id；用于把审批请求路由回对应窗口 */
   approvalWebContentsId?: number;

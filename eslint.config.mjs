@@ -20,7 +20,6 @@ export default tseslint.config(
       'prototypes/**',
       'settings-prototype/**',
       'benchmark/**',
-      'logs/**',
       'test-results/**',
       'scripts/**',
       '*.config.js',

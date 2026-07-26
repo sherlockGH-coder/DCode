@@ -5,7 +5,6 @@ import { skillsManager } from '../skills';
 import { settingsManager } from '../settings';
 import { getEffectiveSystemPrompt, loadDeepseekMdSources } from '../prompts';
 import { approvalService } from '../approvalService';
-import { logChatEvent } from '../logger';
 import { compactConversation } from '../compact';
 import { mcpManager } from '../mcp/manager';
 import * as db from '../database';
@@ -99,7 +98,6 @@ export function registerChatIpc(): void {
       let seqCounter = 0;
       let terminalErrorHandled = false;
 
-      const traceId = Math.random().toString(36).slice(2, 8);
       const chatStartedAt = Date.now();
       const handleTerminalError = (error: Error | string) => {
         if (terminalErrorHandled) return;
@@ -132,17 +130,6 @@ export function registerChatIpc(): void {
 
         safeSend(IPC_EVENTS.CHAT_ERROR, conversationId, message);
       };
-
-      logChatEvent('chat_request', {
-        traceId,
-        conversationId: conversationId ?? null,
-        projectPath,
-        model: model || settingsManager.getPublic().api.defaultModel,
-        messagesCount: messages.length,
-        attachmentsCount: attachmentWhitelist.length,
-        attachmentKinds: attachmentWhitelist.map((a) => a.kind),
-        enabledSkills: enabledSkills.map((s) => s.name),
-      });
 
       try {
         settingsManager.assertActiveApiProfileSupported();

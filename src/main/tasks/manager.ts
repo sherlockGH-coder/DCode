@@ -4,7 +4,7 @@ import { taskStore } from './store';
 import { IPC_EVENTS } from '../../shared/types';
 import type { Task, TaskInput, TaskUpdateInput, TaskStatus, TaskScope } from '../../shared/types';
 import { findConversationIdByTaskId } from '../database';
-import { debugLog } from '../logger';
+import { debugLog } from '../debug';
 import {
   FINISHED_STATUSES,
   applyTaskIdPatch,

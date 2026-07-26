@@ -35,7 +35,7 @@ import { registerPlanIpc } from './ipc/planIpc';
 import { registerAgentsIpc } from './agents';
 import { setupApplicationMenu } from './menu';
 import { applyContentSecurityPolicy } from './security';
-import { debugLog } from './logger';
+import { debugLog } from './debug';
 
 const APP_NAME = 'DeepSeek';
 

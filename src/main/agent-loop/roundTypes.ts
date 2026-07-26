@@ -10,8 +10,6 @@ export interface RoundRunnerParams {
   signal?: AbortSignal;
   callbacks: AgentLoopCallbacks;
   config: AgentLoopConfig;
-  traceId: string;
-  conversationId: string | null;
   roundCount: number;
   roundStart: number;
   finalContent: string;
