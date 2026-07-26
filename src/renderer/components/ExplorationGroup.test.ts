@@ -80,7 +80,7 @@ describe('ExplorationGroup', () => {
       }));
     });
 
-    const summary = container.querySelector('[data-testid="exploration-summary"]') as HTMLElement | null;
+    const summary = container.querySelector('[data-testid="exploration-summary"]');
     expect(summary).not.toBeNull();
     expect(summary?.getAttribute('data-tool-icon')).toBe('search');
     expect(summary?.textContent).toContain('Read a file');

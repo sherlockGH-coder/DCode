@@ -1,18 +1,14 @@
 import React, { useMemo } from 'react';
 import type { ChangeUndoEntry, Conversation, Message, ToolItem } from '../../shared/types';
-import type { ActivityState } from './useChatActivityPhase';
 import type { RenderUnit } from '../utils/tool-pipeline';
 import { parseDbTimestamp } from '../utils/messageTime';
-import { describeToolItem } from '../utils/toolDescriptions';
 import { injectToolItems } from '../utils/tool-pipeline/extractToolItems';
 import MessageBubble from '../components/MessageBubble';
 import RenderUnitView from '../components/RenderUnitView';
 import CompressionSeparator from '../components/CompressionSeparator';
-import ChatActivityIndicator from '../components/ChatActivityIndicator';
 import ExplorationActivityGroup, { type ExplorationActivity } from '../components/ExplorationActivityGroup';
 import ToolItemCard from '../components/ToolItemCard';
 import ProcessedSummary from '../components/ProcessedSummary';
-import type { RecentEdit } from '../components/ArtifactPanel';
 
 interface UseChatPresentationOptions {
   conversationId: string | null;
@@ -26,21 +22,17 @@ interface UseChatPresentationOptions {
   lastUserMessage: Message | undefined;
   isLoading: boolean;
   turnTimers: Record<string, { startedAt: number; endedAt?: number }>;
-  activity: ActivityState;
   reasoningEffort?: string;
   onReasoningEffortChange: (effort: string | undefined) => void;
   onEditSubmit: (editedContent: string, editedAttachments?: Message['attachments']) => void | Promise<void>;
   onResponseNav: (turnId: string, direction: -1 | 1) => void;
   onUndoCascade: (turnId: string, entries: ChangeUndoEntry[]) => Promise<boolean>;
   dismissingFromTurnId?: string | null;
-  onIndicatorRetry: () => void;
-  onIndicatorAbort: () => void;
 }
 
 interface UseChatPresentationResult {
   chatItems: React.ReactNode[];
   pendingApprovalItems: ToolItem[];
-  recentEdits: RecentEdit[];
 }
 
 type TurnGroup =
@@ -73,21 +65,15 @@ export function useChatPresentation({
   lastUserMessage,
   isLoading,
   turnTimers,
-  activity,
   reasoningEffort,
   onReasoningEffortChange,
   onEditSubmit,
   onResponseNav,
   onUndoCascade,
   dismissingFromTurnId,
-  onIndicatorRetry,
-  onIndicatorAbort,
 }: UseChatPresentationOptions): UseChatPresentationResult {
-  const { pendingApprovalItems, recentEdits } = useMemo(() => {
+  const pendingApprovalItems = useMemo(() => {
     const approvals: ToolItem[] = [];
-    const visibleIds = new Set(visibleMessages.map((message) => message.id));
-    const editsByPath = new Map<string, RecentEdit>();
-    const activeTurnId = lastUserMessage?.id;
 
     const hydratedMessages = injectToolItems(messages);
     for (const message of hydratedMessages) {
@@ -95,30 +81,11 @@ export function useChatPresentation({
 
       for (const item of message.toolItems) {
         if (item.status === 'awaiting_approval') approvals.push(item);
-
-        if (
-          activeTurnId &&
-          visibleIds.has(message.id) &&
-          message.turnId === activeTurnId &&
-          (item.kind === 'write' || item.kind === 'edit') &&
-          item.status === 'done' &&
-          item.diff
-        ) {
-          editsByPath.set(item.path, {
-            path: item.path,
-            title: item.path.split('/').pop() || item.path,
-            diff: item.diff,
-            label: describeToolItem(item).verb,
-          });
-        }
       }
     }
 
-    return {
-      pendingApprovalItems: approvals,
-      recentEdits: [...editsByPath.values()],
-    };
-  }, [messages, visibleMessages, lastUserMessage?.id]);
+    return approvals;
+  }, [messages]);
 
   const chatItems = useMemo(() => {
     const items: React.ReactNode[] = [];
@@ -299,66 +266,6 @@ export function useChatPresentation({
       return { intermediateNodes: nodes, finalNode, trailingNodes };
     };
 
-    const buildAssistantNodes = (
-      message: Message,
-      options: {
-        isFinalOfTurn: boolean;
-        turnId: string;
-        activeAttempt: number;
-        sameAttemptMessages: Message[];
-        hideReasoning?: boolean;
-      },
-    ): React.ReactNode[] => {
-      const nodes: React.ReactNode[] = [];
-      const unitIndex = segmentMessageMap.get(message.id);
-      const renderUnit = unitIndex !== undefined && !renderedUnits.has(unitIndex) ? renderUnits[unitIndex] : undefined;
-      const trailingUnits: RenderUnit[] = [];
-      const tailUnitIndexes = tailUnitsByMessageId.get(message.id) ?? [];
-      for (const tailUnitIndex of tailUnitIndexes) {
-        if (renderedUnits.has(tailUnitIndex)) continue;
-        renderedUnits.add(tailUnitIndex);
-        trailingUnits.push(renderUnits[tailUnitIndex]);
-      }
-
-      const isLastOfAttempt = options.sameAttemptMessages[options.sameAttemptMessages.length - 1]?.id === message.id;
-      const attempts = sortedByTurn.get(options.turnId) ?? [options.activeAttempt];
-      const responseTotal = attempts.length;
-      const currentIndex = attempts.indexOf(options.activeAttempt);
-      const hasAwaitingApproval = message.toolItems?.some((item) => item.status === 'awaiting_approval') ?? false;
-      const wireActions = options.isFinalOfTurn && isLastOfAttempt;
-
-      const shouldRenderBubble = options.hideReasoning
-        ? Boolean(message.content || renderUnit || trailingUnits.length > 0)
-        : Boolean(message.content || message.reasoning_content || renderUnit || trailingUnits.length > 0);
-
-      if (shouldRenderBubble) {
-        nodes.push(
-          <MessageBubble
-            key={message.clientId ?? message.id}
-            message={message}
-            renderUnit={renderUnit}
-            showFooter={wireActions && !isLoading && message.id === latestAssistantMessageId}
-            showFooterByDefault={message.id === latestAssistantMessageId}
-            responseCurrent={wireActions ? currentIndex + 1 : undefined}
-            responseTotal={wireActions ? responseTotal : undefined}
-            onResponsePrev={wireActions && responseTotal > 1 ? () => onResponseNav(options.turnId, -1) : undefined}
-            onResponseNext={wireActions && responseTotal > 1 ? () => onResponseNav(options.turnId, 1) : undefined}
-            isGenerating={isLoading && isLastOfAttempt && options.turnId === lastTurnId && !hasAwaitingApproval}
-            hideReasoning={options.hideReasoning}
-            trailingUnits={trailingUnits}
-          />,
-        );
-        if (renderUnit) renderedUnits.add(unitIndex!);
-      }
-
-      if (renderUnit && !renderedUnits.has(unitIndex!)) {
-        renderedUnits.add(unitIndex!);
-        nodes.push(<RenderUnitView key={`ru-${unitIndex}`} unit={renderUnit} />);
-      }
-
-      return nodes;
-    };
-
     for (const group of groups) {
       if (group.kind === 'legacy') {
         const { message } = group;
@@ -499,11 +406,6 @@ export function useChatPresentation({
       }
     }
 
-    {                                       }
-    {
-
-         }
-
     if (dismissingItems.length > 0) {
       items.push(
         <div
@@ -529,20 +431,16 @@ export function useChatPresentation({
     lastUserMessage,
     isLoading,
     turnTimers,
-    activity,
     reasoningEffort,
     onReasoningEffortChange,
     onEditSubmit,
     onResponseNav,
     onUndoCascade,
     dismissingFromTurnId,
-    onIndicatorRetry,
-    onIndicatorAbort,
   ]);
 
   return {
     chatItems,
     pendingApprovalItems,
-    recentEdits,
   };
 }

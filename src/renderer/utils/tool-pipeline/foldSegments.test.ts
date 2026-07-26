@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import type { ToolItem } from '../../../shared/types';
 import type { ToolSegment } from './types';
 import { foldSegments } from './foldSegments';
 

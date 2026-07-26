@@ -10,7 +10,6 @@ const CompressionSeparator: React.FC<CompressionSeparatorProps> = ({ summary }) 
 
   return (
     <div className="my-6 px-1 flex flex-col gap-3">
-      {           }
       <div className="flex items-center gap-4 text-text-tertiary select-none">
         <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-border to-transparent" />
         <div className="flex items-center gap-2 text-[12px] font-sans tracking-wide">
@@ -20,7 +19,6 @@ const CompressionSeparator: React.FC<CompressionSeparatorProps> = ({ summary }) 
         <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-border to-transparent" />
       </div>
 
-      {                                   }
       <div className="overflow-hidden transition-colors duration-150">
         <button
           type="button"

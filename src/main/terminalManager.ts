@@ -2,17 +2,24 @@ import { ipcMain, app, type WebContents } from 'electron';
 import { existsSync } from 'node:fs';
 import { userInfo, hostname } from 'node:os';
 import { spawn as ptySpawn, type IPty } from 'node-pty';
+import { TerminalOutputBuffer } from './terminal/outputBuffer';
 
 interface TerminalSession {
   pty: IPty;
   sender: WebContents;
-  /** attach 之前累积的输出；attach 后清空、不再使用 */
-  buffer: string;
-  /** attach 之后才开始向 sender 直接 send，之前都进 buffer */
+  /** 回放缓冲：attach 时把断连期间的输出补给渲染进程 */
+  buffer: TerminalOutputBuffer;
+  /** attach 之后才开始向 sender 推送 */
   attached: boolean;
+  /** 尚未发送的输出分片，按 FLUSH_INTERVAL_MS 合并成一条 IPC */
+  pending: string[];
+  flushTimer: NodeJS.Timeout | null;
 }
 
 const sessions = new Map<string, TerminalSession>();
+
+/** 已经挂过 destroyed 监听的 WebContents，避免重复注册 */
+const watchedSenders = new WeakSet<WebContents>();
 
 function pickShell(): { file: string; args: string[] } {
   if (process.platform === 'win32') {
@@ -44,14 +51,77 @@ function resolveCwd(input: string | null | undefined): string {
   return app.getPath('home');
 }
 
+const MAX_BUFFER = 256 * 1024;
+
+/**
+ * 输出合批窗口。PTY 的 onData 在高输出量下每秒可触发数百次，
+ * 逐个 chunk 发 IPC 会淹没渲染进程；按一帧的节奏合并成一条即可。
+ */
+const FLUSH_INTERVAL_MS = 16;
+
+function clearFlushTimer(s: TerminalSession): void {
+  if (s.flushTimer !== null) {
+    clearTimeout(s.flushTimer);
+    s.flushTimer = null;
+  }
+}
+
+/** 立即把待发送分片合并成一条 IPC 发出。 */
+function flushPending(sessionId: string, s: TerminalSession): void {
+  clearFlushTimer(s);
+  if (s.pending.length === 0) return;
+
+  const payload = s.pending.join('');
+  s.pending.length = 0;
+
+  if (s.attached && !s.sender.isDestroyed()) {
+    s.sender.send('terminal:data', sessionId, payload);
+  }
+}
+
+function scheduleFlush(sessionId: string, s: TerminalSession): void {
+  if (s.flushTimer !== null) return;
+  s.flushTimer = setTimeout(() => {
+    s.flushTimer = null;
+    const cur = sessions.get(sessionId);
+    if (cur) flushPending(sessionId, cur);
+  }, FLUSH_INTERVAL_MS);
+}
+
 function killSession(sessionId: string) {
   const s = sessions.get(sessionId);
   if (!s) return;
   sessions.delete(sessionId);
-  try { s.pty.kill(); } catch {              }
+  clearFlushTimer(s);
+  s.pending.length = 0;
+  s.buffer.clear();
+  try { s.pty.kill(); } catch {}
 }
 
-const MAX_BUFFER = 256 * 1024;
+/** 关闭并回收全部终端会话。应用退出前调用，避免留下孤儿 shell 进程。 */
+export function killAllTerminalSessions(): void {
+  for (const sessionId of [...sessions.keys()]) {
+    killSession(sessionId);
+  }
+}
+
+/**
+ * 窗口销毁时回收绑定在它上面的会话。
+ *
+ * 之前只有显式 `terminal:kill` 和 PTY 自然退出两条清理路径，
+ * 关掉一个带活跃终端的窗口会让 shell 进程和它的 256KB 缓冲永久留在内存里。
+ */
+function killSessionsBoundTo(sender: WebContents): void {
+  for (const [sessionId, s] of [...sessions.entries()]) {
+    if (s.sender === sender) killSession(sessionId);
+  }
+}
+
+function watchSender(sender: WebContents): void {
+  if (watchedSenders.has(sender)) return;
+  watchedSenders.add(sender);
+  sender.once('destroyed', () => killSessionsBoundTo(sender));
+}
 
 export function registerTerminalIpc() {
   ipcMain.handle(
@@ -79,29 +149,35 @@ export function registerTerminalIpc() {
       const session: TerminalSession = {
         pty,
         sender: event.sender,
-        buffer: '',
+        buffer: new TerminalOutputBuffer(MAX_BUFFER),
         attached: false,
+        pending: [],
+        flushTimer: null,
       };
       sessions.set(sessionId, session);
+      watchSender(event.sender);
 
       pty.onData((data) => {
         const cur = sessions.get(sessionId);
         if (!cur) return;
 
-        cur.buffer += data;
-        if (cur.buffer.length > MAX_BUFFER) {
-          cur.buffer = cur.buffer.slice(-MAX_BUFFER);
-        }
+        cur.buffer.append(data);
 
         if (cur.attached && !cur.sender.isDestroyed()) {
-          cur.sender.send('terminal:data', sessionId, data);
+          cur.pending.push(data);
+          scheduleFlush(sessionId, cur);
         }
       });
 
       pty.onExit(({ exitCode, signal }) => {
         const cur = sessions.get(sessionId);
-        if (cur && !cur.sender.isDestroyed()) {
-          cur.sender.send('terminal:exit', sessionId, { exitCode, signal });
+        if (cur) {
+          // 先把残余输出发完，再报退出，避免丢掉最后一屏
+          flushPending(sessionId, cur);
+          clearFlushTimer(cur);
+          if (!cur.sender.isDestroyed()) {
+            cur.sender.send('terminal:exit', sessionId, { exitCode, signal });
+          }
         }
         sessions.delete(sessionId);
       });
@@ -116,8 +192,15 @@ export function registerTerminalIpc() {
     if (!s) return false;
     s.sender = event.sender;
     s.attached = true;
-    if (s.buffer && !s.sender.isDestroyed()) {
-      s.sender.send('terminal:data', sessionId, s.buffer);
+    watchSender(event.sender);
+
+    // 回放已缓冲的输出；pending 里的内容已经在 buffer 中，清掉避免重复
+    s.pending.length = 0;
+    clearFlushTimer(s);
+
+    const backlog = s.buffer.read();
+    if (backlog && !s.sender.isDestroyed()) {
+      s.sender.send('terminal:data', sessionId, backlog);
     }
     return true;
   });

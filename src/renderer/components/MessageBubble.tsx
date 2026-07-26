@@ -89,7 +89,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
     [handleLocalFileClick],
   );
 
-  const [thinkingStart, setThinkingStart] = useState<number | null>(null);
   const [thinkingEnd, setThinkingEnd] = useState<number | null>(null);
 
   const [reasoningExpanded, setReasoningExpanded] = useState(
@@ -109,27 +108,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
 
   const copyContent = useMemo(
     () => message.content,
-    [isUser, message.content],
+    [message.content],
   );
 
-  const [now, setNow] = useState(Date.now());
-
   useEffect(() => {
-    if (!isUser && message.reasoning_content && !thinkingStart) {
-      setThinkingStart(Date.now());
-    }
     if (!isUser && message.reasoning_content && !thinkingEnd) {
       if (message.content || !isGenerating) {
         setThinkingEnd(Date.now());
       }
     }
-  }, [isUser, message.reasoning_content, message.content, isGenerating, thinkingStart, thinkingEnd]);
-
-  useEffect(() => {
-    if (!isGenerating || !thinkingStart || thinkingEnd) return;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, [isGenerating, thinkingStart, thinkingEnd]);
+  }, [isUser, message.reasoning_content, message.content, isGenerating, thinkingEnd]);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -233,10 +221,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
   }, [onUndoChanges, undoConfirmationMessage, undoEntries, undoStatus]);
 
   const completedAtMs = message.completed_at ?? parseDbTimestamp(message.created_at);
-  const durationSecs = thinkingStart
-    ? Math.max(1, Math.round(((thinkingEnd || now) - thinkingStart) / 1000))
-    : (message.duration ? Math.round(message.duration / 1000) : 0);
-
   const hasStyleTag = !isUser && /<style[\s>]/i.test(message.content);
   const isPureHtmlDoc = !isUser && /^\s*(?:<!doctype\s+html|<html[\s>]|<body[\s>])/i.test(message.content);
   const usesFullDocumentPath = hasStyleTag || isPureHtmlDoc;
@@ -275,7 +259,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
       data-message-role={message.role}
       className={`flex flex-col gap-2 ${isUser ? 'items-end' : 'assistant-message-inset items-start'} relative group`}
     >
-      {                     }
       {isUser && !isEditing && message.attachments && message.attachments.length > 0 && (
         <UserAttachments
           fileAttachments={fileAttachments}
@@ -284,7 +267,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
         />
       )}
 
-      {                                                                      }
       {shouldShowReasoning && (
         <ReasoningPanel
           completedAt={message.completed_at}
@@ -297,7 +279,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
         />
       )}
 
-      {          }
       {isUser ? (
         <>
           {isEditing ? (
@@ -356,7 +337,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleUndoChanges();
+                        void handleUndoChanges();
                       }}
                       disabled={undoStatus === 'undoing' || undoStatus === 'undone'}
                       title={undoStatus === 'undone' ? '已撤销' : '撤销这条回复产生的文件改动'}
@@ -416,7 +397,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
           ) : null}
           </div>
 
-          {            }
           {renderUnit && (
             <div className={hasVisibleContent ? 'mt-2' : 'mt-0'}>
               <RenderUnitView unit={renderUnit} />
@@ -431,7 +411,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
             </div>
           )}
 
-          {                                                             }
           {showFooter && (hasVisibleContent || renderUnit || trailingUnits.length > 0) && (
             <AssistantFooter
               completedAtMs={completedAtMs}

@@ -66,7 +66,7 @@ export async function agentLoop(
     attemptNo,
     approvalWebContentsId,
     approvalPolicy,
-    collaborationMode,
+    collaborationMode: conversationId ? collaborationMode : undefined,
     modeRevision,
     subAgent,
     agentRuntime: {
@@ -95,7 +95,7 @@ export async function agentLoop(
 
   const workingMessages: Message[] = [];
 
-  const systemContext = getSystemContext(projectPath);
+  const systemContext = getSystemContext(projectPath, config.environmentInfoOverride);
 
   const userContext = getUserContext({
     deepseekMdSources,
@@ -318,6 +318,12 @@ Return a concise structured result with:
 
       if (toolResults.some(({ result }) => result.terminal === true)) {
         finalContent = assistantContent;
+        break;
+      }
+
+      if (roundCount >= maxRounds) {
+        finalContent = assistantContent;
+        log(`达到最大工具轮数 ${maxRounds}，停止继续调用工具`);
         break;
       }
 

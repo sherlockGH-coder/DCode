@@ -107,7 +107,6 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, code }) => {
 
   return (
     <div className="my-3 overflow-hidden rounded-[10px] border border-hairline bg-bg-main">
-      {                     }
       <div className="flex justify-between items-center py-1.5 px-3 border-b border-hairline select-none">
         <span className="font-mono text-[12.5px] text-text-secondary">
           {getLanguageLabel(language)}
@@ -130,7 +129,6 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, code }) => {
         </div>
       </div>
 
-      {           }
       {isPlainText ? (
         <pre
           data-testid="plain-text-code-body"

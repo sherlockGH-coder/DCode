@@ -21,9 +21,9 @@ export function applyCacheBreakpoints(
   let remaining = MAX_CACHE_BREAKPOINTS;
   const marked = new Set<object>();
   const mark = (value: unknown) => {
-    if (!value || typeof value !== 'object' || remaining <= 0 || marked.has(value as object)) return;
+    if (!value || typeof value !== 'object' || remaining <= 0 || marked.has(value)) return;
     (value as any).cache_control = { type: 'ephemeral' };
-    marked.add(value as object);
+    marked.add(value);
     remaining--;
   };
   const markLastContentBlock = (message: any) => {
@@ -52,8 +52,6 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
     roundCount,
     roundStart,
     finalContent,
-    toolRegistry,
-    toolCtx,
     log,
     logErr,
   } = params;
@@ -86,7 +84,7 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
   if (reasoningEffort) {
     requestParams.thinking = { type: 'enabled' };
 
-    (requestParams as any).output_config = { effort: reasoningEffort };
+    requestParams.output_config = { effort: reasoningEffort };
 
     requestParams.max_tokens = 32768;
   } else {
@@ -201,8 +199,8 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
               completion_tokens: msg.usage.output_tokens,
               total_tokens: msg.usage.input_tokens + msg.usage.output_tokens,
 
-              prompt_cache_hit_tokens: (msg.usage as any).cache_read_input_tokens ?? 0,
-              prompt_cache_miss_tokens: Math.max(0, msg.usage.input_tokens - ((msg.usage as any).cache_read_input_tokens ?? 0) - ((msg.usage as any).cache_creation_input_tokens ?? 0)),
+              prompt_cache_hit_tokens: msg.usage.cache_read_input_tokens ?? 0,
+              prompt_cache_miss_tokens: Math.max(0, msg.usage.input_tokens - (msg.usage.cache_read_input_tokens ?? 0) - (msg.usage.cache_creation_input_tokens ?? 0)),
             };
           }
           break;
@@ -224,7 +222,7 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
         }
 
         case 'content_block_delta': {
-          const delta = event.delta as any;
+          const delta = event.delta;
           if (delta.type === 'text_delta') {
             assistantContent += delta.text;
             callbacks.onChunk(delta.text);
@@ -250,12 +248,12 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
         }
 
         case 'message_delta': {
-          const delta = event.delta as any;
+          const delta = event.delta;
           if (delta.stop_reason) {
             stopReason = delta.stop_reason;
           }
-          if ((event as any).usage) {
-            const u = (event as any).usage;
+          if (event.usage) {
+            const u = event.usage;
             lastUsage = {
               prompt_tokens: lastUsage?.prompt_tokens ?? 0,
               completion_tokens: u.output_tokens ?? lastUsage?.completion_tokens ?? 0,

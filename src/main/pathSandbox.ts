@@ -2,7 +2,7 @@ import { realpathSync } from 'node:fs';
 import { isAbsolute, resolve, relative, sep, basename, dirname, join } from 'node:path';
 import { homedir } from 'node:os';
 
-export interface ResolvedPath {
+interface ResolvedPath {
   /** 规范化后的绝对路径（已尽可能 realpath） */
   absolutePath: string;
   /** 是否在 projectRoot 内（projectRoot 为 null 时统一为 false，但不代表被拒） */
@@ -40,9 +40,7 @@ function safeRealpath(absPath: string): { path: string; resolved: boolean } {
       try {
         const ancestorReal = realpathSync.native(cursor);
         return { path: join(ancestorReal, ...missingParts), resolved: true };
-      } catch {
-
-      }
+      } catch {}
     }
   }
 }

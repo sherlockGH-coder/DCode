@@ -27,11 +27,6 @@ interface LoadDeepseekMdOptions {
   maxBytes?: number;
 }
 
-/** 返回默认 system prompt 正文（打包时已内联） */
-export function getDefaultSystemPrompt(): string {
-  return defaultSystemPrompt;
-}
-
 /** 综合「用户覆写 > 默认 .md」的最终 system prompt — 调用方每次发请求前取一次 */
 export function getEffectiveSystemPrompt(): string {
   const override = settingsManager.getSystemPromptOverride().trim();
@@ -64,9 +59,7 @@ function findDeepseekMdInDir(dir: string): string | null {
   const candidate = join(dir, DEEPSEEK_MD_FILENAME);
   try {
     if (statSync(candidate).isFile()) return candidate;
-  } catch {
-
-  }
+  } catch {}
   return null;
 }
 
@@ -75,9 +68,7 @@ function findProjectDeepseekMd(dir: string): string | null {
   const candidate = join(dir, PROJECT_DEEPSEEK_DIR, DEEPSEEK_MD_FILENAME);
   try {
     if (statSync(candidate).isFile()) return candidate;
-  } catch {
-
-  }
+  } catch {}
   return null;
 }
 
@@ -194,9 +185,7 @@ function collectDeepseekSources(
         sources.push({ filePath: localFile, contents: loaded.contents, scope: 'local' });
       }
     }
-  } catch {
-
-  }
+  } catch {}
 
   return sources;
 }

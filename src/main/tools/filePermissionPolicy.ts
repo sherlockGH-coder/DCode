@@ -1,12 +1,5 @@
 import { resolveInside } from '../pathSandbox';
 
-export type FilePermissionTool =
-  | 'read_file'
-  | 'grep'
-  | 'glob'
-  | 'write_file'
-  | 'edit_file';
-
 const PROJECT_SCOPED_READONLY_TOOLS = new Set<string>(['read_file', 'grep', 'glob']);
 const PROJECT_SCOPED_FILE_TOOLS = new Set<string>([
   'write_file',
@@ -22,7 +15,7 @@ export function isProjectScopedReadonlyTool(name: string): boolean {
   return PROJECT_SCOPED_READONLY_TOOLS.has(name);
 }
 
-export function isProjectScopedFileTool(name: string): boolean {
+function isProjectScopedFileTool(name: string): boolean {
   return PROJECT_SCOPED_FILE_TOOLS.has(name);
 }
 

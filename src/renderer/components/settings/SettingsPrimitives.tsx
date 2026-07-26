@@ -9,7 +9,7 @@ export const settingsSelectClass =
   settingsInputClass +
   ' cursor-pointer appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M3%204.5l3%203%203-3%22%20stroke%3D%22%237c7e86%22%20stroke-width%3D%221.7%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E")] bg-[length:12px_12px] bg-[right_12px_center] bg-no-repeat pr-9';
 
-export const settingsGroupClass =
+const settingsGroupClass =
   'overflow-hidden rounded-[8px] border border-hairline bg-bg-body shadow-[var(--shadow-card)]';
 
 type Tone = 'blue' | 'green' | 'amber' | 'red' | 'neutral';

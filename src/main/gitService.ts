@@ -6,7 +6,7 @@ import type { GitActionResult, GitCommitStatus, Project } from '../shared/types'
 const execFilePromise = promisify(execFile);
 const GIT_MAX_BUFFER_BYTES = 10 * 1024 * 1024;
 
-export interface GitBranchesResult {
+interface GitBranchesResult {
   currentBranch: string;
   branches: string[];
 }
@@ -151,9 +151,7 @@ export async function getGitCommitStatus(projectPath: string): Promise<GitCommit
       await runGit(projectPath, ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}']);
       hasUpstream = true;
       aheadCount = Number.parseInt((await runGit(projectPath, ['rev-list', '--count', '@{u}..HEAD'])).trim(), 10) || 0;
-    } catch {
-
-    }
+    } catch {}
 
     return {
       hasGit: true,

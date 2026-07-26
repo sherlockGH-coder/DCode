@@ -170,12 +170,6 @@ vi.mock('./hooks/useChatOrchestrator', () => ({
   }),
 }));
 
-vi.mock('./hooks/useChatActivityPhase', () => ({
-  useChatActivityPhase: () => ({
-    visible: false,
-  }),
-}));
-
 vi.mock('./hooks/useToolRenderUnits', () => ({
   useToolRenderUnits: () => ({
     units: [],
@@ -326,7 +320,7 @@ describe('App completed turn rendering', () => {
       root?.render(React.createElement(App));
     });
 
-    const processedButton = container.querySelector('[data-testid="processed-summary-toggle"]') as HTMLButtonElement | null;
+    const processedButton = container.querySelector('[data-testid="processed-summary-toggle"]');
 
     expect(processedButton).not.toBeNull();
     expect(processedButton?.textContent).toContain('已处理');
@@ -398,7 +392,7 @@ describe('App completed turn rendering', () => {
 
       const processedButtons = Array.from(
         container.querySelectorAll('[data-testid="reasoning-activity-toggle"]'),
-      ) as HTMLButtonElement[];
+      );
       expect(processedButtons).toHaveLength(2);
       expect(processedButtons[0].textContent).toContain('已深度思考，思考了 10秒');
       expect(processedButtons[1].textContent).toContain('已深度思考，思考了 28秒');
@@ -468,7 +462,7 @@ describe('App completed turn rendering', () => {
 
       const summaries = Array.from(
         container.querySelectorAll('[data-testid="exploration-activity-summary"]'),
-      ) as HTMLButtonElement[];
+      );
       expect(summaries).toHaveLength(2);
       expect(summaries[0].textContent).toContain('思考了 1分1秒，读取 1 个文件，搜索 1 次');
       expect(summaries[0].getAttribute('data-tool-icon')).toBe('book');
@@ -583,8 +577,11 @@ describe('App completed turn rendering', () => {
     const artifactPanel = container.querySelector('[data-testid="artifact-panel"]');
 
     expect(mainHeader?.querySelector('[aria-label="显示任务监控"]')).toBeNull();
-    expect(mainHeader?.querySelector('[aria-label="隐藏产物面板"]')).toBeNull();
-    expect(mainHeader?.querySelector('[aria-label="显示终端"]')).toBeNull();
+    // 工作区打开时 dock 保持挂载以便过渡动画，但必须处于不可见且不可交互状态
+    const dock = mainHeader?.querySelector('[data-testid="workspace-dock"]');
+    expect(dock?.getAttribute('aria-hidden')).toBe('true');
+    expect(dock?.hasAttribute('inert')).toBe(true);
+    expect(dock?.className).toContain('pointer-events-none');
     expect(artifactPanel?.querySelector('[aria-label="显示任务监控"]')).toBeNull();
   });
 
@@ -595,7 +592,7 @@ describe('App completed turn rendering', () => {
       root?.render(React.createElement(App));
     });
 
-    const dismissLayer = container.querySelector('button.mobile-sidebar-scrim') as HTMLButtonElement | null;
+    const dismissLayer = container.querySelector('button.mobile-sidebar-scrim');
     const sidebarShell = container.querySelector('.sidebar-shell');
     const resizeHandle = container.querySelector('button.sidebar-resize-handle');
     const resizeIndicator = resizeHandle?.querySelector('.sidebar-resize-indicator');

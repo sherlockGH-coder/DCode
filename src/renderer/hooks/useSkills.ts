@@ -40,10 +40,10 @@ export function useSkills(projectPath: string | null): UseSkillsResult {
 
   useEffect(() => {
     setIsLoading(true);
-    refresh();
+    void refresh();
     if (!window.deepseekApi?.onSkillsChanged) return undefined;
     const unsub = window.deepseekApi.onSkillsChanged(() => {
-      refresh();
+      void refresh();
     });
     return unsub;
   }, [refresh]);
@@ -78,6 +78,6 @@ export function useSkills(projectPath: string | null): UseSkillsResult {
 export function useSkillsWatcher(projectPath: string | null): void {
   useEffect(() => {
     if (!window.deepseekApi?.skillsWatchProject) return;
-    window.deepseekApi.skillsWatchProject(projectPath);
+    void window.deepseekApi.skillsWatchProject(projectPath);
   }, [projectPath]);
 }

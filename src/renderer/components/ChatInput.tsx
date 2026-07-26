@@ -11,10 +11,7 @@ import VoiceInputPanel from './chat-input/VoiceInputPanel';
 import { useChatInputAttachments } from './chat-input/useAttachments';
 import { useSlashCommands } from './chat-input/useSlashCommands';
 import {
-  BUILTIN_SLASH_COMMAND_NAMES,
-  CompactContextRing,
   buildSlashCommandPayload,
-  formatCompactSlashCommandDescription,
   insertTextAtSelection,
 } from './chat-input/utils';
 
@@ -204,7 +201,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isModelMenuOpen, slashOpen, isBranchMenuOpen, isPlusMenuOpen]);
+  }, [isModelMenuOpen, slashOpen, isBranchMenuOpen, isPlusMenuOpen, setSlashOpen, slashMenuRef]);
 
   useEffect(() => {
     if (!activeProject) {
@@ -227,7 +224,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
       }
     };
 
-    fetchGitInfo();
+    void fetchGitInfo();
 
     const timer = setInterval(fetchGitInfo, 10000);
 
@@ -361,7 +358,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
         fileAttachments={fileAttachments}
         onRemove={removeAttachment}
       />
-      {                                                                 }
       <div className="relative" ref={slashMenuRef}>
         <SlashCommandMenu
           open={slashOpen}
@@ -383,7 +379,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
         onDrop={handleDrop}
       >
         <div className={inputSurfaceClass}>
-          {                  }
           <div
             className={`${isWelcome ? 'welcome-input-compose-row' : 'px-4'} flex items-start gap-3 relative min-h-[52px]`}
           >

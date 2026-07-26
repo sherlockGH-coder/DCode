@@ -22,7 +22,7 @@ function todaysLogFile(): string {
   return path.join(ensureLogDir(), `chat-${date}.jsonl`);
 }
 
-export type ChatLogEventName =
+type ChatLogEventName =
   | 'chat_request'
   | 'round_request'
   | 'round_response'
@@ -31,7 +31,7 @@ export type ChatLogEventName =
   | 'chat_done'
   | 'error';
 
-export interface ChatLogPayload {
+interface ChatLogPayload {
   traceId: string;
   conversationId?: string | null;
   [key: string]: unknown;
@@ -51,15 +51,7 @@ export function logChatEvent(event: ChatLogEventName, payload: ChatLogPayload): 
   }
 }
 
-export function getLogDir(): string {
-  return ensureLogDir();
-}
-
 const DEBUG_ENABLED = process.env.DCODE_DEBUG === '1' || process.env.DCODE_DEBUG === 'true';
-
-export function isDebugEnabled(): boolean {
-  return DEBUG_ENABLED;
-}
 
 /** 调试日志：仅在 DCODE_DEBUG=1 时输出到控制台 */
 export function debugLog(scope: string, ...args: unknown[]): void {

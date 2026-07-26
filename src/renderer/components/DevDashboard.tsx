@@ -3,7 +3,7 @@ import { useTasks } from '../hooks/useTasks';
 import {
   EmptyState,
 } from './DevDashboardTaskUi';
-import type { Message, Task, TaskStatus } from '../../shared/types';
+import type { Message, Task } from '../../shared/types';
 import { extractToolItems } from '../utils/tool-pipeline/extractToolItems';
 import { useAppContext } from '../contexts/AppContext';
 import {
@@ -58,9 +58,9 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
     if (task.status === 'completed' || task.status === 'cancelled') return;
     try {
       if (task.status === 'pending') {
-        await currentTasksApi.update(task.id, { status: 'in_progress' as TaskStatus });
+        await currentTasksApi.update(task.id, { status: 'in_progress' });
       }
-      await currentTasksApi.update(task.id, { status: 'completed' as TaskStatus });
+      await currentTasksApi.update(task.id, { status: 'completed' });
     } catch (err) {
       console.error('[DevDashboard] failed to complete task:', err);
     }
@@ -159,16 +159,22 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
   const [resourcesCollapsed, setResourcesCollapsed] = useState(() => resourcesCount === 0);
   const previousFilesCount = useRef(filesCount);
   const previousResourcesCount = useRef(resourcesCount);
+  const currentFilesCount = useRef(filesCount);
+  const currentResourcesCount = useRef(resourcesCount);
+  currentFilesCount.current = filesCount;
+  currentResourcesCount.current = resourcesCount;
   const filesAutoExpanded = useRef(filesCount > 0);
   const resourcesAutoExpanded = useRef(resourcesCount > 0);
 
   useEffect(() => {
-    setFilesCollapsed(filesCount === 0);
-    setResourcesCollapsed(resourcesCount === 0);
-    previousFilesCount.current = filesCount;
-    previousResourcesCount.current = resourcesCount;
-    filesAutoExpanded.current = filesCount > 0;
-    resourcesAutoExpanded.current = resourcesCount > 0;
+    const nextFilesCount = currentFilesCount.current;
+    const nextResourcesCount = currentResourcesCount.current;
+    setFilesCollapsed(nextFilesCount === 0);
+    setResourcesCollapsed(nextResourcesCount === 0);
+    previousFilesCount.current = nextFilesCount;
+    previousResourcesCount.current = nextResourcesCount;
+    filesAutoExpanded.current = nextFilesCount > 0;
+    resourcesAutoExpanded.current = nextResourcesCount > 0;
   }, [activeConversationId]);
 
   useEffect(() => {
@@ -221,10 +227,8 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
       style={style}
       className={`bg-bg-main flex flex-col min-h-0 overflow-hidden font-sans text-text-primary transition-[width] duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] ${className}`}
     >
-      {           }
       <div className="flex flex-1 flex-col overflow-y-auto min-h-0 custom-scrollbar">
         <RuntimeEnvironment activeProject={activeProject} />
-        {                   }
         <CollapsibleSection
           title="变更"
           meta={filesCount}
@@ -252,7 +256,6 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
           )}
         </CollapsibleSection>
 
-        {                        }
         <CollapsibleSection
           title="外部资源"
           meta={resourcesCount}
@@ -269,7 +272,6 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
             />
           ) : (
             <div className="flex flex-col gap-1">
-              {           }
               {(() => {
                 const grouped = externalResources.reduce((acc, resource) => {
                   const type = resource.type;
@@ -302,7 +304,6 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
           )}
         </CollapsibleSection>
 
-        {                                }
         {hasActiveTodo ? (
           <CollapsibleSection
             title="待办事项"

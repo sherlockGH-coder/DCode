@@ -249,7 +249,6 @@ const ToolItemCard: React.FC<ToolItemCardProps> = ({ item, hideIcon = false }) =
                   ? <ExecOutputPanel item={item} />
                   : <OutputPreview output={output} />
               )}
-              {                               }
               {item.kind === 'tool' && !output && (
                 <div className="px-3 py-2 text-[12px] leading-[1.6] text-text-tertiary">
                   {item.status === 'running' || item.status === 'pending'

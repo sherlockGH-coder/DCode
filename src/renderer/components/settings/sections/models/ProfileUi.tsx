@@ -1,15 +1,8 @@
 import React from 'react';
 import { IconInfo, IconKey } from '../../../icons';
 import type { ApiProfile } from '../../../../../shared/types';
-import { type SaveState } from './profileDraft';
 
 export const PANEL_CLASS = 'rounded-lg border border-black/[0.07] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.025)] dark:border-white/[0.08] dark:bg-[#1E1E20]';
-
-export const SaveIndicator: React.FC<{ state: SaveState; error: string | null }> = ({ error }) => (
-  <div className="min-h-5 text-right text-[11.5px] font-medium">
-    {error && <span className="text-red-500">{error}</span>}
-  </div>
-);
 
 export const KeyBadge: React.FC<{ active: boolean }> = ({ active }) => (
   <span

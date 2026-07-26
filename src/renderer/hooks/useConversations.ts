@@ -152,12 +152,12 @@ export function useConversations(activeProject: string | null) {
   );
 
   useEffect(() => {
-    loadConversations();
+    void loadConversations();
   }, [loadConversations, activeProject]);
 
   useEffect(() => {
     const unsub = window.conversationsApi.onChanged(() => {
-      loadConversations();
+      void loadConversations();
     });
     return unsub;
   }, [loadConversations]);
@@ -197,7 +197,7 @@ export function useConversations(activeProject: string | null) {
       }).catch(() => {});
       return;
     }
-    loadMessages(convId);
+    void loadMessages(convId);
   }, [conversationId, loadMessages, touchConversationCache]);
 
   const handleDeleteConversation = useCallback(async (convId: string) => {

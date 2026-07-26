@@ -61,14 +61,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [conversations]);
 
   return (
-    <aside className="sidebar-frame w-full shrink-0 flex flex-row min-h-0 h-full select-none overflow-hidden p-2">
+    <aside className="sidebar-frame shrink-0 flex flex-row min-h-0 h-full select-none overflow-hidden p-2">
       <div className="flex-1 sidebar-surface flex flex-col min-w-0 h-full overflow-hidden rounded-[14px] border border-hairline">
-        {                                         }
         <div className="shrink-0 h-11 px-3 flex items-center gap-1.5 [-webkit-app-region:drag]">
-          {                                                                  }
           {reserveTrafficLights && <div className="w-[72px] shrink-0" />}
 
-          {                      }
           <button
             type="button"
             className="flex items-center gap-1.5 flex-1 py-1 px-2 rounded-[7px] bg-bg-chip text-text-secondary hover:bg-bg-hover transition-colors duration-150 text-left text-[13px] cursor-pointer min-w-0 select-none h-7 [-webkit-app-region:no-drag]"
@@ -81,7 +78,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             </kbd>
           </button>
 
-          {                             }
           <button
             type="button"
             className="w-8 h-8 flex items-center justify-center rounded-[7px] hover:bg-bg-hover text-text-secondary transition-colors duration-150 shrink-0 cursor-pointer [-webkit-app-region:no-drag]"
@@ -92,7 +88,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {                               }
         <div className="shrink-0 pt-2 px-2 pb-1.5">
           <button
             type="button"
@@ -104,7 +99,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {                                     }
         <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
           <div className="sidebar-scroll flex-1 overflow-y-auto px-2 pb-2 my-1">
             <ProjectSwitcher
@@ -122,7 +116,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {                            }
         <div className="shrink-0 p-2 flex flex-col gap-0.5">
           <button
             type="button"

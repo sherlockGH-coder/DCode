@@ -36,7 +36,7 @@ const WelcomeBranchSelector: React.FC<WelcomeBranchSelectorProps> = ({ activePro
       }
     };
 
-    fetchGitInfo();
+    void fetchGitInfo();
 
     const timer = setInterval(fetchGitInfo, 10000);
 

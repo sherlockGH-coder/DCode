@@ -16,7 +16,7 @@ interface SubmitEditedMessageRetryArgs {
   onTruncateError?: (error: unknown) => void;
 }
 
-export interface SubmitEditedMessageRetryResult {
+interface SubmitEditedMessageRetryResult {
   submitted: boolean;
   truncateFailed: boolean;
 }

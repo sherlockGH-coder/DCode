@@ -1,4 +1,4 @@
-export interface LocalFileReference {
+interface LocalFileReference {
   path: string;
   line?: number;
 }

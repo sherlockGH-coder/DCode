@@ -32,7 +32,7 @@ const SkillEditorModal: React.FC<Props> = ({ scope, initial, loadFull, onClose, 
   useEffect(() => {
     if (!initial) return;
     let cancelled = false;
-    loadFull(initial.name).then((full) => {
+    void loadFull(initial.name).then((full) => {
       if (cancelled) return;
       if (full) setBody(full.body);
       setLoading(false);

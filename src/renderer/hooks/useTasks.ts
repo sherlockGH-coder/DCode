@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Task, TaskInput, TaskUpdateInput, TaskStatus, TaskScope } from '../../shared/types';
+import type { Task, TaskInput, TaskUpdateInput, TaskScope } from '../../shared/types';
 
 interface UseTasksResult {
   tasks: Task[];
@@ -27,9 +27,9 @@ export function useTasks(projectPath: string | null, conversationId: string | nu
 
   useEffect(() => {
     setIsLoading(true);
-    refresh();
+    void refresh();
     const unsub = window.deepseekApi.onTasksChanged(() => {
-      refresh();
+      void refresh();
     });
     return unsub;
   }, [refresh, projectPath, conversationId]);

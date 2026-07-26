@@ -1,4 +1,4 @@
-import { app, clipboard, ipcMain, BrowserWindow, dialog, nativeImage, shell } from 'electron';
+import { app, clipboard, ipcMain, BrowserWindow, dialog, shell } from 'electron';
 import { mkdir, readFile, stat, readdir, writeFile } from 'node:fs/promises';
 import { isAbsolute, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -21,7 +21,7 @@ function broadcastSettingsChanged(): void {
 }
 
 async function findFileRecursively(dir: string, targetPath: string): Promise<string | null> {
-  const IGNORE_DIRS = new Set(['node_modules', '.git', 'build', 'out', 'dist', '.ace-tool', 'release', '.DS_Store', 'node_modules', '.svelte-kit']);
+  const IGNORE_DIRS = new Set(['node_modules', '.git', 'build', 'out', 'dist', '.ace-tool', 'release', '.DS_Store', '.svelte-kit']);
   const cleanTarget = targetPath.replace(/\\/g, '/');
   const targetParts = cleanTarget.split('/');
   const targetFilename = targetParts[targetParts.length - 1];
@@ -45,9 +45,7 @@ async function findFileRecursively(dir: string, targetPath: string): Promise<str
         if (found) return found;
       }
     }
-  } catch {
-
-  }
+  } catch {}
   return null;
 }
 
@@ -58,9 +56,7 @@ async function resolvePreviewPath(rawPath: string, activeProject: string | null)
   try {
     await stat(absolutePath);
     return isInsideKnownProject(absolutePath, projectRoots) ? absolutePath : null;
-  } catch {
-
-  }
+  } catch {}
 
   if (isAbsolute(rawPath)) return null;
 

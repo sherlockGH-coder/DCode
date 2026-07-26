@@ -202,13 +202,13 @@ class SkillsManager {
     this.stopWatchers();
     this.watcherKey = watcherKey;
     const dirs = [this.builtinDir(), this.userDir()];
-    if (projectPath) dirs.push(this.projectDir(projectPath as string));
+    if (projectPath) dirs.push(this.projectDir(projectPath));
     for (const dir of dirs) {
       try {
         if (!existsSync(dir)) {
 
           if (dir === this.userDir()) {
-            try { mkdirSync(dir, { recursive: true }); } catch {              }
+            try { mkdirSync(dir, { recursive: true }); } catch {}
           } else {
             continue;
           }
@@ -224,7 +224,7 @@ class SkillsManager {
 
   stopWatchers(): void {
     for (const w of this.watchers) {
-      try { w.close(); } catch {              }
+      try { w.close(); } catch {}
     }
     this.watchers = [];
     this.watcherKey = null;

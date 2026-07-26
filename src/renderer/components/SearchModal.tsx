@@ -85,17 +85,14 @@ const SearchModal: React.FC<SearchModalProps> = ({
     <>
       {isOpen && (
         <>
-          {              }
           <div
             className="fixed inset-0 bg-black/10 z-50 [-webkit-app-region:no-drag]"
             onClick={onClose}
           />
-          {                     }
           <div className="fixed inset-0 z-50 pointer-events-none flex items-start justify-center pt-[15vh]">
             <div
               className="pointer-events-auto w-[600px] bg-bg-main rounded-[14px] shadow-floating border border-hairline flex flex-col [-webkit-app-region:no-drag] animate-[menu-in_150ms_ease-out]"
             >
-              {                   }
               <div className="flex items-center px-4 py-3 border-b border-hairline gap-3">
                 <span className="text-text-secondary w-5 h-5 flex items-center justify-center">
                   <IconSearch />
@@ -110,7 +107,6 @@ const SearchModal: React.FC<SearchModalProps> = ({
                 <span className="text-[11px] text-text-tertiary bg-bg-chip px-1.5 py-0.5 rounded border border-hairline">ESC</span>
               </div>
 
-              {                  }
               <div className="flex-1 overflow-y-auto max-h-[400px] p-2 bg-bg-main pb-3">
                 <div className="text-[12px] font-normal text-text-tertiary mb-1.5 px-2.5 mt-2">
                   {query.trim() ? '搜索结果' : '近期对话'}

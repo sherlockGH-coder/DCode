@@ -56,7 +56,7 @@ export function clearLocalFilePreviewAllowListForTest(): void {
   previewAllowList.clear();
 }
 
-export function getLocalFileProjectRoots(): string[] {
+function getLocalFileProjectRoots(): string[] {
   const state = projectManager.getState();
   return [
     ...(state.activeProject ? [state.activeProject] : []),

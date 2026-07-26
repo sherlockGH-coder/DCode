@@ -19,6 +19,32 @@ export { TaskValidationError } from './validation';
 
 const BROADCAST_DEBOUNCE_MS = 200;
 
+function buildTask(
+  scope: TaskScope,
+  input: TaskInput,
+  projectPath: string | null,
+  conversationId: string | null | undefined,
+  now: string,
+): Task {
+  const status = input.status || 'pending';
+  return {
+    id: randomUUID(),
+    title: input.title.trim() || 'Untitled',
+    description: input.description?.trim() || '',
+    status,
+    scope,
+    projectPath,
+    blockedBy: normalizeTaskIds(input.blockedBy),
+    blocks: normalizeTaskIds(input.blocks),
+    isBackground: input.isBackground || false,
+    conversationId: conversationId || null,
+    outputFilePath: null,
+    createdAt: now,
+    updatedAt: now,
+    completedAt: FINISHED_STATUSES.has(status) ? now : null,
+  };
+}
+
 export class TaskManager {
   private tasks = new Map<string, Task>();
   private currentProjectPath: string | null = null;
@@ -70,24 +96,40 @@ export class TaskManager {
     assertScopeProjectPath(scope, projectPath);
 
     const now = new Date().toISOString();
-    const task: Task = {
-      id: randomUUID(),
-      title: input.title.trim() || 'Untitled',
-      description: input.description?.trim() || '',
-      status: input.status || 'pending',
-      scope,
-      projectPath,
-      blockedBy: normalizeTaskIds(input.blockedBy),
-      blocks: normalizeTaskIds(input.blocks),
-      isBackground: input.isBackground || false,
-      conversationId: conversationId || null,
-      outputFilePath: null,
-      createdAt: now,
-      updatedAt: now,
-      completedAt: FINISHED_STATUSES.has(input.status || 'pending') ? now : null,
-    };
+    const task = buildTask(scope, input, projectPath, conversationId, now);
     assertTaskCanBeCreated(this.tasks, task);
 
+    this.linkDependencies(task, now);
+    this.tasks.set(task.id, task);
+    this.persist(task);
+    this.scheduleBroadcast();
+    return task;
+  }
+
+  createBatch(scope: TaskScope, inputs: TaskInput[], projectPath: string | null, conversationId?: string | null): Task[] {
+    assertScopeProjectPath(scope, projectPath);
+    const now = new Date().toISOString();
+
+    const createdTasks = inputs.map((input) => (
+      buildTask(scope, input, projectPath, conversationId, now)
+    ));
+
+    assertBatchCanBeCreated(this.tasks, createdTasks);
+
+    for (const task of createdTasks) {
+      this.tasks.set(task.id, task);
+    }
+
+    for (const task of createdTasks) {
+      this.linkDependencies(task, now);
+      this.persist(task);
+    }
+
+    this.scheduleBroadcast();
+    return createdTasks;
+  }
+
+  private linkDependencies(task: Task, now: string): void {
     for (const blockerId of task.blockedBy) {
       const blocker = this.tasks.get(blockerId);
       if (blocker && !blocker.blocks.includes(task.id)) {
@@ -105,68 +147,6 @@ export class TaskManager {
         this.persist(blocked);
       }
     }
-
-    this.tasks.set(task.id, task);
-    this.persist(task);
-    this.scheduleBroadcast();
-    return task;
-  }
-
-  createBatch(scope: TaskScope, inputs: TaskInput[], projectPath: string | null, conversationId?: string | null): Task[] {
-    assertScopeProjectPath(scope, projectPath);
-    const now = new Date().toISOString();
-
-    const createdTasks = inputs.map((input): Task => {
-      const status = input.status || 'pending';
-      return {
-        id: randomUUID(),
-        title: input.title.trim() || 'Untitled',
-        description: input.description?.trim() || '',
-        status,
-        scope,
-        projectPath,
-        blockedBy: normalizeTaskIds(input.blockedBy),
-        blocks: normalizeTaskIds(input.blocks),
-        isBackground: input.isBackground || false,
-        conversationId: conversationId || null,
-        outputFilePath: null,
-        createdAt: now,
-        updatedAt: now,
-        completedAt: FINISHED_STATUSES.has(status) ? now : null,
-      };
-    });
-
-    assertBatchCanBeCreated(this.tasks, createdTasks);
-
-    for (const task of createdTasks) {
-      this.tasks.set(task.id, task);
-    }
-
-    for (const task of createdTasks) {
-
-      for (const blockerId of task.blockedBy) {
-        const blocker = this.tasks.get(blockerId);
-        if (blocker && !blocker.blocks.includes(task.id)) {
-          blocker.blocks.push(task.id);
-          blocker.updatedAt = now;
-          this.persist(blocker);
-        }
-      }
-
-      for (const blockedId of task.blocks) {
-        const blocked = this.tasks.get(blockedId);
-        if (blocked && !blocked.blockedBy.includes(task.id)) {
-          blocked.blockedBy.push(task.id);
-          blocked.updatedAt = now;
-          this.persist(blocked);
-        }
-      }
-
-      this.persist(task);
-    }
-
-    this.scheduleBroadcast();
-    return createdTasks;
   }
 
   get(id: string): Task | undefined {
@@ -200,7 +180,7 @@ export class TaskManager {
     return filtered;
   }
 
-  update(id: string, input: TaskUpdateInput, projectPath: string | null): Task | null {
+  update(id: string, input: TaskUpdateInput): Task | null {
     const task = this.tasks.get(id);
     if (!task) return null;
 
@@ -308,7 +288,7 @@ export class TaskManager {
     return task;
   }
 
-  remove(id: string, projectPath: string | null): boolean {
+  remove(id: string): boolean {
     const task = this.tasks.get(id);
     if (!task) return false;
 
@@ -385,9 +365,9 @@ export class TaskManager {
 
   private repairNullConversationIds(): void {
     let changedUser = false;
-    let changedProjects = new Set<string>();
+    const changedProjects = new Set<string>();
 
-    for (const [id, t] of this.tasks) {
+    for (const t of this.tasks.values()) {
       if (t.conversationId === null) {
         try {
           const convId = findConversationIdByTaskId(t.id);

@@ -18,18 +18,18 @@ const LANGUAGE_BY_EXTENSION: Record<string, string> = {
   sh: 'bash',
 };
 
-export function getFileExtension(pathOrName: string): string {
+function getFileExtension(pathOrName: string): string {
   return pathOrName.split('.').pop()?.toLowerCase() || '';
 }
 
-export function getPreviewKindFromExtension(ext: string): PreviewItem['type'] {
+function getPreviewKindFromExtension(ext: string): PreviewItem['type'] {
   if (IMAGE_EXTENSIONS.has(ext)) return 'image';
   if (HTML_EXTENSIONS.has(ext)) return 'html';
   if (MARKDOWN_EXTENSIONS.has(ext)) return 'markdown';
   return 'code';
 }
 
-export function getCodeLanguageFromExtension(ext: string): string {
+function getCodeLanguageFromExtension(ext: string): string {
   return LANGUAGE_BY_EXTENSION[ext] || 'text';
 }
 

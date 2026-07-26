@@ -9,7 +9,7 @@ interface MaskedSecretInputProps extends Omit<React.InputHTMLAttributes<HTMLInpu
   onValueChange: (value: string) => void;
 }
 
-export const MaskedSecretInput: React.FC<MaskedSecretInputProps> = ({
+const MaskedSecretInput: React.FC<MaskedSecretInputProps> = ({
   value,
   configured,
   onValueChange,

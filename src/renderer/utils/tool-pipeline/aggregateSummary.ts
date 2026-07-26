@@ -1,7 +1,7 @@
 import type { ToolItem } from '../../../shared/types';
 import type { SegmentSummary } from './types';
 
-export function computeSummary(items: ToolItem[]): SegmentSummary {
+function computeSummary(items: ToolItem[]): SegmentSummary {
   const summary: SegmentSummary = {
     readCount: 0,
     writeCount: 0,
@@ -65,7 +65,7 @@ export function computeSummary(items: ToolItem[]): SegmentSummary {
   return summary;
 }
 
-export function formatSummary(summary: SegmentSummary): string {
+function formatSummary(summary: SegmentSummary): string {
   const parts: string[] = [];
   const count = (value: number, unit: string) => `${value} ${unit}`;
 

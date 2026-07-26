@@ -14,7 +14,6 @@ interface SettingsPageProps {
   onClose?: () => void;
   isMacOS?: boolean;
   isFullscreen?: boolean;
-  onJumpConversation?: (conversationId: string) => void;
 }
 
 const SettingsPage: React.FC<SettingsPageProps> = ({
@@ -22,7 +21,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
   onClose,
   isMacOS = false,
   isFullscreen = false,
-  onJumpConversation,
 }) => {
   const [activeSection, setActiveSection] = useState<SettingsSection>('appearance');
   const { settings, isLoading, patch, setApiProfileApiKey, setTavilyApiKey, setSpeechApiKey } = useSettings();

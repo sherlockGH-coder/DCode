@@ -67,7 +67,7 @@ describe('CollapsedSegment', () => {
       }));
     });
 
-    const icon = container.querySelector('[data-testid="collapsed-segment-icon"]') as HTMLElement | null;
+    const icon = container.querySelector('[data-testid="collapsed-segment-icon"]');
     expect(icon).not.toBeNull();
     expect(icon?.getAttribute('data-tool-icon')).toBe('pencil');
   });
@@ -109,11 +109,11 @@ describe('CollapsedSegment', () => {
       }));
     });
 
-    const icon = container.querySelector('[data-testid="collapsed-segment-icon"]') as HTMLElement | null;
+    const icon = container.querySelector('[data-testid="collapsed-segment-icon"]');
     expect(icon).not.toBeNull();
     expect(icon?.getAttribute('data-tool-icon')).toBe('terminal');
 
-    const button = container.querySelector('button') as HTMLButtonElement | null;
+    const button = container.querySelector('button');
     act(() => {
       button?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
@@ -162,7 +162,7 @@ describe('CollapsedSegment', () => {
       }));
     });
 
-    const button = container.querySelector('button') as HTMLButtonElement | null;
+    const button = container.querySelector('button');
     act(() => {
       button?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });

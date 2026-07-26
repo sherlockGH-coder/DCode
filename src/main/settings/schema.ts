@@ -6,7 +6,7 @@ export const STATE_FILE = 'settings.json';
 export const USER_SETTINGS_DIR = '.deepseek';
 export const SPEECH_MIN_DURATION_SECONDS = 5;
 export const SPEECH_MAX_DURATION_SECONDS = 180;
-export const SPEECH_DEFAULT_DURATION_SECONDS = 60;
+const SPEECH_DEFAULT_DURATION_SECONDS = 60;
 export const SPEECH_DEFAULT_MODEL = 'whisper-1';
 export const DEFAULT_PROFILE_ID = 'default';
 
@@ -159,7 +159,7 @@ export function normalizeProfile(raw: LegacyProfileInput, fallbackId: string): P
   };
 }
 
-export function profileToPublic(profile: PersistedApiProfile, apiKeySet: boolean): ApiProfile {
+function profileToPublic(profile: PersistedApiProfile, apiKeySet: boolean): ApiProfile {
   return {
     id: profile.id,
     name: profile.name,
@@ -266,7 +266,7 @@ export function defaults(): PersistedShape {
     },
     vision: {
       enabled: false,
-      provider: 'anthropic' as VisionProvider,
+      provider: 'anthropic',
       baseUrl: visionDefaultBaseUrl('anthropic'),
       model: visionDefaultModel('anthropic'),
     },

@@ -76,7 +76,7 @@ async function fetchAvailableModels(): Promise<string[]> {
       return defaultModels;
     }
 
-    const data = await response.json() as any;
+    const data = await response.json();
     const models: string[] = [];
 
     if (Array.isArray(data?.data)) {

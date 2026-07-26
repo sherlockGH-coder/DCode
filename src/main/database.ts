@@ -12,6 +12,8 @@ import type {
 } from '../shared/types';
 import { initializeSchema } from './database/schema';
 import { prepareStatements } from './database/statements';
+import { applyConnectionPragmas, checkpointWal } from './database/pragmas';
+import { applyMigrations } from './database/migrations';
 
 let _db: Database.Database | null = null;
 let _dbDir: string | null = null;
@@ -27,9 +29,15 @@ function ensureInitialized(): void {
 
   _db = new Database(_dbPath);
 
-  _db.pragma('journal_mode = WAL');
+  applyConnectionPragmas(_db);
 
   initializeSchema(_db);
+
+  // 先清掉历史遗留的孤儿行，再打开外键强制，避免旧数据触发约束错误
+  applyMigrations(_db);
+
+  // 必须在事务之外设置，且要在建表/清理之后
+  _db.pragma('foreign_keys = ON');
 
   _stmts = prepareStatements(_db);
 }
@@ -41,7 +49,23 @@ export function getDbDir(): string { ensureInitialized(); return _dbDir!; }
 export function getDbPath(): string { ensureInitialized(); return _dbPath!; }
 export function getRawDatabase(): Database.Database { ensureInitialized(); return _db!; }
 
-export interface CreateConversationOptions {
+/**
+ * 退出前把 WAL 回写并关闭连接。
+ * 不调用也不会丢数据，但 WAL 文件会一直留在 userData 里持续变大。
+ */
+export function closeDatabase(): void {
+  if (!_db) return;
+  checkpointWal(_db);
+  try {
+    _db.close();
+  } catch (err) {
+    console.warn('[database] close failed:', err instanceof Error ? err.message : String(err));
+  }
+  _db = null;
+  _stmts = null;
+}
+
+interface CreateConversationOptions {
   parentConversationId?: string | null;
   rootConversationId?: string | null;
   agentRole?: string | null;
@@ -87,20 +111,6 @@ export function getConversations(projectPath?: string | null) {
   if (projectPath === undefined) rows = stmts().getConversations.all() as any[];
   else if (projectPath === null) rows = stmts().getConversationsWithoutProject.all() as any[];
   else rows = stmts().getConversationsByProject.all(projectPath) as any[];
-  return rows.map(r => ({
-    ...r,
-    activeAttempts: r.active_attempts ? safeParseJsonObject(r.active_attempts) : {},
-  }));
-}
-
-export function getCronConversations(_jobId?: string | null) {
-
-  return [];
-}
-
-export function getAgentConversations(rootConversationId: string) {
-  ensureInitialized();
-  const rows = stmts().getAgentConversationsByRoot.all(rootConversationId) as any[];
   return rows.map(r => ({
     ...r,
     activeAttempts: r.active_attempts ? safeParseJsonObject(r.active_attempts) : {},
@@ -168,23 +178,26 @@ export function updateConversationSummary(id: string, summary: string | null, co
   stmts().updateConversationSummary.run(summary, compactedToMessageId, id);
 }
 
-/** 更新对话时间（用于排序） */
-export function updateConversationTime(id: string) {
-  ensureInitialized();
-  stmts().updateConversationTime.run(id);
-}
-
 export function updateAgentConversationStatus(id: string, status: AgentRunStatus): void {
   ensureInitialized();
   stmts().updateAgentConversationStatus.run(status, id);
 }
 
-/** 删除对话（级联删除消息） */
+/**
+ * 删除对话及其全部从属数据。
+ *
+ * 外键级联现在已启用，但这里仍显式删除并包在一个事务里：
+ * 显式删除让顺序与意图可读，事务保证不会在中途崩溃后留下半删除的对话。
+ */
 export function deleteConversation(id: string) {
   ensureInitialized();
 
-  stmts().deleteMessages.run(id);
-  stmts().deleteConversation.run(id);
+  db().transaction(() => {
+    stmts().deletePlanExecutionRuns.run(id);
+    stmts().deletePlanArtifacts.run(id);
+    stmts().deleteMessages.run(id);
+    stmts().deleteConversation.run(id);
+  })();
 }
 
 /** 添加消息。可传入 id 让外部预生成（保持 renderer / main / DB 三方 id 一致）；不传则自生成。 */
@@ -262,13 +275,6 @@ export function getMessages(conversationId: string) {
   }));
 }
 
-/** 计算指定 turn 下已有的最大 attempt_no（不存在则返回 0） */
-export function getMaxAttemptNo(conversationId: string, turnId: string): number {
-  ensureInitialized();
-  const row = stmts().getMaxAttemptNo.get(conversationId, turnId) as { maxNo: number | null } | undefined;
-  return row?.maxNo ?? 0;
-}
-
 /** 读取对话的激活 attempt 映射 */
 export function getActiveAttempts(conversationId: string): Record<string, number> {
   ensureInitialized();
@@ -302,12 +308,6 @@ export function setActiveAttempts(conversationId: string, map: Record<string, nu
       db().prepare('UPDATE conversations SET active_plan_artifact_id = NULL WHERE id = ?').run(conversationId);
     }
   })();
-}
-
-/** 删除某对话的所有消息 */
-export function deleteMessages(conversationId: string) {
-  ensureInitialized();
-  stmts().deleteMessages.run(conversationId);
 }
 
 /** 删除指定消息及之后所有消息（用于编辑重试截断） */
@@ -380,19 +380,6 @@ export function deleteMessagesFromTurn(conversationId: string, turnId: string): 
   })();
 }
 
-/** 按 ID 删除指定消息（用于 compact 压缩旧消息） */
-export function deleteMessagesByIds(conversationId: string, ids: string[]): void {
-  ensureInitialized();
-  if (ids.length === 0) return;
-  const deleteStmt = db().prepare('DELETE FROM messages WHERE id = ? AND conversation_id = ?');
-  db().transaction(() => {
-    for (const id of ids) {
-      deleteStmt.run(id, conversationId);
-    }
-    stmts().updateConversationTime.run(conversationId);
-  })();
-}
-
 export function findConversationIdByTaskId(taskId: string): string | null {
   ensureInitialized();
   try {
@@ -405,13 +392,5 @@ export function findConversationIdByTaskId(taskId: string): string | null {
   } catch (err) {
     console.warn(`[db] findConversationIdByTaskId error for task ${taskId}:`, err);
     return null;
-  }
-}
-
-export function closeDatabase() {
-  if (_db) {
-    _db.close();
-    _db = null;
-    _stmts = null;
   }
 }

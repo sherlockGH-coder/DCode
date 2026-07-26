@@ -58,7 +58,7 @@ const HtmlPreview: React.FC<HtmlPreviewProps> = memo(({ code, filePath }) => {
           const h = doc.documentElement.scrollHeight;
           iframe.style.height = `${Math.max(h + 16, 300)}px`;
         }
-      } catch {                            }
+      } catch {}
     };
     iframe.addEventListener('load', handleLoad);
     return () => iframe.removeEventListener('load', handleLoad);

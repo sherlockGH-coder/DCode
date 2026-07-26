@@ -73,7 +73,7 @@ export function useProject() {
   }, [loadState]);
 
   useEffect(() => {
-    loadState();
+    void loadState();
     const unsub = window.deepseekApi.onProjectChanged(applyState);
     return () => unsub();
   }, [loadState, applyState]);

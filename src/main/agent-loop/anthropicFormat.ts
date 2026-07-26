@@ -41,7 +41,7 @@ export function convertMessagesToAnthropic(messages: Message[]): {
         type: 'tool_result',
         tool_use_id: msg.tool_call_id || '',
         content: msg.contentBlocks && msg.contentBlocks.length > 0
-          ? msg.contentBlocks as any
+          ? msg.contentBlocks
           : msg.content || '',
         ...(msg.error ? { is_error: true } : {}),
       });
@@ -55,7 +55,7 @@ export function convertMessagesToAnthropic(messages: Message[]): {
       if (Array.isArray(msg.content as any)) {
         anthropicMessages.push({
           role: 'user',
-          content: msg.content as any,
+          content: msg.content,
         });
       } else if (msg.id === 'user_context_reminder' || msg.id === 'tail_context_reminder') {
         anthropicMessages.push({
@@ -82,7 +82,7 @@ export function convertMessagesToAnthropic(messages: Message[]): {
           type: 'thinking',
           thinking: msg.reasoning_content,
           signature: '',
-        } as Anthropic.ThinkingBlockParam);
+        });
       }
 
       if (msg.content) {
@@ -97,9 +97,7 @@ export function convertMessagesToAnthropic(messages: Message[]): {
           let input: Record<string, unknown> = {};
           try {
             input = JSON.parse(tc.function.arguments);
-          } catch {
-
-          }
+          } catch {}
           contentBlocks.push({
             type: 'tool_use',
             id: tc.id,

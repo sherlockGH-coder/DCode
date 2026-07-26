@@ -6,7 +6,6 @@ import {
   applyApprovalToMessages,
   shouldAutoApproveApproval,
 } from './use-messages/approval';
-import { findMessageIndex } from './use-messages/anchors';
 import { activeRequestRegistry } from './use-messages/hotRegistry';
 import { useMessageStreamEvents } from './use-messages/useMessageStreamEvents';
 import type { ActiveRequest, RetryInfo } from './use-messages/types';
@@ -50,7 +49,7 @@ interface SendMessageOptions {
   messageOrigin?: Message['origin'];
 }
 
-export type { ActiveRequest, RetryInfo } from './use-messages/types';
+export type { ActiveRequest } from './use-messages/types';
 export { applyApprovalToMessages, createFallbackToolItemFromApproval } from './use-messages/approval';
 
 export function useMessages() {
@@ -63,7 +62,7 @@ export function useMessages() {
   const bindSetMessagesRef = useRef<((convId: string) => (updater: (prev: Message[]) => Message[]) => void) | null>(null);
 
   const abortSend = useCallback((conversationId?: string | null) => {
-    window.deepseekApi.abortChat(conversationId ?? undefined);
+    void window.deepseekApi.abortChat(conversationId ?? undefined);
   }, []);
 
   /** 检查指定对话是否有活跃请求 */
@@ -192,7 +191,7 @@ export function useMessages() {
 
       if (!currentConvId) {
         currentConvId = await window.deepseekApi.createConversation(title, activeProject);
-        onConversationCreated?.(currentConvId!);
+        onConversationCreated?.(currentConvId);
         await onConversationsReload?.();
       } else if (isFirstMessageInConversation) {
         try {
@@ -206,7 +205,7 @@ export function useMessages() {
       setMessages = bindSetMessages(currentConvId);
 
       const modeState = typeof window.deepseekApi.getConversationModeState === 'function'
-        ? await window.deepseekApi.getConversationModeState(currentConvId!)
+        ? await window.deepseekApi.getConversationModeState(currentConvId)
         : { contextEpoch: 0 };
       const userMessage: Message | null = isRetry ? null : (() => {
           const uid = planExecution?.executionTurnId ?? crypto.randomUUID();
@@ -225,8 +224,8 @@ export function useMessages() {
         };
       })();
 
-      const turnId = isRetry ? retryTurnId! : userMessage!.id;
-      const attemptNo = isRetry ? retryAttemptNo! : 1;
+      const turnId = isRetry ? retryTurnId : userMessage!.id;
+      const attemptNo = isRetry ? retryAttemptNo : 1;
       pendingTurnId = turnId;
       pendingAttemptNo = attemptNo;
 
@@ -249,8 +248,8 @@ export function useMessages() {
       setIsLoading(true);
       setRetryInfo(null);
 
-      activeRequestsRef.current.set(currentConvId!, {
-        conversationId: currentConvId!,
+      activeRequestsRef.current.set(currentConvId, {
+        conversationId: currentConvId,
         fullContent: '',
         fullReasoning: '',
         setMessages,
@@ -263,7 +262,7 @@ export function useMessages() {
 
       if (!isRetry && userMessage) {
         await window.deepseekApi.addMessage(
-          currentConvId!, 'user', userInput,
+          currentConvId, 'user', userInput,
           undefined, undefined, undefined, undefined, attachments,
           undefined, undefined, undefined, undefined,
           turnId, 0, 0, userMessage.id,

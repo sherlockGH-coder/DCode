@@ -24,7 +24,3 @@ export function rememberSessionAllow(key: string): void {
 export function matchesSessionAllow(key: string): boolean {
   return !!key && sessionAllowedKeys.has(key);
 }
-
-export function clearSessionAllow(): void {
-  sessionAllowedKeys.clear();
-}

@@ -74,7 +74,6 @@ const ProcessedSummary: React.FC<Props> = ({
           canToggle && !isProcessing ? 'cursor-pointer' : 'cursor-default'
         }`}
       >
-        {                                    }
         <span className="flex items-center gap-1 text-[13.5px] text-text-secondary group-hover:text-text-primary transition-colors">
           {isProcessing && (
             <svg className="animate-[ai-micro-spin_0.9s_linear_infinite] text-accent shrink-0 mr-0.5" width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -96,12 +95,10 @@ const ProcessedSummary: React.FC<Props> = ({
         )}
       </button>
 
-      {             }
       {hasIntermediate && effectiveExpanded && (
         <hr className="my-1.5 border-t border-hairline" />
       )}
 
-      {                                  }
       {hasIntermediate && effectiveExpanded && children && (
         <div data-testid="processed-summary-content" className="mt-0.5 flex flex-col gap-2">{children}</div>
       )}

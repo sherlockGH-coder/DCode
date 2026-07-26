@@ -2,7 +2,7 @@ import type { AgentLoopCallbacks, ToolCall } from '../../shared/types';
 import type { ToolExecutionContext, ToolRegistry } from '../tools/types';
 import { logChatEvent } from '../logger';
 
-export interface ToolExecutionPair {
+interface ToolExecutionPair {
   toolCall: ToolCall;
   result: any;
 }

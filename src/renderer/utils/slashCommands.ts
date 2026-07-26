@@ -1,4 +1,4 @@
-export interface ParsedSlashCommand {
+interface ParsedSlashCommand {
   name: string;
   rest: string;
 }

@@ -2,21 +2,6 @@ import React from 'react';
 import type { PlanUpdateItem, Task, ToolItem } from '../../../shared/types';
 import { IconCheck, IconChevronRight, IconGlobe, IconLayers, IconPlug, IconX, getFileIcon } from '../icons';
 
-export const ProgressIllustration: React.FC = () => (
-  <svg width="112" height="64" viewBox="0 0 112 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="dark:opacity-80">
-    <rect x="18" y="2" width="76" height="56" rx="5" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-black/[0.14] dark:text-white/[0.14]" />
-    <rect x="39" y="2" width="34" height="9" rx="2" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-black/[0.14] dark:text-white/[0.14]" />
-    <line x1="29" y1="20" x2="55" y2="20" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="text-black/[0.08] dark:text-white/[0.08]" />
-    <line x1="29" y1="27" x2="42" y2="27" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="text-black/[0.06] dark:text-white/[0.06]" />
-    <circle cx="27" cy="20" r="5" fill="currentColor" stroke="currentColor" strokeWidth="0.8" className="text-black/[0.18] dark:text-white/[0.22]" />
-    <polyline points="24.5 20 26.2 21.7 29.5 18.3" fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-[#1E1E20]" />
-    <line x1="29" y1="37" x2="65" y2="37" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="text-black/[0.14] dark:text-white/[0.16]" />
-    <line x1="29" y1="44" x2="48" y2="44" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" className="text-black/[0.08] dark:text-white/[0.10]" />
-    <circle cx="27" cy="37" r="5" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-black/[0.16] dark:text-white/[0.20]" />
-    <circle cx="27" cy="51" r="2.5" fill="currentColor" className="text-black/[0.10] dark:text-white/[0.14]" />
-  </svg>
-);
-
 export const FolderIllustration: React.FC = () => (
   <svg width="112" height="64" viewBox="0 0 112 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="dark:opacity-80">
     <rect x="6" y="10" width="44" height="50" rx="4" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-black/[0.14] dark:text-white/[0.14]" />
@@ -180,7 +165,7 @@ export const TimelineTaskRow: React.FC<{
   );
 };
 
-export type PlanUpdateToolItem = Extract<ToolItem, { kind: 'plan_update' }>;
+type PlanUpdateToolItem = Extract<ToolItem, { kind: 'plan_update' }>;
 
 const PLAN_STATUS_LABELS: Record<PlanUpdateItem['status'], string> = {
   pending: '待处理',

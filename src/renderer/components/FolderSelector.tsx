@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import type { Project, ProjectCreateInput } from '../../shared/types';
-import { IconFolderSoft, IconFolderOpen, IconChevronDown, IconSearch, IconCheck, IconPlus, IconChevronRight, IconFolderPlus, IconFolderCode } from './icons';
+import { IconFolderSoft, IconFolderOpen, IconChevronDown, IconSearch, IconCheck, IconPlus, IconChevronRight, IconFolderPlus } from './icons';
 
 interface FolderSelectorProps {
   projects: Project[];
@@ -172,7 +172,6 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
 
   return (
     <div className={variant === 'inline' ? 'relative inline-flex' : 'relative shrink-0'} ref={containerRef}>
-      {                  }
       {variant === 'inline' ? (
         <button
           type="button"

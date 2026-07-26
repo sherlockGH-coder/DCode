@@ -1,18 +1,21 @@
 import { ToolExecutor, ToolExecuteResult } from './types';
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import { extname, join, relative } from 'node:path';
 import { resolveInside } from '../pathSandbox';
 import { debugLog } from '../logger';
+import { createGlobMatcher } from './globMatch';
+import { createIgnoreFilter, type IgnoreFilter } from './ignoreFilter';
+import { DEFAULT_IO_CONCURRENCY } from '../utils/concurrency';
+import { collectRelativeFilePaths } from './fileTraversal';
 
-const IGNORE_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'dist',
-  'out',
-  '.next',
-  'coverage',
-  '__pycache__',
-]);
+/** 超过此大小的文件跳过不搜——避免把打包产物、日志整个读进内存再逐行切分。 */
+const MAX_SEARCHABLE_BYTES = 20 * 1024 * 1024;
+
+/** 每批并行处理的文件数。批与批之间按顺序推进，保证输出稳定且可提前终止。 */
+const SCAN_BATCH_SIZE = DEFAULT_IO_CONCURRENCY * 4;
+
+/** 二进制嗅探窗口：前 8KB 里出现 NUL 字节即判定为二进制。 */
+const BINARY_SNIFF_BYTES = 8192;
 
 const BINARY_EXTS = new Set([
   '.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.svg',
@@ -52,50 +55,6 @@ const TYPE_EXTENSIONS: Record<string, string[]> = {
   sql: ['.sql'],
 };
 
-function escapeRegex(s: string): string {
-  return s.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-}
-
-function globToRegex(pattern: string): RegExp {
-  let regex = '';
-  let i = 0;
-  while (i < pattern.length) {
-    const ch = pattern[i];
-    if (ch === '*' && pattern[i + 1] === '*') {
-      regex += '.*';
-      i += 2;
-      if (pattern[i] === '/') i++;
-    } else if (ch === '*') {
-      regex += '[^/]*';
-      i++;
-    } else if (ch === '?') {
-      regex += '[^/]';
-      i++;
-    } else if (ch === '{') {
-      const end = pattern.indexOf('}', i);
-      if (end !== -1) {
-        const options = pattern.slice(i + 1, end).split(',');
-        regex += `(?:${options.map(escapeRegex).join('|')})`;
-        i = end + 1;
-      } else {
-        regex += escapeRegex(ch);
-        i++;
-      }
-    } else {
-      regex += escapeRegex(ch);
-      i++;
-    }
-  }
-  return new RegExp(`^${regex}$`, 'i');
-}
-
-function matchesGlobPath(filePath: string, basePath: string, pattern: string): boolean {
-  const relPath = relative(basePath, filePath).replace(/\\/g, '/');
-  const basename = relPath.split('/').pop() ?? relPath;
-  const regex = globToRegex(pattern);
-  return regex.test(relPath) || (!pattern.includes('/') && regex.test(basename));
-}
-
 function relativeDisplayPath(basePath: string, filePath: string): string {
   return relative(basePath, filePath).replace(/\\/g, '/');
 }
@@ -114,28 +73,96 @@ function numberArg(value: unknown, fallback: number): number {
     : fallback;
 }
 
-async function walkDir(dir: string, files: string[]): Promise<void> {
-  const entries = await readdir(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    if (IGNORE_DIRS.has(entry.name)) continue;
-    const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      await walkDir(fullPath, files);
-    } else if (entry.isFile()) {
-      files.push(fullPath);
-    }
-  }
+function boolArg(value: unknown, fallback: boolean): boolean {
+  return typeof value === 'boolean' ? value : fallback;
 }
 
-async function collectSearchFiles(searchPath: string): Promise<string[]> {
+async function collectSearchFiles(searchPath: string, ignore: IgnoreFilter): Promise<string[]> {
   const info = await stat(searchPath);
   if (info.isFile()) return [searchPath];
   if (!info.isDirectory()) {
     throw new Error(`Path is not a file or directory: ${searchPath}`);
   }
-  const files: string[] = [];
-  await walkDir(searchPath, files);
-  return files;
+  const relativePaths = await collectRelativeFilePaths(searchPath, ignore);
+  return relativePaths.map((relativePath) => join(searchPath, relativePath));
+}
+
+interface LoadedFile {
+  /** 文件文本；跳过（二进制/过大/读失败）时为 null。 */
+  text: string | null;
+  /** 因体积超限被跳过 */
+  tooLarge: boolean;
+}
+
+/** 读取候选文件，顺带做体积与二进制判定。任何失败都降级为「跳过」。 */
+async function loadSearchableFile(filePath: string): Promise<LoadedFile> {
+  const ext = extname(filePath).toLowerCase();
+  if (BINARY_EXTS.has(ext)) return { text: null, tooLarge: false };
+
+  try {
+    const info = await stat(filePath);
+    if (info.size > MAX_SEARCHABLE_BYTES) return { text: null, tooLarge: true };
+
+    const buffer = await readFile(filePath);
+    // 扩展名之外再做一次内容嗅探，捕获无扩展名/非常见后缀的二进制文件
+    const sniffEnd = Math.min(buffer.length, BINARY_SNIFF_BYTES);
+    if (buffer.indexOf(0, 0) !== -1 && buffer.indexOf(0, 0) < sniffEnd) {
+      return { text: null, tooLarge: false };
+    }
+    return { text: buffer.toString('utf-8'), tooLarge: false };
+  } catch {
+    return { text: null, tooLarge: false };
+  }
+}
+
+/**
+ * 按批并行扫描文件：批内并发，批间顺序推进。
+ *
+ * `shouldStop` 在每批结束后被调用，返回 true 就不再读取后续文件——
+ * 这样 head_limit 能真正省下 I/O，而不是扫完全仓库再 slice。
+ * 结果按文件顺序回调，因此输出与并发无关，保持确定性。
+ */
+async function scanFiles(
+  files: readonly string[],
+  onFile: (filePath: string, text: string) => void,
+  shouldStop: () => boolean,
+): Promise<{ skippedTooLarge: number }> {
+  let skippedTooLarge = 0;
+
+  for (let start = 0; start < files.length; start += SCAN_BATCH_SIZE) {
+    const batch = files.slice(start, start + SCAN_BATCH_SIZE);
+    const loaded = await Promise.all(batch.map((file) => loadSearchableFile(file)));
+
+    for (let i = 0; i < batch.length; i++) {
+      if (loaded[i].tooLarge) skippedTooLarge++;
+      const text = loaded[i].text;
+      if (text !== null) onFile(batch[i], text);
+    }
+
+    if (shouldStop()) break;
+  }
+
+  return { skippedTooLarge };
+}
+
+/** 预计算换行位置，把「偏移量 → 行号」从 O(n) 降到 O(log n)。 */
+function buildLineIndex(content: string): number[] {
+  const starts = [0];
+  for (let i = content.indexOf('\n'); i !== -1; i = content.indexOf('\n', i + 1)) {
+    starts.push(i + 1);
+  }
+  return starts;
+}
+
+function lineNumberAt(lineStarts: readonly number[], offset: number): number {
+  let lo = 0;
+  let hi = lineStarts.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (lineStarts[mid] <= offset) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo + 1;
 }
 
 interface CountResult {
@@ -244,6 +271,11 @@ export const grepTool: ToolExecutor = {
           type: 'number',
           description: 'Deprecated alias for head_limit.',
         },
+        no_ignore: {
+          type: 'boolean',
+          default: false,
+          description: 'Set true to search files that .gitignore would normally exclude.',
+        },
       },
       required: ['pattern'],
       additionalProperties: false,
@@ -264,6 +296,7 @@ export const grepTool: ToolExecutor = {
     const multiline = (args.multiline as boolean) ?? false;
     const caseInsensitive = (args['-i'] as boolean) ?? (args.case_insensitive as boolean) ?? false;
     const showLineNumbers = args['-n'] !== false;
+    const respectGitignore = !boolArg(args.no_ignore, false);
 
     if (typeof pattern !== 'string' || pattern.trim().length === 0) {
       throw new Error('grep requires a non-empty pattern');
@@ -285,88 +318,97 @@ export const grepTool: ToolExecutor = {
         throw new Error('Pattern rejected: potential catastrophic backtracking (nested quantifiers)');
       }
       const regex = new RegExp(pattern, flags);
-      const allFiles = await collectSearchFiles(searchPath);
 
+      const ignore = createIgnoreFilter(respectGitignore);
+      const allFiles = await collectSearchFiles(searchPath, ignore);
+
+      // glob 只编译一次，而不是在 per-file 谓词里反复构造
+      const globMatches = globFilter ? createGlobMatcher(globFilter) : null;
       const files = allFiles.filter((file) => {
-        if (globFilter && !matchesGlobPath(file, searchPath, globFilter)) return false;
+        if (globMatches && !globMatches(relativeDisplayPath(searchPath, file))) return false;
         if (!matchesType(file, typeFilter)) return false;
         return true;
       });
 
+      /** 已够返回一页时提前收工，省下后续文件的 I/O。 */
+      const enough = (collected: number): boolean =>
+        effectiveLimit !== Infinity && collected > offset + effectiveLimit;
+
+      const noteSkipped = (skipped: number): string =>
+        skipped > 0 ? `\n（另有 ${skipped} 个文件超过 ${MAX_SEARCHABLE_BYTES / 1024 / 1024}MB 未搜索）` : '';
+
       if (outputMode === 'files_with_matches') {
         const matchedFiles: string[] = [];
-        for (const file of files) {
-          const ext = extname(file).toLowerCase();
-          if (BINARY_EXTS.has(ext)) continue;
-          try {
-            const content = await readFile(file, 'utf-8');
-            if (multiline) {
-              if (regex.test(content)) matchedFiles.push(relativeDisplayPath(searchPath, file));
-            } else {
-              const lines = content.split('\n');
-              if (lines.some((l) => regex.test(l))) matchedFiles.push(relativeDisplayPath(searchPath, file));
-            }
-          } catch {          }
-        }
+        const { skippedTooLarge } = await scanFiles(
+          files,
+          (file, content) => {
+            const hit = multiline
+              ? regex.test(content)
+              : content.split('\n').some((l) => regex.test(l));
+            if (hit) matchedFiles.push(relativeDisplayPath(searchPath, file));
+          },
+          () => enough(matchedFiles.length),
+        );
+
         const paged = matchedFiles.slice(offset, offset + effectiveLimit);
         const truncated = matchedFiles.length > offset + effectiveLimit;
         const suffix = truncated ? `\n（还有更多结果，使用 offset: ${offset + effectiveLimit} 翻页）` : '';
         return {
           content: paged.length > 0
-            ? `找到 ${matchedFiles.length} 个匹配文件:\n${paged.join('\n')}${suffix}`
-            : `未找到匹配 "${pattern}" 的文件`,
+            ? `找到 ${matchedFiles.length} 个匹配文件:\n${paged.join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`
+            : `未找到匹配 "${pattern}" 的文件${noteSkipped(skippedTooLarge)}`,
           metadata: { kind: 'grep', pattern, matchCount: matchedFiles.length, fileCount: matchedFiles.length },
         };
       }
 
       if (outputMode === 'count') {
         const counts: CountResult[] = [];
-        for (const file of files) {
-          const ext = extname(file).toLowerCase();
-          if (BINARY_EXTS.has(ext)) continue;
-          try {
-            const content = await readFile(file, 'utf-8');
+        // count 模式要按次数排序，必须扫完全部文件才能确定名次
+        const { skippedTooLarge } = await scanFiles(
+          files,
+          (file, content) => {
             let count: number;
             if (multiline) {
               const matches = content.match(new RegExp(pattern, flags + 'g'));
               count = matches?.length ?? 0;
             } else {
-              const lines = content.split('\n');
-              count = lines.filter((l) => regex.test(l)).length;
+              count = content.split('\n').filter((l) => regex.test(l)).length;
             }
             if (count > 0) counts.push({ file: relativeDisplayPath(searchPath, file), count });
-          } catch {          }
-        }
-        counts.sort((a, b) => b.count - a.count);
+          },
+          () => false,
+        );
+        counts.sort((a, b) => b.count - a.count || a.file.localeCompare(b.file));
         const paged = counts.slice(offset, offset + effectiveLimit);
         const totalMatches = counts.reduce((sum, c) => sum + c.count, 0);
         const truncated = counts.length > offset + effectiveLimit;
         const suffix = truncated ? `\n（还有更多结果，使用 offset: ${offset + effectiveLimit} 翻页）` : '';
         return {
           content: paged.length > 0
-            ? `匹配统计（${counts.length} 个文件，共 ${totalMatches} 处）:\n${paged.map((c) => `${c.file}: ${c.count}`).join('\n')}${suffix}`
-            : `未找到匹配 "${pattern}" 的结果`,
+            ? `匹配统计（${counts.length} 个文件，共 ${totalMatches} 处）:\n${paged.map((c) => `${c.file}: ${c.count}`).join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`
+            : `未找到匹配 "${pattern}" 的结果${noteSkipped(skippedTooLarge)}`,
           metadata: { kind: 'grep', pattern, matchCount: totalMatches, fileCount: counts.length },
         };
       }
 
       const matchGroups: ContentMatchGroup[] = [];
 
-      for (const file of files) {
-        const ext = extname(file).toLowerCase();
-        if (BINARY_EXTS.has(ext)) continue;
-        try {
-          const content = await readFile(file, 'utf-8');
+      const { skippedTooLarge } = await scanFiles(
+        files,
+        (file, content) => {
           const relPath = relativeDisplayPath(searchPath, file);
 
           if (multiline) {
-
-            let m: RegExpExecArray | null;
+            // 预建换行索引，行号查询变成二分；此前每个匹配都要 slice + split，
+            // 匹配数多的文件会退化成 O(n·m)
+            const lineStarts = buildLineIndex(content);
             const re = new RegExp(pattern, flags + 'g');
+            let m: RegExpExecArray | null;
             while ((m = re.exec(content)) !== null) {
-              const lineNum = content.slice(0, m.index).split('\n').length;
-              const matchLine = m[0];
-              matchGroups.push({ file: relPath, lines: [{ line: lineNum, content: matchLine }] });
+              matchGroups.push({
+                file: relPath,
+                lines: [{ line: lineNumberAt(lineStarts, m.index), content: m[0] }],
+              });
               if (m[0] === '') re.lastIndex++;
             }
           } else {
@@ -383,15 +425,16 @@ export const grepTool: ToolExecutor = {
               }
             }
           }
-        } catch {          }
-      }
+        },
+        () => enough(matchGroups.length),
+      );
 
       const totalMatchCount = matchGroups.length;
       const fileCount = new Set(matchGroups.map((m) => m.file)).size;
 
       if (totalMatchCount === 0) {
         return {
-          content: `未找到匹配 "${pattern}" 的结果`,
+          content: `未找到匹配 "${pattern}" 的结果${noteSkipped(skippedTooLarge)}`,
           metadata: { kind: 'grep', pattern, matchCount: 0, fileCount: 0 },
         };
       }
@@ -409,7 +452,7 @@ export const grepTool: ToolExecutor = {
       const suffix = truncated ? `\n（还有更多结果，使用 offset: ${offset + effectiveLimit} 翻页）` : '';
 
       return {
-        content: `找到 ${totalMatchCount} 条匹配${truncated ? '（已截断）' : ''}:\n${resultLines.join('\n')}${suffix}`,
+        content: `找到 ${totalMatchCount} 条匹配${truncated ? '（已截断）' : ''}:\n${resultLines.join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`,
         metadata: { kind: 'grep', pattern, matchCount: totalMatchCount, fileCount },
       };
     } catch (err) {

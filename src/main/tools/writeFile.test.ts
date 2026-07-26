@@ -13,7 +13,7 @@ describe('writeFileTool', () => {
       const filePath = join(projectRoot, 'new.txt');
       const result = await writeFileTool.execute(
         { file_path: filePath, content: 'hello\n' },
-        { projectPath: projectRoot, toolCallId: 'call_1' } as never,
+        { projectPath: projectRoot, toolCallId: 'call_1' },
       );
 
       expect(result.content).toContain('文件写入成功');
@@ -32,7 +32,7 @@ describe('writeFileTool', () => {
 
       await expect(writeFileTool.execute(
         { file_path: filePath, content: 'new\n' },
-        { projectPath: projectRoot, toolCallId: 'call_2' } as never,
+        { projectPath: projectRoot, toolCallId: 'call_2' },
       )).rejects.toThrow('File has not been read yet');
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });
@@ -45,11 +45,11 @@ describe('writeFileTool', () => {
       const filePath = join(projectRoot, 'existing.txt');
       await mkdir(projectRoot, { recursive: true });
       await writeFileAsync(filePath, 'old\n', 'utf8');
-      await readFileTool.execute({ file_path: filePath }, { projectPath: projectRoot, toolCallId: 'read_1' } as never);
+      await readFileTool.execute({ file_path: filePath }, { projectPath: projectRoot, toolCallId: 'read_1' });
 
       const result = await writeFileTool.execute(
         { file_path: filePath, content: 'new\n' },
-        { projectPath: projectRoot, toolCallId: 'call_3' } as never,
+        { projectPath: projectRoot, toolCallId: 'call_3' },
       );
 
       expect(result.content).toContain('文件写入成功');
@@ -66,7 +66,7 @@ describe('writeFileTool', () => {
 
       await expect(writeFileTool.execute(
         { path: filePath, content: 'new\n' },
-        { projectPath: projectRoot, toolCallId: 'call_legacy' } as never,
+        { projectPath: projectRoot, toolCallId: 'call_legacy' },
       )).rejects.toThrow('write_file requires file_path');
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });

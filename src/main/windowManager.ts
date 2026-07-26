@@ -1,5 +1,6 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
 import { join } from 'node:path';
+import { bindNavigationGuards } from './security';
 
 const WINDOW_CONFIG = {
   DEFAULT_WIDTH: 1125,
@@ -14,8 +15,8 @@ export const TRAFFIC_LIGHT_POSITIONS = {
 
 const windows = new Set<BrowserWindow>();
 
-export function getMainWindow(): BrowserWindow | null {
-  const firstWindow = windows.values().next().value as BrowserWindow | undefined;
+function getMainWindow(): BrowserWindow | null {
+  const firstWindow = windows.values().next().value;
   return firstWindow ?? BrowserWindow.getAllWindows()[0] ?? null;
 }
 
@@ -52,6 +53,7 @@ export function createMainWindow(): BrowserWindow {
   loadRenderer(win);
   bindMediaPermission(win);
   bindFullscreenEvents(win);
+  bindNavigationGuards(win);
 
   return win;
 }
@@ -85,10 +87,21 @@ export function setupDockIcon(): void {
 
 function loadRenderer(win: BrowserWindow): void {
   const rendererUrl = process.env.ELECTRON_RENDERER_URL;
-  if (rendererUrl && rendererUrl.trim()) {
-    win.loadURL(rendererUrl);
+  const target = rendererUrl && rendererUrl.trim() ? rendererUrl.trim() : null;
+
+  // 加载失败以前是静默的：窗口白屏，日志里什么都没有
+  const onFailure = (err: unknown) => {
+    console.error(
+      '[windowManager] Failed to load renderer:',
+      target ?? 'packaged index.html',
+      err instanceof Error ? err.message : String(err),
+    );
+  };
+
+  if (target) {
+    win.loadURL(target).catch(onFailure);
   } else {
-    win.loadFile(join(__dirname, '../renderer/index.html'));
+    win.loadFile(join(__dirname, '../renderer/index.html')).catch(onFailure);
   }
 }
 

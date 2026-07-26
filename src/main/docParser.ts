@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 
 /** 解析结果统一形态 */
-export interface ParsedDoc {
+interface ParsedDoc {
   /** 提取到的纯文本 */
   text: string;
   /** 解析器标记（pdf / docx / xlsx），用于日志/UI */

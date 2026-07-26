@@ -28,6 +28,18 @@ describe('TaskManager', () => {
     }).toThrow(TaskValidationError);
   });
 
+  it('links batch dependencies in both directions', () => {
+    const blocker = manager.create('project', { title: 'Blocker' }, '/workspace/project');
+    const [blocked] = manager.createBatch(
+      'project',
+      [{ title: 'Blocked', blockedBy: [blocker!.id] }],
+      '/workspace/project',
+    );
+
+    expect(blocked.blockedBy).toEqual([blocker!.id]);
+    expect(manager.get(blocker!.id)?.blocks).toEqual([blocked.id]);
+  });
+
   it('allows only one in-progress task at a time', () => {
     const first = manager.create('project', { title: 'First', status: 'in_progress' }, '/workspace/project');
     expect(first?.status).toBe('in_progress');
@@ -42,7 +54,7 @@ describe('TaskManager', () => {
     expect(task).not.toBeNull();
 
     expect(() => {
-      manager.update(task!.id, { status: 'completed' }, '/workspace/project');
+      manager.update(task!.id, { status: 'completed' });
     }).toThrow('非法任务状态流转: pending -> completed');
   });
 
@@ -51,11 +63,11 @@ describe('TaskManager', () => {
     expect(task).not.toBeNull();
 
     expect(() => {
-      manager.update(task!.id, { addBlockedBy: ['missing-task'] }, '/workspace/project');
+      manager.update(task!.id, { addBlockedBy: ['missing-task'] });
     }).toThrow('依赖任务不存在: missing-task');
 
     expect(() => {
-      manager.update(task!.id, { addBlocks: [task!.id] }, '/workspace/project');
+      manager.update(task!.id, { addBlocks: [task!.id] });
     }).toThrow('任务不能依赖或阻塞自身');
   });
 
@@ -66,7 +78,7 @@ describe('TaskManager', () => {
     expect(second).not.toBeNull();
 
     expect(() => {
-      manager.update(first!.id, { addBlockedBy: [second!.id] }, '/workspace/project');
+      manager.update(first!.id, { addBlockedBy: [second!.id] });
     }).toThrow('依赖关系会形成循环');
   });
 
@@ -76,7 +88,7 @@ describe('TaskManager', () => {
     expect(blocked).not.toBeNull();
 
     expect(() => {
-      manager.update(blocked!.id, { status: 'in_progress' }, '/workspace/project');
+      manager.update(blocked!.id, { status: 'in_progress' });
     }).toThrow(`任务 ${blocked!.id} 仍被未完成任务阻塞: ${blocker!.id}`);
   });
 });

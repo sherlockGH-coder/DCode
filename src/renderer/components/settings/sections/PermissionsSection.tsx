@@ -18,36 +18,26 @@ const BASH_OPTIONS: {
   label: string;
   desc: string;
   icon: React.ReactNode;
-  tone: 'blue' | 'amber' | 'red';
 }[] = [
   {
     value: 'default',
     label: '默认审批',
     desc: '本地只读工具自动执行；bash、文件写入、联网请求和外部状态变更仍会弹窗确认。',
     icon: <IconAsk />,
-    tone: 'blue',
   },
   {
     value: 'auto_review',
     label: '文件操作自动放行',
     desc: '本地文件读取、搜索、写入和编辑会自动执行；bash、联网请求和任务变更仍需确认。',
     icon: <IconAllow />,
-    tone: 'amber',
   },
   {
     value: 'full_access',
     label: '完全访问',
     desc: '不弹权限审批，AI 可直接执行工具和终端命令。仅在完全信任的本地开发环境使用。',
     icon: <IconUnlock />,
-    tone: 'red',
   },
 ];
-
-const STATUS_TONE_CLASS = {
-  blue: 'text-accent [&>span]:bg-accent',
-  amber: 'text-amber-700 dark:text-amber-400 [&>span]:bg-amber-500',
-  red: 'text-red-600 dark:text-red-400 [&>span]:bg-red-500',
-};
 
 const FullAccessConfirmDialog: React.FC<{
   isSaving: boolean;

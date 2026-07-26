@@ -77,11 +77,11 @@ export function registerChatIpc(): void {
           : [...effectiveMessages, executionMessage];
       } else if (modeState && modeState.contextEpoch > 0 && conversationId) {
         effectiveMessages = (db.getMessages(conversationId) as Message[]).filter((message) => (
-          message.contextEpoch === modeState!.contextEpoch
+          message.contextEpoch === modeState.contextEpoch
         ));
       } else if (modeState) {
         effectiveMessages = effectiveMessages.filter((message) => (
-          message.contextEpoch === undefined || message.contextEpoch === modeState!.contextEpoch
+          message.contextEpoch === undefined || message.contextEpoch === modeState.contextEpoch
         ));
       }
 

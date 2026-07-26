@@ -2,7 +2,6 @@ import React, { useMemo, useCallback } from 'react';
 import { useAppContext } from './contexts/AppContext';
 import { useConversations } from './hooks/useConversations';
 import { useMessages } from './hooks/useMessages';
-import { useChatActivityPhase } from './hooks/useChatActivityPhase';
 import { useChatOrchestrator } from './hooks/useChatOrchestrator';
 import { useToolRenderUnits } from './hooks/useToolRenderUnits';
 import { useChatPresentation } from './hooks/useChatPresentation';
@@ -48,6 +47,17 @@ const App: React.FC = () => {
 
   const conv = useConversations(project.activeProject);
   const chat = useMessages();
+  const conversationId = conv.conversationId;
+  const conversationMessages = conv.messages;
+  const activeAttempts = conv.activeAttempts;
+  const setConversationMessages = conv.setMessages;
+  const setActiveAttempts = conv.setActiveAttempts;
+  const createConversation = conv.handleNewConversation;
+  const reloadConversations = conv.loadConversations;
+  const deleteMessagesFromTurn = conv.deleteMessagesFromTurn;
+  const handleApprovalConfirm = chat.handleApprovalConfirm;
+  const setRightPanelCollapsed = rightPanel.setCollapsed;
+  const setBottomPanelCollapsed = bottomPanel.setCollapsed;
   const planMode = usePlanMode(conv.conversationId);
   const { isMacOS, isFullscreen } = windowChrome;
 
@@ -57,12 +67,12 @@ const App: React.FC = () => {
   }, [isMacOS, isFullscreen, sidebar.collapsed]);
 
   const handleToggleRightPanel = useCallback(() => {
-    rightPanel.setCollapsed(!rightPanel.collapsed);
-  }, [rightPanel.collapsed, rightPanel.setCollapsed]);
+    setRightPanelCollapsed(!rightPanel.collapsed);
+  }, [rightPanel.collapsed, setRightPanelCollapsed]);
 
   const handleToggleBottomPanel = useCallback(() => {
-    bottomPanel.setCollapsed(!bottomPanel.collapsed);
-  }, [bottomPanel.collapsed, bottomPanel.setCollapsed]);
+    setBottomPanelCollapsed(!bottomPanel.collapsed);
+  }, [bottomPanel.collapsed, setBottomPanelCollapsed]);
 
   const currentConversationProjectPath = useMemo(() => {
     if (conv.conversationId) {
@@ -108,7 +118,7 @@ const App: React.FC = () => {
     apply: applyEntry,
   });
 
-  const { handleSend, handleRetry: orchestratorRetry, abortSend, isLoading } = useChatOrchestrator({
+  const { handleSend, abortSend, isLoading } = useChatOrchestrator({
     chat,
     conv,
     selectedModel: models.selectedModel,
@@ -124,11 +134,11 @@ const App: React.FC = () => {
   const lastUserMessage = useMemo(() => findLastUserMessage(conv.messages), [conv.messages]);
 
   const ensureConversation = React.useCallback(async (): Promise<string> => {
-    if (conv.conversationId) return conv.conversationId;
-    const id = await conv.handleNewConversation(chatProjectPath);
+    if (conversationId) return conversationId;
+    const id = await createConversation(chatProjectPath);
     if (!id) throw new Error('无法创建对话');
     return id;
-  }, [chatProjectPath, conv.conversationId, conv.handleNewConversation]);
+  }, [chatProjectPath, conversationId, createConversation]);
 
   const enterPlanMode = React.useCallback(async (conversationId: string) => {
     const current = await window.deepseekApi.getConversationModeState(conversationId);
@@ -216,15 +226,15 @@ const App: React.FC = () => {
   const handleEditSubmit = React.useCallback(async (editedContent: string, editedAttachments?: Attachment[]) => {
     try {
       await submitEditedMessageRetry({
-        conversationId: conv.conversationId,
-        messages: conv.messages,
+        conversationId,
+        messages: conversationMessages,
         lastUserMessage,
         editedContent,
         editedAttachments,
         truncateMessages: window.deepseekApi.truncateMessages,
         setMessages: (nextMessages) => {
-          if (!conv.conversationId) return;
-          conv.setMessages(conv.conversationId, () => nextMessages);
+          if (!conversationId) return;
+          setConversationMessages(conversationId, () => nextMessages);
         },
         sendMessage: handleSend,
         onTruncateError: (err) => {
@@ -234,27 +244,11 @@ const App: React.FC = () => {
     } catch (err) {
       console.error('[App] 编辑重试失败:', err);
     }
-  }, [lastUserMessage, conv.conversationId, conv.messages, conv.setMessages, handleSend]);
-
-  const activity = useChatActivityPhase({
-    isLoading: isLoading,
-    messages: conv.messages,
-    lastTurnId: lastUserMessage?.id,
-    retryInfo: chat.retryInfo,
-  });
-  const handleIndicatorRetry = React.useCallback(() => {
-    if (!lastUserMessage?.id) return;
-
-    window.deepseekApi.abortChat(conv.conversationId ?? undefined);
-    orchestratorRetry(lastUserMessage.id);
-  }, [lastUserMessage?.id, conv.conversationId, orchestratorRetry]);
-  const handleIndicatorAbort = React.useCallback(() => {
-    chat.abortSend(conv.conversationId);
-  }, [chat, conv.conversationId]);
+  }, [lastUserMessage, conversationId, conversationMessages, setConversationMessages, handleSend]);
 
   const handleResponseNav = React.useCallback((turnId: string, direction: -1 | 1) => {
     const indexSet = new Set<number>();
-    for (const m of conv.messages) {
+    for (const m of conversationMessages) {
       if (m.turnId === turnId && (m.role === 'assistant' || m.role === 'tool') && m.attemptNo !== undefined) {
         indexSet.add(m.attemptNo);
       }
@@ -262,13 +256,13 @@ const App: React.FC = () => {
     const sorted = [...indexSet].sort((a, b) => a - b);
     if (sorted.length <= 1) return;
 
-    const currentActive = conv.activeAttempts[turnId] ?? sorted[sorted.length - 1];
+    const currentActive = activeAttempts[turnId] ?? sorted[sorted.length - 1];
     const currentIdx = sorted.indexOf(currentActive);
     const nextIdx = Math.max(0, Math.min(sorted.length - 1, currentIdx + direction));
     const next = sorted[nextIdx];
     if (next === currentActive) return;
-    conv.setActiveAttempts((prev) => ({ ...prev, [turnId]: next }));
-  }, [conv.messages, conv.activeAttempts, conv.setActiveAttempts]);
+    setActiveAttempts((prev) => ({ ...prev, [turnId]: next }));
+  }, [conversationMessages, activeAttempts, setActiveAttempts]);
 
   const handleCloseOverlay = React.useCallback(() => {
     nav.navigate({ view: 'chat', conversationId: conv.conversationId });
@@ -375,8 +369,8 @@ const App: React.FC = () => {
 
   const handleRenameConversation = React.useCallback(async (convId: string, title: string) => {
     await window.deepseekApi.updateConversationTitle(convId, title);
-    await conv.loadConversations();
-  }, [conv.loadConversations]);
+    await reloadConversations();
+  }, [reloadConversations]);
 
   const handleOpenSettings = React.useCallback(() => {
     nav.navigate({ view: 'settings', conversationId: conv.conversationId });
@@ -412,7 +406,6 @@ const App: React.FC = () => {
   );
 
   const handleUndoCascade = useCallback(async (turnId: string, entries: ChangeUndoEntry[]): Promise<boolean> => {
-    const conversationId = conv.conversationId;
     if (!conversationId || entries.length === 0) return false;
     try {
       const result = await window.deepseekApi.undoChanges(entries);
@@ -422,7 +415,7 @@ const App: React.FC = () => {
       }
       setUndoDismissing({ conversationId, turnId });
       await delay(UNDO_DISSOLVE_MS);
-      await conv.deleteMessagesFromTurn(conversationId, turnId);
+      await deleteMessagesFromTurn(conversationId, turnId);
       setUndoDismissing((current) => (
         current?.conversationId === conversationId && current.turnId === turnId ? null : current
       ));
@@ -435,11 +428,11 @@ const App: React.FC = () => {
       window.alert(`撤销失败: ${message}`);
       return false;
     }
-  }, [conv.conversationId, conv.deleteMessagesFromTurn]);
+  }, [conversationId, deleteMessagesFromTurn]);
 
   const { units: renderUnits, segmentMessageMap, tailUnitsByMessageId } = useToolRenderUnits(visibleMessages, isLoading);
 
-  const { chatItems, pendingApprovalItems, recentEdits } = useChatPresentation({
+  const { chatItems, pendingApprovalItems } = useChatPresentation({
     conversationId: conv.conversationId,
     conversations: conv.conversations,
     messages: conv.messages,
@@ -451,15 +444,12 @@ const App: React.FC = () => {
     lastUserMessage,
     isLoading,
     turnTimers: chat.turnTimers,
-    activity,
     reasoningEffort,
     onReasoningEffortChange: handleReasoningEffortChange,
     onEditSubmit: handleEditSubmit,
     onResponseNav: handleResponseNav,
     onUndoCascade: handleUndoCascade,
     dismissingFromTurnId: undoDismissing?.conversationId === conv.conversationId ? undoDismissing.turnId : null,
-    onIndicatorRetry: handleIndicatorRetry,
-    onIndicatorAbort: handleIndicatorAbort,
   });
   const pendingApprovalItem = pendingApprovalItems[0] ?? null;
   const isQuestionItem = pendingApprovalItem?.kind === 'ask_user_question';
@@ -473,15 +463,13 @@ const App: React.FC = () => {
       lastVisibleMessage?.content?.length ?? 0,
       lastVisibleMessage?.reasoning_content?.length ?? 0,
       lastPendingApproval?.toolCallId ?? '',
-      activity.phase,
-      activity.visible ? '1' : '0',
     ].join(':');
-  }, [visibleMessages, pendingApprovalItems, activity.phase, activity.visible, chatItems.length]);
+  }, [visibleMessages, pendingApprovalItems, chatItems.length]);
 
   /** AskUserQuestion 提交处理：委托给 handleApprovalConfirm，传入 answers */
   const handleQuestionSubmit = useCallback((toolCallId: string, answers: Record<string, string>) => {
-    chat.handleApprovalConfirm(toolCallId, true, undefined, undefined, undefined, answers);
-  }, [chat.handleApprovalConfirm]);
+    handleApprovalConfirm(toolCallId, true, undefined, undefined, undefined, answers);
+  }, [handleApprovalConfirm]);
 
   return (
     <AppView
@@ -505,7 +493,6 @@ const App: React.FC = () => {
       pendingApprovalItem={pendingApprovalItem}
       pendingApprovalItems={pendingApprovalItems}
       isQuestionItem={isQuestionItem}
-      recentEdits={recentEdits}
       visibleMessages={visibleMessages}
       chatProjectPath={chatProjectPath}
       contextUsagePercent={contextUsagePercent}

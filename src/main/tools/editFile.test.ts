@@ -14,7 +14,7 @@ describe('editFileTool', () => {
       const filePath = join(projectRoot, 'note.txt');
       await mkdir(projectRoot, { recursive: true });
       await writeFile(filePath, 'hello world\n', 'utf8');
-      await readFileTool.execute({ file_path: filePath }, { projectPath: projectRoot, toolCallId: 'read_1' } as never);
+      await readFileTool.execute({ file_path: filePath }, { projectPath: projectRoot, toolCallId: 'read_1' });
 
       const result = await editFileTool.execute(
         {
@@ -22,7 +22,7 @@ describe('editFileTool', () => {
           old_string: 'world',
           new_string: 'DeepSeek',
         },
-        { projectPath: projectRoot, toolCallId: 'call_1' } as never,
+        { projectPath: projectRoot, toolCallId: 'call_1' },
       );
 
       expect(result.content).toContain('文件编辑成功');
@@ -41,7 +41,7 @@ describe('editFileTool', () => {
 
       await expect(editFileTool.execute(
         { file_path: filePath, old_string: 'beta', new_string: 'gamma' },
-        { projectPath: projectRoot, toolCallId: 'call_2' } as never,
+        { projectPath: projectRoot, toolCallId: 'call_2' },
       )).rejects.toThrow('File has not been read yet');
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });
@@ -59,7 +59,7 @@ describe('editFileTool', () => {
           old_string: '',
           new_string: 'created\n',
         },
-        { projectPath: projectRoot, toolCallId: 'call_create' } as never,
+        { projectPath: projectRoot, toolCallId: 'call_create' },
       );
 
       expect(result.content).toContain('文件编辑成功');
@@ -78,7 +78,7 @@ describe('editFileTool', () => {
 
       await expect(editFileTool.execute(
         { path: filePath, old_string: 'beta', new_string: 'gamma' },
-        { projectPath: projectRoot, toolCallId: 'call_legacy' } as never,
+        { projectPath: projectRoot, toolCallId: 'call_legacy' },
       )).rejects.toThrow('edit_file requires file_path');
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });

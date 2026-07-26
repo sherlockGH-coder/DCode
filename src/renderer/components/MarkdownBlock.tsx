@@ -26,7 +26,7 @@ const MarkdownBlock: React.FC<MarkdownBlockProps> = ({ text, isTail, components 
       rehypePlugins={hasHtml ? ([rehypeRaw] as any) : ([] as any)}
       disallowedElements={DISALLOWED_ELEMENTS}
       urlTransform={safeUrlTransform}
-      components={components as any}
+      components={components}
     >
       {processed}
     </ReactMarkdown>

@@ -67,7 +67,7 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row).not.toBeNull();
     expect(container.querySelector('[data-testid="tool-item-kind-icon"]')?.getAttribute('data-tool-icon')).toBe('pencil');
     expect(container.querySelector('[data-testid="tool-item-status"]')).toBeNull();
@@ -100,7 +100,7 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row).not.toBeNull();
     expect(row?.textContent).toContain('已运行');
     expect(row?.textContent).toContain('pnpm run dev');
@@ -117,8 +117,8 @@ describe('ToolItemCard', () => {
       row?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    const panel = container.querySelector('[data-testid="exec-output-panel"]') as HTMLElement | null;
-    const detail = container.querySelector('[data-testid="tool-item-detail"]') as HTMLElement | null;
+    const panel = container.querySelector('[data-testid="exec-output-panel"]');
+    const detail = container.querySelector('[data-testid="tool-item-detail"]');
     expect(panel).not.toBeNull();
     expect(detail?.className).toContain('ml-2');
     expect(detail?.className).not.toContain('ml-[25px]');
@@ -142,7 +142,7 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row).not.toBeNull();
     expect(container.querySelector('[data-testid="tool-item-status"]')).toBeNull();
     expect(row?.textContent).not.toContain('执行中');
@@ -243,7 +243,7 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
 
     expect(row).not.toBeNull();
     expect(row?.textContent).toContain('已运行');
@@ -271,12 +271,12 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     act(() => {
       row?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    const panel = container.querySelector('[data-testid="exec-output-panel"]') as HTMLElement | null;
+    const panel = container.querySelector('[data-testid="exec-output-panel"]');
     expect(panel).not.toBeNull();
     expect(panel?.textContent).not.toContain('成功');
     expect(panel?.textContent).not.toContain('退出码 0');
@@ -301,12 +301,12 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     act(() => {
       row?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    const panel = container.querySelector('[data-testid="exec-output-panel"]') as HTMLElement | null;
+    const panel = container.querySelector('[data-testid="exec-output-panel"]');
     expect(panel).not.toBeNull();
     expect(panel?.textContent).toContain('$ pnpm test src/renderer/components/ToolItemCard.test.ts');
     expect(panel?.textContent).not.toContain('/bin/zsh -lc');
@@ -349,7 +349,7 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row).not.toBeNull();
     expect(row?.textContent).toContain('已读取');
     expect(row?.textContent).toContain('TerminalPanel.tsx');
@@ -383,12 +383,12 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     act(() => {
       row?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    const panel = container.querySelector('[data-testid="exec-output-panel"]') as HTMLElement | null;
+    const panel = container.querySelector('[data-testid="exec-output-panel"]');
     const ellipsis = panel?.querySelector('[data-testid="command-ellipsis"]') as HTMLElement | null;
     const copyButton = panel?.querySelector('[data-testid="copy-command-btn"]') as HTMLElement | null;
     expect(ellipsis?.className).toContain('tracking-[-0.16em]');
@@ -507,7 +507,7 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row?.textContent).toContain('已编辑');
     expect(row?.textContent).toContain('ToolItemCard.tsx');
     expect(row?.textContent).toContain('+4');
@@ -518,7 +518,7 @@ describe('ToolItemCard', () => {
       row?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    const detail = container.querySelector('[data-testid="file-change-detail"]') as HTMLElement | null;
+    const detail = container.querySelector('[data-testid="file-change-detail"]');
     expect(detail).not.toBeNull();
     expect(detail?.textContent).toContain('ToolItemCard.tsx');
     expect(detail?.textContent).toContain('+4');
@@ -543,7 +543,7 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row?.textContent).toContain('已创建');
     expect(row?.textContent).toContain('NewFile.tsx');
     expect(row?.textContent).toContain('+0');

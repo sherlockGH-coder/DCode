@@ -117,10 +117,8 @@ function safeFitAndSync(sessionId: string, term: Terminal, fit: FitAddon, host: 
     if (term.cols !== layout.rendererCols || term.rows !== layout.rows) {
       term.resize(layout.rendererCols, layout.rows);
     }
-    window.terminalApi.resize(sessionId, layout.ptyCols, layout.rows);
-  } catch {
-
-  }
+    void window.terminalApi.resize(sessionId, layout.ptyCols, layout.rows);
+  } catch {}
 }
 
 interface TerminalViewProps {
@@ -199,11 +197,11 @@ const TerminalView: React.FC<TerminalViewProps> = ({
     safeFitAndSync(sessionId, term, fit, host);
 
     let cancelled = false;
-    const fontsReady =
-      typeof document !== 'undefined' && document.fonts?.ready
-        ? document.fonts.ready
-        : Promise.resolve();
-    fontsReady.then(() => {
+    // 用 ?? 而不是三元真值判断：document.fonts.ready 是 Promise，恒为真值，
+    // 真正要判断的是它存不存在
+    const fontsReady: Promise<unknown> =
+      (typeof document !== 'undefined' ? document.fonts?.ready : undefined) ?? Promise.resolve();
+    void fontsReady.then(() => {
       if (cancelled || !hostRef.current || !termRef.current || !fitRef.current) return;
       safeFitAndSync(sessionId, termRef.current, fitRef.current, hostRef.current);
     });
@@ -215,13 +213,13 @@ const TerminalView: React.FC<TerminalViewProps> = ({
       term.write(`\r\n\x1b[2m[进程已退出 (code ${exitCode})]\x1b[0m\r\n`);
     });
 
-    window.terminalApi.attach(sessionId).then(() => {
+    void window.terminalApi.attach(sessionId).then(() => {
       if (cancelled || !hostRef.current) return;
       safeFitAndSync(sessionId, term, fit, hostRef.current);
     });
 
     const inputDisp = term.onData((data) => {
-      window.terminalApi.write(sessionId, data);
+      void window.terminalApi.write(sessionId, data);
     });
 
     const ro = new ResizeObserver(() => {
@@ -336,7 +334,7 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
   useEffect(() => {
     if (!visible || tabs.length > 0 || creatingRef.current) return;
     creatingRef.current = true;
-    addTab().finally(() => {
+    void addTab().finally(() => {
       creatingRef.current = false;
     });
   }, [visible, tabs.length, addTab]);

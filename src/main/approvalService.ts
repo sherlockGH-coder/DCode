@@ -9,7 +9,7 @@ export type ApprovalRequest = PendingApprovalRequest;
  * 用户决策。新增的 scope 字段用于「本会话允许」时告诉主进程要把
  * 什么加入会话级 allow list。
  */
-export interface ApprovalDecision {
+interface ApprovalDecision {
   allowed: boolean;
   reason?: string;
   /** 用户勾选「本会话允许」时为 true（项目外路径场景） */

@@ -14,7 +14,7 @@ const READ_FILE_STATE_MAX = 200;
 const FILE_UNCHANGED_STUB = '[File unchanged: this exact range was already read and the file has not changed.]';
 const THIN_SPACE = String.fromCharCode(8239);
 
-export interface ReadFileStateEntry {
+interface ReadFileStateEntry {
   mtimeMs: number;
   size: number;
   offset: number;

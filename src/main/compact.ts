@@ -3,7 +3,7 @@ import { settingsManager } from './settings';
 import * as db from './database';
 import type { Message } from '../shared/types';
 
-export interface CompactResult {
+interface CompactResult {
   /** 更新后的滚动摘要（若本次 no-op 则为已有摘要） */
   summary: string;
   /** 压缩边界：该 id 及其之前的消息在发送给模型时会被摘要替换 */

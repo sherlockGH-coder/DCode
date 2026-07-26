@@ -54,18 +54,21 @@ interface OrchestratorDeps {
 }
 
 export function useChatOrchestrator({ chat, conv, selectedModel, activeProject, reasoningEffort, onConversationCreated }: OrchestratorDeps) {
+  const setConversationId = conv.setConversationId;
+  const setMessages = conv.setMessages;
+  const rebindActiveRequests = chat.rebindActiveRequests;
   const handleConvCreated = useCallback((id: string) => {
-    conv.setConversationId(id);
+    setConversationId(id);
     onConversationCreated?.(id);
-  }, [conv, onConversationCreated]);
+  }, [setConversationId, onConversationCreated]);
 
   const bindSetMessages = useCallback((convId: string) => (updater: (prev: Message[]) => Message[]) => {
-    conv.setMessages(convId, updater);
-  }, [conv.setMessages]);
+    setMessages(convId, updater);
+  }, [setMessages]);
 
   useEffect(() => {
-    chat.rebindActiveRequests(bindSetMessages);
-  }, [chat.rebindActiveRequests, bindSetMessages]);
+    rebindActiveRequests(bindSetMessages);
+  }, [rebindActiveRequests, bindSetMessages]);
 
   const handleSend = useCallback(async (
     userInput: string,

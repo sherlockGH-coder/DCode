@@ -78,6 +78,8 @@ export interface AgentLoopConfig {
   baseUrl?: string;
   /** 当前对话所属项目根；null = 未归类对话（文件访问需单独确认） */
   projectPath?: string | null;
+  /** 覆盖注入给模型的运行环境描述；用于工具实际连接远端/容器环境的运行器。 */
+  environmentInfoOverride?: string;
   /** 本回合用户附件清单 — read_file 命中其路径则跳过项目沙箱并按 mimeType 路由解析器 */
   attachmentWhitelist?: import('./attachment.types').Attachment[];
   /** 当前启用的 skill 概要（仅 name + description），注入 system prompt 让 AI 决策 load_skill */

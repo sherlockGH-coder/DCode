@@ -20,7 +20,8 @@ import {
 } from './windowManager';
 
 import { registerApprovalIpc } from './approvalService';
-import { registerTerminalIpc } from './terminalManager';
+import { registerTerminalIpc, killAllTerminalSessions } from './terminalManager';
+import { closeDatabase } from './database';
 import { registerSkillsIpc } from './skills';
 import { registerModelIpc } from './ipc/modelIpc';
 import { registerChatIpc } from './ipc/chatIpc';
@@ -33,6 +34,7 @@ import { registerSpeechIpc } from './ipc/speechIpc';
 import { registerPlanIpc } from './ipc/planIpc';
 import { registerAgentsIpc } from './agents';
 import { setupApplicationMenu } from './menu';
+import { applyContentSecurityPolicy } from './security';
 import { debugLog } from './logger';
 
 const APP_NAME = 'DeepSeek';
@@ -63,7 +65,7 @@ if (!gotTheLock) {
       }
 
       if (app.isReady()) {
-        handleOpenFolder(targetDir);
+        safeRun('open folder', () => handleOpenFolder(targetDir));
         createMainWindow();
       } else {
         folderToOpenOnStart = targetDir;
@@ -81,7 +83,7 @@ if (!gotTheLock) {
 
     const folderPath = parseFolderPathFromArgs(argv, workingDirectory);
     if (folderPath) {
-      handleOpenFolder(folderPath);
+      safeRun('open folder', () => handleOpenFolder(folderPath));
     }
   });
 
@@ -106,11 +108,7 @@ if (!gotTheLock) {
   registerTaskIpc();
   registerWindowIpc();
 
-  const activeProject = projectManager.getState().activeProject;
-  safeRun('mcp loadAll', () => mcpManager.loadAll(activeProject));
-  safeRun('task loadAll', () => taskManager.loadAll(activeProject));
-
-  app.whenReady().then(() => {
+  void app.whenReady().then(() => {
 
     protocol.handle('local-file', (request) => {
       try {
@@ -125,15 +123,26 @@ if (!gotTheLock) {
       }
     });
 
+    // 必须在建窗之前挂上，否则首个文档的响应头拿不到 CSP
+    applyContentSecurityPolicy();
+
     setupDockIcon();
     setupApplicationMenu();
     createMainWindow();
 
     if (folderToOpenOnStart) {
-      debugLog('App', '应用已就绪，正在激活冷启动暂存路径:', folderToOpenOnStart);
-      handleOpenFolder(folderToOpenOnStart);
+      // 先取出本地常量：safeRun 的回调是延迟执行的，闭包里拿不到窄化后的类型
+      const pendingFolder = folderToOpenOnStart;
+      debugLog('App', '应用已就绪，正在激活冷启动暂存路径:', pendingFolder);
+      safeRun('open folder', () => handleOpenFolder(pendingFolder));
       folderToOpenOnStart = null;
     }
+
+    // MCP server 会拉起子进程，task 加载会读盘——两者都不是首帧的前置依赖，
+    // 放到建窗之后启动，避免和渲染进程抢 CPU。
+    const activeProject = projectManager.getState().activeProject;
+    safeRun('mcp loadAll', () => mcpManager.loadAll(activeProject));
+    safeRun('task loadAll', () => taskManager.loadAll(activeProject));
   });
 
   app.on('window-all-closed', () => {
@@ -146,6 +155,9 @@ if (!gotTheLock) {
 
   app.on('before-quit', () => {
     safeRun('mcp stopAll', () => mcpManager.stopAll());
+    // 回收 PTY 子进程，并把 WAL 回写进主库
+    try { killAllTerminalSessions(); } catch (err) { console.error('[App] terminal cleanup failed:', err); }
+    try { closeDatabase(); } catch (err) { console.error('[App] database close failed:', err); }
   });
 }
 
@@ -168,9 +180,7 @@ function parseFolderPathFromArgs(argv: string[], workingDirectory: string): stri
       } else {
         return resolve(fullPath, '..');
       }
-    } catch {
-
-    }
+    } catch {}
   }
   return null;
 }

@@ -1,6 +1,6 @@
-export type WorkspaceBreadcrumbSegmentKind = 'root' | 'directory' | 'file';
+type WorkspaceBreadcrumbSegmentKind = 'root' | 'directory' | 'file';
 
-export interface WorkspaceBreadcrumbSegment {
+interface WorkspaceBreadcrumbSegment {
   id: string;
   label: string;
   kind: WorkspaceBreadcrumbSegmentKind;

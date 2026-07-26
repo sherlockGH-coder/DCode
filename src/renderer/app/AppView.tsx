@@ -5,7 +5,7 @@ import ArtifactPanel from '../components/ArtifactPanel';
 import TaskProgressAccessory from '../components/TaskProgressAccessory';
 import Sidebar from '../components/Sidebar';
 import AppHeader from '../components/AppHeader';
-import TerminalPanel from '../components/TerminalPanel';
+import { useMountAfterFirstUse } from '../hooks/useMountAfterFirstUse';
 import SearchModal from '../components/SearchModal';
 import ApprovalPanel from '../components/ApprovalPanel';
 import QuestionDialog from '../components/QuestionDialog';
@@ -24,6 +24,12 @@ import type { useChatPresentation } from '../hooks/useChatPresentation';
 import type { useSkills } from '../hooks/useSkills';
 import type { Attachment, Project, ProjectCreateInput, ToolItem, Message, ConversationModeState, PlanDecisionResult } from '../../shared/types';
 import type { NavView } from '../hooks/useNavHistory';
+
+/**
+ * xterm 及其 webgl addon 约 560KB，而底部终端面板默认是折叠的。
+ * 推迟到用户第一次展开时再加载，首屏就不用解析这部分代码。
+ */
+const TerminalPanel = React.lazy(() => import('../components/TerminalPanel'));
 
 type AppContextValue = ReturnType<typeof useAppContext>;
 type ConversationsState = ReturnType<typeof useConversations>;
@@ -78,7 +84,6 @@ interface AppViewProps {
   pendingApprovalItem: ToolItem | null;
   pendingApprovalItems: ToolItem[];
   isQuestionItem: boolean;
-  recentEdits: ChatPresentationState['recentEdits'];
   visibleMessages: Message[];
   chatProjectPath: string | null;
   contextUsagePercent: number | null;
@@ -198,7 +203,6 @@ const AppView: React.FC<AppViewProps> = ({
   pendingApprovalItem,
   pendingApprovalItems,
   isQuestionItem,
-  recentEdits,
   visibleMessages,
   chatProjectPath,
   contextUsagePercent,
@@ -212,6 +216,8 @@ const AppView: React.FC<AppViewProps> = ({
   handlers,
 }) => {
   const isWelcomeMode = chatItems.length === 0 && view !== 'settings';
+  // 终端面板默认折叠：第一次展开前不挂载，展开过之后保持挂载以留住回滚缓冲
+  const shouldMountTerminal = useMountAfterFirstUse(!bottomPanel.collapsed);
   return (
     <div className={`app-stage flex flex-row h-screen w-full bg-transparent relative overflow-hidden ${isWelcomeMode ? 'has-welcome-stage' : ''}`}>
     <div
@@ -222,7 +228,7 @@ const AppView: React.FC<AppViewProps> = ({
     <div
       ref={sidebar.sidebarRef}
       className={`sidebar-shell shrink-0 flex flex-col min-h-0 h-full min-w-0 overflow-hidden transition-[width] duration-[0.24s] ease-[cubic-bezier(0.32,0.72,0,1)] will-change-[width]${sidebar.collapsed ? ' pointer-events-none' : ''}`}
-      style={{ width: sidebar.collapsed ? 0 : sidebar.width }}
+      style={{ width: sidebar.collapsed ? 0 : sidebar.width, '--panel-size': `${sidebar.width}px` } as React.CSSProperties}
       aria-hidden={sidebar.collapsed}
     >
       <Sidebar
@@ -256,14 +262,15 @@ const AppView: React.FC<AppViewProps> = ({
         <span className="sidebar-resize-indicator absolute top-3 bottom-3 left-1/2 w-px -translate-x-1/2 bg-transparent transition-[width,background-color] duration-150 group-hover:w-[3px] group-hover:bg-black/[0.06] dark:group-hover:bg-white/[0.07] group-active:w-[3px] group-active:bg-black/[0.1] dark:group-active:bg-white/[0.11]" />
       </button>
     </div>
-    {!sidebar.collapsed ? (
-      <button
-        type="button"
-        className="mobile-sidebar-scrim"
-        aria-label="收起侧栏"
-        onClick={() => sidebar.setCollapsed(true)}
-      />
-    ) : null}
+    <button
+      type="button"
+      className={`mobile-sidebar-scrim${sidebar.collapsed ? ' mobile-sidebar-scrim--hidden' : ''}`}
+      aria-label="收起侧栏"
+      aria-hidden={sidebar.collapsed}
+      inert={sidebar.collapsed ? true : undefined}
+      tabIndex={sidebar.collapsed ? -1 : 0}
+      onClick={() => sidebar.setCollapsed(true)}
+    />
     <div className={`app-main-shell flex flex-row flex-1 min-w-0 h-full relative overflow-hidden ${sidebar.collapsed ? 'app-main-shell--flush' : ''}`}>
       <div className="app-primary-surface flex flex-col flex-1 min-w-0 h-full relative overflow-hidden">
         <div className="shrink-0 z-30">
@@ -276,8 +283,9 @@ const AppView: React.FC<AppViewProps> = ({
             onShowSidebar={() => sidebar.setCollapsed(false)}
             onNewConversation={handlers.handleNewConversation}
             rightContent={
-              view !== 'settings' && rightPanel.collapsed ? (
+              view !== 'settings' ? (
                 <WorkspaceDock
+                  hidden={!rightPanel.collapsed}
                   artifactPanelActive={!rightPanel.collapsed}
                   terminalActive={!bottomPanel.collapsed}
                   onToggleRightPanel={handlers.handleToggleRightPanel}
@@ -394,12 +402,16 @@ const AppView: React.FC<AppViewProps> = ({
               style={{ height: bottomPanel.collapsed ? 0 : bottomPanel.size }}
               aria-hidden={bottomPanel.collapsed}
             >
-              <TerminalPanel
-                cwd={chatProjectPath}
-                resizeTick={bottomPanel.size}
-                visible={!bottomPanel.collapsed}
-                onAllClosed={() => bottomPanel.setCollapsed(true)}
-              />
+              {shouldMountTerminal && (
+                <React.Suspense fallback={null}>
+                  <TerminalPanel
+                    cwd={chatProjectPath}
+                    resizeTick={bottomPanel.size}
+                    visible={!bottomPanel.collapsed}
+                    onAllClosed={() => bottomPanel.setCollapsed(true)}
+                  />
+                </React.Suspense>
+              )}
             </div>
           </div>
         </div>
@@ -408,7 +420,7 @@ const AppView: React.FC<AppViewProps> = ({
       <div
         ref={rightPanel.panelRef}
         className="right-panel-frame workspace-panel-shell shrink-0 flex flex-col min-h-0 h-full min-w-0 overflow-hidden relative z-20 transition-[width] duration-[0.24s] ease-[cubic-bezier(0.32,0.72,0,1)]"
-        style={{ width: rightPanel.collapsed ? 0 : rightPanel.size }}
+        style={{ width: rightPanel.collapsed ? 0 : rightPanel.size, '--panel-size': `${rightPanel.size}px` } as React.CSSProperties}
         aria-hidden={rightPanel.collapsed}
       >
         <button
@@ -424,10 +436,7 @@ const AppView: React.FC<AppViewProps> = ({
         </button>
         <div className="right-panel-card-frame flex flex-1 min-h-0 min-w-0 p-2">
           <div className="workspace-surface right-panel-card flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden">
-            <ArtifactPanel
-              recentEdits={recentEdits}
-              activeProject={chatProjectPath}
-            />
+            <ArtifactPanel activeProject={chatProjectPath} />
           </div>
         </div>
       </div>
@@ -447,7 +456,6 @@ const AppView: React.FC<AppViewProps> = ({
         onClose={handlers.handleCloseOverlay}
         isMacOS={isMacOS}
         isFullscreen={isFullscreen}
-        onJumpConversation={handlers.handleSelectConversation}
       />
     </OverlayView>
     <SearchModal

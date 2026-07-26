@@ -62,7 +62,7 @@ export function createToolItemFromStart(event: { id: string; name: string; argum
   };
 
   let args: Record<string, unknown> = {};
-  try { args = JSON.parse(event.arguments); } catch {              }
+  try { args = JSON.parse(event.arguments); } catch {}
 
   switch (kind) {
     case 'read':
@@ -122,32 +122,32 @@ export function applyMetadata(item: ToolItem, metadata: ToolResultMetadata | und
   }
   switch (metadata.kind) {
     case 'read':
-      return { ...item, status, kind: 'read', path: metadata.path, lineCount: metadata.lineCount, truncated: metadata.truncated, output } as ToolItem;
+      return { ...item, status, kind: 'read', path: metadata.path, lineCount: metadata.lineCount, truncated: metadata.truncated, output };
     case 'write':
-      return { ...item, status, kind: 'write', path: metadata.path, isNew: metadata.isNew, diff: metadata.diff } as ToolItem;
+      return { ...item, status, kind: 'write', path: metadata.path, isNew: metadata.isNew, diff: metadata.diff };
     case 'edit':
-      return { ...item, status, kind: 'edit', path: metadata.path, linesAdded: metadata.linesAdded, linesDeleted: metadata.linesDeleted, diff: metadata.diff } as ToolItem;
+      return { ...item, status, kind: 'edit', path: metadata.path, linesAdded: metadata.linesAdded, linesDeleted: metadata.linesDeleted, diff: metadata.diff };
     case 'exec':
-      return { ...item, status, kind: 'exec', command: metadata.command, exitCode: metadata.exitCode, duration: metadata.duration, outputLines: metadata.outputLines, output } as ToolItem;
+      return { ...item, status, kind: 'exec', command: metadata.command, exitCode: metadata.exitCode, duration: metadata.duration, outputLines: metadata.outputLines, output };
     case 'grep':
-      return { ...item, status, kind: 'grep', pattern: metadata.pattern, matchCount: metadata.matchCount, fileCount: metadata.fileCount, output } as ToolItem;
+      return { ...item, status, kind: 'grep', pattern: metadata.pattern, matchCount: metadata.matchCount, fileCount: metadata.fileCount, output };
     case 'glob':
-      return { ...item, status, kind: 'glob', pattern: metadata.pattern, matchCount: metadata.matchCount, output } as ToolItem;
+      return { ...item, status, kind: 'glob', pattern: metadata.pattern, matchCount: metadata.matchCount, output };
     case 'web_search':
-      return { ...item, status, kind: 'web_search', query: metadata.query, resultCount: metadata.resultCount, output } as ToolItem;
+      return { ...item, status, kind: 'web_search', query: metadata.query, resultCount: metadata.resultCount, output };
     case 'web_fetch':
-      return { ...item, status, kind: 'web_fetch', url: metadata.url, title: metadata.title, charCount: metadata.charCount, provider: metadata.provider, output } as ToolItem;
+      return { ...item, status, kind: 'web_fetch', url: metadata.url, title: metadata.title, charCount: metadata.charCount, provider: metadata.provider, output };
     case 'vision':
-      return { ...item, status, kind: 'vision', path: metadata.path, question: metadata.question, provider: metadata.provider, model: metadata.model, output } as ToolItem;
+      return { ...item, status, kind: 'vision', path: metadata.path, question: metadata.question, provider: metadata.provider, model: metadata.model, output };
     case 'list_directory':
-      return { ...item, status, kind: 'list_directory', path: metadata.path, totalCount: metadata.totalCount, output } as ToolItem;
+      return { ...item, status, kind: 'list_directory', path: metadata.path, totalCount: metadata.totalCount, output };
     case 'task':
-      return { ...item, status, kind: 'task', action: metadata.action, taskId: metadata.taskId, title: metadata.title, output } as ToolItem;
+      return { ...item, status, kind: 'task', action: metadata.action, taskId: metadata.taskId, title: metadata.title, output };
     case 'plan_update':
-      return { ...item, status, kind: 'plan_update', explanation: metadata.explanation, plan: metadata.plan, output } as ToolItem;
+      return { ...item, status, kind: 'plan_update', explanation: metadata.explanation, plan: metadata.plan, output };
     case 'plan_artifact':
-      return { ...item, status, kind: 'plan_artifact', title: metadata.plan.title, plan: metadata.plan, output } as ToolItem;
-    case 'ask_user_question':
+      return { ...item, status, kind: 'plan_artifact', title: metadata.plan.title, plan: metadata.plan, output };
+    case 'ask_user_question': {
       const existingQuestions = item.kind === 'ask_user_question' ? item.questions : undefined;
       return {
         ...item,
@@ -156,7 +156,8 @@ export function applyMetadata(item: ToolItem, metadata: ToolResultMetadata | und
         questions: metadata.questions.length > 0 ? metadata.questions : existingQuestions,
         answers: metadata.answers,
         output,
-      } as ToolItem;
+      };
+    }
     case 'agent':
       return {
         ...item,
@@ -171,7 +172,7 @@ export function applyMetadata(item: ToolItem, metadata: ToolResultMetadata | und
         agents: metadata.agents,
         timedOut: metadata.timedOut,
         output,
-      } as ToolItem;
+      };
     default:
       return { ...item, status, output } as ToolItem;
   }
@@ -198,7 +199,7 @@ export function reconstructToolItems(
     if (toolMsg) {
 
       const status: 'done' | 'error' = toolMsg.error ? 'error' : 'done';
-      items.push(applyMetadata(baseItem, toolMsg.metadata, status, toolMsg.content) as ToolItem);
+      items.push(applyMetadata(baseItem, toolMsg.metadata, status, toolMsg.content));
     } else if (baseItem.kind === 'ask_user_question') {
 
       items.push({ ...baseItem, status: 'error', output: INTERRUPTED_ASK_USER_OUTPUT });

@@ -34,9 +34,9 @@ export function useMcp(projectPath: string | null): UseMcpResult {
 
   useEffect(() => {
     setIsLoading(true);
-    refresh();
+    void refresh();
     const unsub = window.deepseekApi.onMcpChanged(() => {
-      refresh();
+      void refresh();
     });
     return unsub;
   }, [refresh]);

@@ -8,15 +8,14 @@ export function useWindowChrome() {
     if (!isMacOS) return;
 
     let disposed = false;
-    let unsubscribe: (() => void) | undefined;
 
-    window.electronEnv?.isFullScreen().then((v) => {
+    void window.electronEnv?.isFullScreen().then((v) => {
       if (!disposed) setIsFullscreen(v);
     }).catch(() => {
-
+      // 拿不到初始全屏状态就沿用默认值
     });
 
-    unsubscribe = window.electronEnv?.onFullscreenChanged((v) => {
+    const unsubscribe = window.electronEnv?.onFullscreenChanged((v) => {
       setIsFullscreen(v);
     });
 

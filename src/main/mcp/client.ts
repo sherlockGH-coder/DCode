@@ -21,7 +21,7 @@ export interface McpToolFull extends McpToolEntry {
   };
 }
 
-export interface McpCallResult {
+interface McpCallResult {
   text: string;
   isError: boolean;
 }
@@ -82,9 +82,9 @@ export class McpClient {
       this._lastError = err instanceof Error ? err.message : String(err);
       this._status = 'error';
 
-      try { await tempClient?.close(); } catch {              }
-      try { await tempTransport?.close(); } catch {              }
-      try { await this.ownedServer?.close(); } catch {              }
+      try { await tempClient?.close(); } catch {}
+      try { await tempTransport?.close(); } catch {}
+      try { await this.ownedServer?.close(); } catch {}
 
       this.transport = null;
       this.ownedServer = null;
@@ -97,9 +97,9 @@ export class McpClient {
     this._status = 'stopped';
     this._tools = [];
     this._instructions = undefined;
-    try { await this.client?.close(); } catch {              }
-    try { await this.transport?.close(); } catch {              }
-    try { await this.ownedServer?.close(); } catch {              }
+    try { await this.client?.close(); } catch {}
+    try { await this.transport?.close(); } catch {}
+    try { await this.ownedServer?.close(); } catch {}
     this.client = null;
     this.transport = null;
     this.ownedServer = null;
@@ -149,7 +149,7 @@ export class McpClient {
   }
 }
 
-export function namespaceToolName(serverName: string, toolName: string): string {
+function namespaceToolName(serverName: string, toolName: string): string {
 
   const safe = (s: string) => s.replace(/[^a-zA-Z0-9_-]/g, '_');
   return `mcp__${safe(serverName)}__${safe(toolName)}`;

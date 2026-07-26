@@ -1,4 +1,4 @@
-export interface RawSkill {
+interface RawSkill {
   frontmatter: Record<string, unknown>;
   body: string;
 }

@@ -17,7 +17,7 @@ function getStableDateString(): string {
   return `${y}/${m}/${d} (UTC${sign}${th}:${tm})`;
 }
 
-export interface SystemContext {
+interface SystemContext {
   /** 操作系统信息（会话内不变） */
   environmentInfo?: string;
   /** 项目路径（会话内不变） */
@@ -28,10 +28,12 @@ export interface SystemContext {
  * 获取 System Context（会话内不变的环境信息）
  * 这些信息会被追加到 system prompt，享受缓存优化
  */
-export function getSystemContext(projectPath: string | null): SystemContext {
+export function getSystemContext(projectPath: string | null, environmentInfoOverride?: string): SystemContext {
   const context: SystemContext = {};
 
-  const lines = [`- 操作系统: ${getOSInfo()}`];
+  const lines = environmentInfoOverride
+    ? [environmentInfoOverride]
+    : [`- 操作系统: ${getOSInfo()}`];
   if (projectPath) {
     lines.push(`- 项目路径: ${projectPath}`);
     lines.push(`- 工具默认工作目录: ${projectPath}`);
@@ -58,7 +60,7 @@ export function formatSystemContext(context: SystemContext): string {
   return parts.join('\n\n');
 }
 
-export interface UserContext {
+interface UserContext {
   /** DEEPSEEK.md 来源列表（包含文件路径、内容、scope） */
   deepseekMdSources?: DeepseekMdSource[];
   /** 当前日期（每次请求时刷新） */

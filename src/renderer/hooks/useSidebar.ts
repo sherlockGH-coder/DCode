@@ -36,7 +36,7 @@ export function useSidebar() {
     setCollapsed(next);
     try {
       localStorage.setItem('sidebar-collapsed', next ? '1' : '0');
-    } catch {              }
+    } catch {}
   }, []);
 
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -53,6 +53,8 @@ export function useSidebar() {
       const next = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, startW + (ev.clientX - startX)));
       widthRef.current = next;
       el.style.width = `${next}px`;
+      // 内层刚性宽度跟随拖拽实时更新（开合动画时它保持不变，内容整体滑动）
+      el.style.setProperty('--panel-size', `${next}px`);
     };
 
     const onUp = () => {
@@ -64,7 +66,7 @@ export function useSidebar() {
       setWidth(widthRef.current);
       try {
         localStorage.setItem('sidebar-width', String(widthRef.current));
-      } catch {              }
+      } catch {}
 
       requestAnimationFrame(() => {
         el.style.transition = '';

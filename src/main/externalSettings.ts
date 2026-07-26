@@ -7,7 +7,7 @@ export interface ExternalSettings {
   root: JsonRecord;
 }
 
-export interface ExternalApiKeyContext {
+interface ExternalApiKeyContext {
   profileId: string;
   profileName: string;
 }

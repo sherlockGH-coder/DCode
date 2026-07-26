@@ -360,7 +360,6 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
 
             {!isRenaming && (
               <div className="relative shrink-0 flex items-center justify-end h-5 w-[24px]">
-                {                               }
                 <button
                   ref={(node) => {
                     menuTriggerRefs.current[conv.id] = node;
@@ -377,7 +376,6 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
                 </button>
                 {renderMenu(conv)}
 
-                {                    }
                 <div className="group-hover:opacity-0 transition-opacity duration-150 flex items-center justify-end">
                   {relativeTime && (
                     <span className="text-[11.5px] text-text-tertiary whitespace-nowrap font-normal">
@@ -433,7 +431,6 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
 
   return (
     <section className="mt-2.5 flex flex-col gap-4.5">
-      {                      }
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between px-2.5 py-0.5">
           <h2 className="text-[12px] font-normal text-text-tertiary">
@@ -527,7 +524,6 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
         </ul>
       </div>
 
-      {                                          }
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between px-2.5 py-0.5">
           <h2 className="text-[12px] font-normal text-text-tertiary">
@@ -547,7 +543,6 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
           renderConversationList(UNSORTED_CONVERSATION_LIST_ID, unarchivedChats, false)}
       </div>
 
-      {            }
       {confirmDelete &&
         createPortal(
           <ConfirmDialog
@@ -561,7 +556,6 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
           document.body,
         )}
 
-      {              }
       {confirmRemoveProject &&
         createPortal(
           <ConfirmDialog

@@ -25,6 +25,12 @@ describe('getSystemContext', () => {
     const ctx = getSystemContext(null);
     expect(ctx.projectPath).toBeUndefined();
   });
+
+  it('允许远端运行器覆盖宿主机环境描述', () => {
+    const ctx = getSystemContext(null, '- 操作系统: Harbor Linux sandbox\n- 工具连接到隔离任务容器');
+    expect(ctx.environmentInfo).toContain('Harbor Linux sandbox');
+    expect(ctx.environmentInfo).not.toContain('macOS');
+  });
 });
 
 describe('formatSystemContext', () => {

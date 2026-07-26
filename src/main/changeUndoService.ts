@@ -105,8 +105,3 @@ export async function undoChanges(entries: ChangeUndoEntry[]): Promise<ChangeUnd
     return { success: false, reverted, error };
   }
 }
-
-export const changeUndoInternals = {
-  parseToolDiff,
-  undoOneChange,
-};

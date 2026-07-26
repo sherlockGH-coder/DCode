@@ -1,9 +1,9 @@
-export interface TerminalDimensions {
+interface TerminalDimensions {
   cols: number;
   rows: number;
 }
 
-export interface TerminalLayout {
+interface TerminalLayout {
   rendererCols: number;
   ptyCols: number;
   rows: number;

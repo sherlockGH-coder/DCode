@@ -1,8 +1,7 @@
 import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { app } from 'electron';
 
-export interface Env {
+interface Env {
   ANTHROPIC_API_KEY: string;
   ANTHROPIC_BASE_URL: string;
   ANTHROPIC_MODELS: string[];

@@ -1,6 +1,6 @@
 import { usePanel } from './usePanel';
 
-export const WORKSPACE_PANEL_DEFAULT_WIDTH = 640;
+const WORKSPACE_PANEL_DEFAULT_WIDTH = 640;
 
 export function useRightPanel() {
   return usePanel({

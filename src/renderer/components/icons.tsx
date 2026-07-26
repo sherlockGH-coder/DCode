@@ -1,5 +1,5 @@
 import React from 'react';
-export { getFileIcon, IconDocument } from './fileIcons';
+export { getFileIcon } from './fileIcons';
 
 interface IconProps {
   size?: number;
@@ -78,13 +78,6 @@ export const IconPanels: React.FC<IconProps> = ({ size = 16 }) => (
   </svg>
 );
 
-export const IconSidebarToggle: React.FC<IconProps> = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-    <line x1="9" y1="3" x2="9" y2="21"/>
-  </svg>
-);
-
 export const IconPanelsRight: React.FC<IconProps> = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -107,12 +100,6 @@ export const IconChevronLeft: React.FC<IconProps> = ({ size = 16, className }) =
 export const IconChevronRight: React.FC<IconProps> = ({ size = 16, className }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <polyline points="9 18 15 12 9 6" />
-  </svg>
-);
-
-export const IconChat: React.FC<IconProps> = ({ size = 14, className = 'shrink-0' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M12 3C6.48 3 2 6.8 2 11.5C2 13.86 3.1 15.96 4.9 17.42L3.8 20.72C3.66 21.14 4.14 21.52 4.54 21.32L8.3 19.82C9.46 20.22 10.72 20.5 12 20.5C17.52 20.5 22 16.7 22 12C22 7.3 17.52 3 12 3Z" />
   </svg>
 );
 
@@ -212,9 +199,7 @@ export const IconProjectFolder: React.FC<IconProps> = ({ size = 16, className = 
 
 export const IconFolderOpen: React.FC<IconProps> = ({ size = 16, className = 'shrink-0 text-text-secondary' }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 26 26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    {                                      }
     <path fill="var(--bg-sidebar)" d="M3 8a2 2 0 0 1 2-2h4.17a2 2 0 0 1 1.41.59l1.24 1.23A2 2 0 0 0 13.23 8.4H19a2 2 0 0 1 2 2V20H3V8Z" />
-    {                                                  }
     <path fill="var(--bg-sidebar)" d="M4 20l2-8a2 2 0 0 1 2-1h14a1 1 0 0 1 1 2l-2 7H4z" />
   </svg>
 );
@@ -224,24 +209,6 @@ export const IconFolderPlus: React.FC<IconProps> = ({ size = 16, className = 'sh
     <path d="M12 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v5" />
     <line x1="18" y1="14" x2="18" y2="22" />
     <line x1="14" y1="18" x2="22" y2="18" />
-  </svg>
-);
-
-export const IconFolderCode: React.FC<IconProps> = ({ size = 16, className = 'shrink-0 text-text-secondary' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M3 8a2 2 0 0 1 2-2h4.17a2 2 0 0 1 1.41.59l1.24 1.23A2 2 0 0 0 13.23 8.4H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z" />
-    <path d="m8 11-2 2 2 2" />
-    <path d="m14 11 2 2-2 2" />
-    <line x1="12" y1="10" x2="10" y2="16" />
-  </svg>
-);
-
-export const IconComet: React.FC<IconProps> = ({ size = 16, className = 'shrink-0 text-text-secondary' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="m11.5 11.5-6-6" />
-    <path d="m16 8.5-10-5" />
-    <path d="m8.5 16-5-10" />
-    <circle cx="17" cy="17" r="3" />
   </svg>
 );
 
@@ -270,16 +237,6 @@ export const IconKey: React.FC<IconProps> = ({ size = 18, className = 'shrink-0 
 export const IconShield: React.FC<IconProps> = ({ size = 18, className = 'shrink-0 text-text-secondary' }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-  </svg>
-);
-
-export const IconMemory: React.FC<IconProps> = ({ size = 18, className = 'shrink-0 text-text-secondary' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M8 7a4 4 0 0 1 8 0v10a4 4 0 0 1-8 0V7Z" />
-    <path d="M8 9H6.5a2.5 2.5 0 0 0 0 5H8" />
-    <path d="M16 9h1.5a2.5 2.5 0 0 1 0 5H16" />
-    <path d="M11 6v12" />
-    <path d="M13 6v12" />
   </svg>
 );
 
@@ -313,13 +270,6 @@ export const IconUnlock: React.FC<IconProps> = ({ size = 20, className = 'shrink
   </svg>
 );
 
-export const IconDeny: React.FC<IconProps> = ({ size = 20, className = 'shrink-0' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-    <circle cx="12" cy="12" r="10" />
-    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-  </svg>
-);
-
 export const IconGlobe: React.FC<IconProps> = ({ size = 16, className = 'shrink-0 text-text-secondary' }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <circle cx="12" cy="12" r="10" />
@@ -334,32 +284,10 @@ export const IconGithub: React.FC<IconProps> = ({ size = 16, className = 'shrink
   </svg>
 );
 
-export const IconSparkles: React.FC<IconProps> = ({ size = 20, className = 'shrink-0' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-    <path d="M5 3v4"/>
-    <path d="M19 17v4"/>
-    <path d="M3 5h4"/>
-    <path d="M17 19h4"/>
-  </svg>
-);
-
 export const IconCopy: React.FC<IconProps> = ({ size = 16, className }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <rect x="2" y="9" width="13" height="13" rx="2" ry="2" />
     <path d="M9 5V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-1" />
-  </svg>
-);
-
-export const IconBroom: React.FC<IconProps> = ({ size = 16, className = 'shrink-0' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="m4.5 11 10.5 10.5" />
-    <path d="m5 16 1.5 1.5" />
-    <path d="m6 10 1.5 1.5" />
-    <path d="M14.5 5.5 16 7" />
-    <path d="m15.5 10 1.5 1.5" />
-    <path d="M16 5c.8-1 1.2-2.3 3.5-3s3 2.7 2.2 5c-.7 2.3-2 2.7-3 3.5" />
-    <path d="M8 22c-.5-1.1-1.3-1.8-2.2-2.2H2v-4.4C2.4 14.5 3.1 13.7 4.2 13.2" />
   </svg>
 );
 
@@ -405,15 +333,6 @@ export const IconBranch: React.FC<IconProps> = ({ size = 16, className = 'shrink
   </svg>
 );
 
-export const IconDiff: React.FC<IconProps> = ({ size = 16, className = 'shrink-0' }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M7 7h10" />
-    <path d="M7 17h10" />
-    <path d="m14 4 3 3-3 3" />
-    <path d="m10 14-3 3 3 3" />
-  </svg>
-);
-
 export const IconRobot: React.FC<IconProps> = ({ size = 16, className = 'shrink-0' }) => (
   <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <rect x="3" y="7" width="18" height="13" rx="2" />
@@ -437,15 +356,6 @@ export const IconCompress: React.FC<IconProps> = ({ size = 16, className = 'shri
     <polyline points="20 10 14 10 14 4" />
     <line x1="14" y1="10" x2="21" y2="3" />
     <line x1="10" y1="14" x2="3" y2="21" />
-  </svg>
-);
-
-export const IconReactAtom: React.FC<IconProps> = ({ size = 14, className = 'shrink-0 text-[#149ECA]' }) => (
-  <svg className={className} width={size} height={size} viewBox="-12 -12 24 24" fill="none" aria-hidden>
-    <circle cx="0" cy="0" r="2.8" fill="currentColor" />
-    <ellipse rx="9.5" ry="4.5" stroke="currentColor" strokeWidth="2.2" />
-    <ellipse rx="9.5" ry="4.5" stroke="currentColor" strokeWidth="2.2" transform="rotate(60)" />
-    <ellipse rx="9.5" ry="4.5" stroke="currentColor" strokeWidth="2.2" transform="rotate(120)" />
   </svg>
 );
 

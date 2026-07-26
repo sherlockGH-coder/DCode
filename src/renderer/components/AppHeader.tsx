@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  IconSidebarToggle,
+  IconPanels,
   IconEdit,
   IconProjectFolder,
 } from './icons';
@@ -25,7 +25,11 @@ interface HeaderToolButtonProps {
 }
 
 const HEADER_ACTIONS_CLASS = 'inline-flex h-7 items-center gap-1.5';
-const TOOL_BUTTON_BASE_CLASS = 'inline-flex h-7 w-7 items-center justify-center rounded-[7px] border-0 bg-transparent p-0 text-text-secondary transition-colors duration-150 hover:bg-bg-hover hover:text-text-primary';
+/* 侧栏收起后 header 左侧滑入的按钮簇：两个 28px 按钮 + 6px 间距 */
+const HEADER_ACTIONS_REVEAL_CLASS = 'shrink-0 overflow-hidden transition-[width,margin-right,opacity] duration-[0.24s] ease-[cubic-bezier(0.32,0.72,0,1)] [-webkit-app-region:no-drag]';
+const HEADER_ACTIONS_VISIBLE_CLASS = 'w-[62px] opacity-100';
+const HEADER_ACTIONS_HIDDEN_CLASS = 'w-0 -mr-2.5 opacity-0 pointer-events-none';
+const TOOL_BUTTON_BASE_CLASS = 'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border-0 bg-transparent p-0 text-text-secondary transition-colors duration-150 hover:bg-bg-hover hover:text-text-primary';
 const TOOL_BUTTON_ACTIVE_CLASS = 'text-accent hover:text-accent';
 const MAX_VISIBLE_TITLE_CHARS = 48;
 const TITLE_GROUP_CLASS = 'flex shrink min-w-0 max-w-[min(64vw,760px)] items-center gap-2 [-webkit-app-region:drag]';
@@ -84,19 +88,21 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
   return (
     <header
-      className="app-header shrink-0 flex h-11 items-center gap-2.5 bg-transparent pl-2.5 pr-3.5 z-30 [-webkit-app-region:drag]"
+      className="app-header shrink-0 flex h-11 items-center gap-2.5 bg-transparent pl-2.5 pr-3.5 z-30 transition-[padding-left] duration-[0.24s] ease-[cubic-bezier(0.32,0.72,0,1)] [-webkit-app-region:drag]"
       style={isMacOS && sidebarCollapsed && !isFullscreen ? { paddingLeft: 78 } : undefined}
     >
-      {sidebarCollapsed ? (
-        <div className={`${HEADER_ACTIONS_CLASS} shrink-0 [-webkit-app-region:no-drag]`}>
-          <HeaderToolButton label="显示侧栏" onClick={onShowSidebar}>
-            <IconSidebarToggle size={16} />
-          </HeaderToolButton>
-          <HeaderToolButton label="新对话" onClick={onNewConversation}>
-            <IconEdit size={16} />
-          </HeaderToolButton>
-        </div>
-      ) : null}
+      <div
+        className={`${HEADER_ACTIONS_CLASS} ${HEADER_ACTIONS_REVEAL_CLASS} ${sidebarCollapsed ? HEADER_ACTIONS_VISIBLE_CLASS : HEADER_ACTIONS_HIDDEN_CLASS}`}
+        aria-hidden={!sidebarCollapsed}
+        inert={sidebarCollapsed ? undefined : true}
+      >
+        <HeaderToolButton label="显示侧栏" onClick={onShowSidebar}>
+          <IconPanels size={16} />
+        </HeaderToolButton>
+        <HeaderToolButton label="新对话" onClick={onNewConversation}>
+          <IconEdit size={16} />
+        </HeaderToolButton>
+      </div>
       {displayTitle ? (
         <div className={TITLE_GROUP_CLASS} title={fullTitle}>
           {projectName ? (

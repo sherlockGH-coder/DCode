@@ -1,8 +1,8 @@
 import type { ToolItem } from '../../../shared/types';
 
-export type EntryRenderUnit = { kind: 'entry'; item: ToolItem; segmentIndex: number };
+type EntryRenderUnit = { kind: 'entry'; item: ToolItem; segmentIndex: number };
 
-export type ExplorationGroupRenderUnit = {
+type ExplorationGroupRenderUnit = {
   kind: 'exploration-group';
   items: ToolItem[];
   summary: string;

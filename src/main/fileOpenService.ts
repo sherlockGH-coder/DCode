@@ -47,7 +47,7 @@ const APP_CANDIDATES: AppCandidate[] = [
 
 export async function getFileOpenOptions(finalPath: string): Promise<FileOpenOption[]> {
   const resolvedOptions = await resolveFileOpenOptions(finalPath);
-  return resolvedOptions.map(({ appPath, ...option }) => option);
+  return resolvedOptions.map(({ appPath: _appPath, ...option }) => option);
 }
 
 export async function openResolvedPath(finalPath: string, optionId: string): Promise<FileOpenResult> {

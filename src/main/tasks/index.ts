@@ -19,11 +19,13 @@ export function registerTaskIpc(): void {
   });
 
   ipcMain.handle('task:update', (_event, id: string, input: TaskUpdateInput, projectPath: string | null) => {
-    return taskManager.update(id, input, resolveKnownProjectPath(projectPath)) ?? undefined;
+    resolveKnownProjectPath(projectPath);
+    return taskManager.update(id, input) ?? undefined;
   });
 
   ipcMain.handle('task:delete', (_event, id: string, projectPath: string | null) => {
-    return taskManager.remove(id, resolveKnownProjectPath(projectPath));
+    resolveKnownProjectPath(projectPath);
+    return taskManager.remove(id);
   });
 }
 

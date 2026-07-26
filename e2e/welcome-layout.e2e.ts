@@ -1,28 +1,16 @@
-import { _electron as electron, expect, test, type ElectronApplication } from '@playwright/test';
-import { mkdtempSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-
-async function stopElectron(app: ElectronApplication): Promise<void> {
-  const closed = new Promise<void>((resolveClosed) => app.once('close', resolveClosed));
-  await app.evaluate(({ app: electronApp, BrowserWindow }) => {
-    for (const window of BrowserWindow.getAllWindows()) window.destroy();
-    electronApp.quit();
-  }).catch(() => undefined);
-  await closed;
-}
+import { expect, test } from '@playwright/test';
+import {
+  createUserDataDir,
+  launchElectronApp,
+  removeUserDataDir,
+  stopElectron,
+} from './support/electron';
 
 test('opens wider and renders compact welcome action icons and titles', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'deepseek-welcome-layout-e2e-'));
-  const app = await electron.launch({
-    args: [resolve('out/main/index.js')],
-    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
-  });
+  const userData = createUserDataDir('deepseek-welcome-layout-e2e-');
+  const { app, page } = await launchElectronApp(userData);
 
   try {
-    const page = await app.firstWindow();
-    await page.waitForLoadState('domcontentloaded');
-
     const bounds = await app.evaluate(({ BrowserWindow }) => (
       BrowserWindow.getAllWindows()[0]?.getBounds()
     ));
@@ -92,5 +80,6 @@ test('opens wider and renders compact welcome action icons and titles', async ()
     ))).toBe(750);
   } finally {
     await stopElectron(app);
+    removeUserDataDir(userData);
   }
 });

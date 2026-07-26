@@ -51,7 +51,9 @@ export function setupApplicationMenu(): void {
         {
           label: 'Learn More',
           click: () => {
-            shell.openExternal('https://www.electronjs.org');
+            shell.openExternal('https://www.electronjs.org').catch((err: unknown) => {
+              console.warn('[menu] openExternal failed:', err instanceof Error ? err.message : String(err));
+            });
           },
         },
       ],

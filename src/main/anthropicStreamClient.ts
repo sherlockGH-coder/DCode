@@ -1,16 +1,16 @@
-export interface AnthropicStreamParams {
+interface AnthropicStreamParams {
   apiKey: string;
   baseUrl: string;
   body: Record<string, unknown>;
   signal?: AbortSignal;
 }
 
-export interface SseEvent {
+interface SseEvent {
   event?: string;
   data: string;
 }
 
-export class AnthropicStreamParseError extends Error {
+class AnthropicStreamParseError extends Error {
   readonly eventName?: string;
   readonly payloadLength: number;
 
@@ -22,7 +22,7 @@ export class AnthropicStreamParseError extends Error {
   }
 }
 
-export class AnthropicRequestError extends Error {
+class AnthropicRequestError extends Error {
   readonly status: number;
 
   constructor(message: string, status: number) {

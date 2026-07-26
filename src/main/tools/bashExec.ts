@@ -92,9 +92,7 @@ function startBackgroundCommand(command: string, cwd: string | undefined, timeou
         try {
           process.kill(process.platform === 'win32' ? pid : -pid, 'SIGTERM');
           appendFileSync(outputPath, `\n--- timed out after ${timeout}ms ---\n`, 'utf-8');
-        } catch {
-
-        }
+        } catch {}
       }, timeout)
     : null;
   killTimer?.unref();

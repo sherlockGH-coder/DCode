@@ -10,7 +10,7 @@ const RECORDING_MIME_TYPES = [
   'audio/mp4',
 ];
 
-export type VoiceInputStatus = 'idle' | 'requesting' | 'recording' | 'transcribing' | 'error';
+type VoiceInputStatus = 'idle' | 'requesting' | 'recording' | 'transcribing' | 'error';
 
 interface UseVoiceInputOptions {
   maxDurationMs?: number;

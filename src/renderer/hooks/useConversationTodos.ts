@@ -3,9 +3,9 @@ import type { Message, PlanUpdateItem, TaskStatus, ToolItem } from '../../shared
 import { extractToolItems } from '../utils/tool-pipeline/extractToolItems';
 import { useTasks } from './useTasks';
 
-export type ConversationTodoStatus = PlanUpdateItem['status'];
+type ConversationTodoStatus = PlanUpdateItem['status'];
 
-export interface ConversationTodoItem {
+interface ConversationTodoItem {
   id: string;
   title: string;
   description?: string;
@@ -13,7 +13,7 @@ export interface ConversationTodoItem {
   source: 'plan' | 'task';
 }
 
-export type PlanUpdateToolItem = Extract<ToolItem, { kind: 'plan_update' }>;
+type PlanUpdateToolItem = Extract<ToolItem, { kind: 'plan_update' }>;
 
 const isResolved = (status: ConversationTodoStatus): boolean =>
   status === 'completed';

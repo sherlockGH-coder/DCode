@@ -17,7 +17,7 @@ function applyApprovalToItem(item: ToolItem, approvalReq: PendingApprovalRequest
     ...(approvalReq.kind === 'ask_user_question' && approvalReq.questions
       ? { questions: approvalReq.questions }
       : {}),
-  } as ToolItem;
+  };
 }
 
 export function createFallbackToolItemFromApproval(approvalReq: PendingApprovalRequest): ToolItem {

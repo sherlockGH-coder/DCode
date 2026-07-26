@@ -46,7 +46,7 @@ class ProjectManager {
         }));
         this.activeProject = legacy.activeFolder ?? null;
         this.save();
-        try { renameSync(this.legacyStatePath, this.legacyStatePath + '.bak'); } catch {              }
+        try { renameSync(this.legacyStatePath, this.legacyStatePath + '.bak'); } catch {}
         console.log('[project] 迁移完成，项目数:', this.projects.length);
         return;
       }
@@ -68,7 +68,7 @@ class ProjectManager {
       renameSync(tmpPath, this.statePath);
     } catch (err) {
       console.error('[project] 保存状态失败:', err);
-      try { unlinkSync(tmpPath); } catch {              }
+      try { unlinkSync(tmpPath); } catch {}
     }
   }
 

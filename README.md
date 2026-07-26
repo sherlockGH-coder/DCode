@@ -75,6 +75,24 @@ pnpm test
 pnpm build
 ```
 
+## Terminal-Bench 2.0
+
+The Harbor adapter runs the existing Electron main-process agent loop without opening the UI. Model credentials and the default model are read from the same `DeepSeek-Dev` user-data settings used by `pnpm dev`; credentials are not copied into Harbor job files.
+
+Prerequisites are a running Docker daemon and Harbor CLI (`uv tool install harbor`). Run one task serially as a smoke test:
+
+```bash
+pnpm benchmark:terminal:smoke
+```
+
+For a larger sample, pass Harbor options to the general script. `max_tool_rounds` limits model/tool iterations per task:
+
+```bash
+pnpm benchmark:terminal -- -l 10 -n 2 -y --ak max_tool_rounds=30
+```
+
+Results and per-trial tool transcripts are written under `benchmark/jobs/`.
+
 ## Architecture
 
 DeepSeek App uses Electron, React, and TypeScript. The codebase is divided by process boundary:

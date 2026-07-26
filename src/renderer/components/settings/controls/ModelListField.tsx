@@ -121,7 +121,6 @@ const ModelListField: React.FC<ModelListFieldProps> = ({
                   isDefault ? 'bg-accent/5' : ''
                 }`}
               >
-                {               }
                 <button
                   type="button"
                   onClick={() => onSetDefault(model)}

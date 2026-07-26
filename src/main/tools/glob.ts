@@ -1,63 +1,12 @@
 import { ToolExecutor, ToolExecuteResult } from './types';
-import { readdir, stat } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { stat } from 'node:fs/promises';
+import { join } from 'node:path';
 import { resolveInside } from '../pathSandbox';
 import { debugLog } from '../logger';
-
-const IGNORE_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'dist',
-  'out',
-  '.next',
-  'coverage',
-  '__pycache__',
-]);
-
-/**
- * 将 glob 模式转为正则表达式
- * 支持: **, *, ?, {a,b}
- */
-function globToRegex(pattern: string): RegExp {
-  let regex = '';
-  let i = 0;
-  while (i < pattern.length) {
-    const ch = pattern[i];
-    if (ch === '*' && pattern[i + 1] === '*') {
-
-      regex += '.*';
-      i += 2;
-
-      if (pattern[i] === '/') i++;
-    } else if (ch === '*') {
-
-      regex += '[^/]*';
-      i++;
-    } else if (ch === '?') {
-      regex += '[^/]';
-      i++;
-    } else if (ch === '{') {
-
-      const end = pattern.indexOf('}', i);
-      if (end !== -1) {
-        const options = pattern.slice(i + 1, end).split(',');
-        regex += `(?:${options.map(escapeRegex).join('|')})`;
-        i = end + 1;
-      } else {
-        regex += escapeRegex(ch);
-        i++;
-      }
-    } else {
-      regex += escapeRegex(ch);
-      i++;
-    }
-  }
-  return new RegExp(`^${regex}$`);
-}
-
-function escapeRegex(s: string): string {
-  return s.replace(/[.+^${}()|[\]\\]/g, '\\$&');
-}
+import { globToRegex } from './globMatch';
+import { createIgnoreFilter } from './ignoreFilter';
+import { DEFAULT_IO_CONCURRENCY, mapWithConcurrency } from '../utils/concurrency';
+import { collectRelativeFilePaths } from './fileTraversal';
 
 interface GlobFile {
   path: string;
@@ -70,28 +19,8 @@ function numberArg(value: unknown, fallback: number): number {
     : fallback;
 }
 
-async function walkDir(dir: string, basePath: string, files: GlobFile[]): Promise<void> {
-  let entries;
-  try {
-    entries = await readdir(dir, { withFileTypes: true });
-  } catch {
-    return;
-  }
-
-  for (const entry of entries) {
-    if (IGNORE_DIRS.has(entry.name)) continue;
-    const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      await walkDir(fullPath, basePath, files);
-    } else if (entry.isFile()) {
-      try {
-        const info = await stat(fullPath);
-        files.push({ path: relative(basePath, fullPath).replace(/\\/g, '/'), mtimeMs: info.mtimeMs });
-      } catch {
-
-      }
-    }
-  }
+function boolArg(value: unknown, fallback: boolean): boolean {
+  return typeof value === 'boolean' ? value : fallback;
 }
 
 export const globTool: ToolExecutor = {
@@ -123,6 +52,11 @@ export const globTool: ToolExecutor = {
           description: 'Number of matching results to skip before returning results.',
           default: 0,
         },
+        no_ignore: {
+          type: 'boolean',
+          description: 'Set true to search files that .gitignore would normally exclude.',
+          default: false,
+        },
       },
       required: ['pattern'],
       additionalProperties: false,
@@ -134,6 +68,7 @@ export const globTool: ToolExecutor = {
     const rawPath = (args.path as string) || '.';
     const limit = numberArg(args.limit, 100);
     const offset = numberArg(args.offset, 0);
+    const respectGitignore = !boolArg(args.no_ignore, false);
     debugLog('tool', '查找文件:', pattern, 'in', rawPath);
 
     if (typeof pattern !== 'string' || pattern.trim().length === 0) {
@@ -148,12 +83,28 @@ export const globTool: ToolExecutor = {
         throw new Error(`Path is not a directory: ${searchPath}`);
       }
 
-      const allFiles: GlobFile[] = [];
-      await walkDir(searchPath, searchPath, allFiles);
-
+      // 编译一次，避免在 per-file 谓词里反复构造正则
       const regex = globToRegex(pattern);
-      const matched = allFiles
-        .filter((file) => regex.test(file.path))
+
+      const ignore = createIgnoreFilter(respectGitignore);
+      const allPaths = await collectRelativeFilePaths(searchPath, ignore);
+
+      const matchedPaths = allPaths.filter((relPath) => regex.test(relPath));
+      const stats = await mapWithConcurrency(
+        matchedPaths,
+        DEFAULT_IO_CONCURRENCY,
+        async (relPath): Promise<GlobFile | null> => {
+          try {
+            const info = await stat(join(searchPath, relPath));
+            return { path: relPath, mtimeMs: info.mtimeMs };
+          } catch {
+            return null;
+          }
+        },
+      );
+
+      const matched = stats
+        .filter((file): file is GlobFile => file !== null)
         .sort((a, b) => b.mtimeMs - a.mtimeMs || a.path.localeCompare(b.path));
       const paged = limit === 0 ? matched.slice(offset) : matched.slice(offset, offset + limit);
       const truncated = limit !== 0 && matched.length > offset + limit;

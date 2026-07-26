@@ -1,12 +1,16 @@
-import { _electron as electron, expect, test, type ElectronApplication } from '@playwright/test';
-import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
-import { createServer } from 'node:http';
-import type { Server } from 'node:http';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { expect, test, type Page } from '@playwright/test';
+import {
+  closeApiFixture,
+  launchApiFixture,
+  launchElectronApp,
+  sse,
+  stopElectron,
+  textResponse,
+} from './support/electron';
 
-function sse(events: unknown[]): string {
-  return events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join('');
+interface AnthropicRequest {
+  messages: unknown[];
+  tools: Array<{ name: string }>;
 }
 
 function planResponse(title: string, summary = 'Implement safely', documentOverrides: Record<string, unknown> = {}): string {
@@ -20,41 +24,42 @@ function planResponse(title: string, summary = 'Implement safely', documentOverr
   ]);
 }
 
+async function createPlanForConversation(
+  page: Page,
+  conversationId: string,
+  contextEpoch: number,
+  content: string,
+): Promise<void> {
+  await page.evaluate(async (input) => {
+    const turnId = crypto.randomUUID();
+    await window.deepseekApi.addMessage(
+      input.conversationId, 'user', input.content, undefined, undefined, undefined, undefined,
+      undefined, undefined, undefined, undefined, undefined, turnId, 0, 0, turnId,
+      undefined, input.contextEpoch, 'chat',
+    );
+    await window.deepseekApi.sendMessage(
+      [{ role: 'user', content: input.content }], 'e2e-model', input.conversationId,
+      undefined, undefined, turnId, 1,
+    );
+  }, { conversationId, contextEpoch, content });
+}
+
 test('Plan document renders GFM with a fixed approval footer and matches the composer width', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-layout-e2e-'));
-  const server = createServer((request, response) => {
-    request.resume();
-    request.on('end', () => {
-      response.writeHead(200, { 'content-type': 'text/event-stream' });
-      response.end(planResponse(
-        'Markdown Plan',
-        'A document-first plan with enough content to require its own scroll area.',
-        {
-          implementationSteps: [
-            'Use `react-markdown` with **GFM** support',
-            'Render a table:\n\n| Area | Expected |\n| --- | --- |\n| Body | Scrolls |\n| Footer | Fixed |',
-            ...Array.from({ length: 36 }, (_, index) => `Long implementation step ${index + 1} with supporting detail that verifies the document keeps scrolling independently from the approval footer`),
-          ],
-          testPlan: ['[ ] Verify task lists', '[x] Verify headings', 'Check dark mode'],
-          assumptions: ['The existing theme tokens remain authoritative'],
-        },
-      ));
-    });
-  });
-  await new Promise<void>((resolveReady) => server.listen(0, '127.0.0.1', resolveReady));
-  const address = server.address();
-  if (!address || typeof address === 'string') throw new Error('Fixture server did not start');
-  writeFileSync(join(userData, 'settings.json'), JSON.stringify({
-    schemaVersion: 1,
-    apiProfiles: [{ id: 'default', name: 'E2E', protocol: 'anthropic', baseUrl: `http://127.0.0.1:${address.port}`, models: ['e2e-model'], defaultModel: 'e2e-model', apiKeyPlain: 'e2e-key' }],
-    activeApiProfileId: 'default',
-  }));
-  const app = await electron.launch({
-    args: [resolve('out/main/index.js')],
-    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
-  });
+  const fixture = await launchApiFixture<AnthropicRequest>('deepseek-plan-layout-e2e-', () => planResponse(
+    'Markdown Plan',
+    'A document-first plan with enough content to require its own scroll area.',
+    {
+      implementationSteps: [
+        'Use `react-markdown` with **GFM** support',
+        'Render a table:\n\n| Area | Expected |\n| --- | --- |\n| Body | Scrolls |\n| Footer | Fixed |',
+        ...Array.from({ length: 36 }, (_, index) => `Long implementation step ${index + 1} with supporting detail that verifies the document keeps scrolling independently from the approval footer`),
+      ],
+      testPlan: ['[ ] Verify task lists', '[x] Verify headings', 'Check dark mode'],
+      assumptions: ['The existing theme tokens remain authoritative'],
+    },
+  ));
+  const { page } = fixture;
   try {
-    const page = await app.firstWindow();
     await page.setViewportSize({ width: 1280, height: 820 });
     const composer = page.getByTestId('chat-input-composer').locator('textarea');
     await composer.fill('/plan render a long markdown plan');
@@ -93,122 +98,48 @@ test('Plan document renders GFM with a fixed approval footer and matches the com
     const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
     expect(hasHorizontalOverflow).toBe(false);
   } finally {
-    await stopElectron(app);
-    stopServer(server);
+    await closeApiFixture(fixture);
   }
 });
 
-function textResponse(text: string): string {
-  return sse([
-    { type: 'message_start', message: { usage: { input_tokens: 10, output_tokens: 0 } } },
-    { type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } },
-    { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text } },
-    { type: 'content_block_stop', index: 0 },
-    { type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 5 } },
-    { type: 'message_stop' },
-  ]);
-}
-
-async function stopElectron(app: ElectronApplication): Promise<void> {
-  const closed = new Promise<void>((resolveClosed) => app.once('close', () => resolveClosed()));
-  await app.evaluate(({ app: electronApp, BrowserWindow }) => {
-    for (const window of BrowserWindow.getAllWindows()) window.destroy();
-    electronApp.quit();
-  }).catch(() => undefined);
-  await closed;
-}
-
-function stopServer(server: Server): void {
-  server.closeAllConnections();
-  server.close();
-}
-
 test('Plan is shown before approval, tools are restricted, and fresh execution starts immediately', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-e2e-'));
-  const requests: any[] = [];
-  const server = createServer((request, response) => {
-    let body = '';
-    request.on('data', (chunk) => { body += chunk; });
-    request.on('end', () => {
-      const parsed = JSON.parse(body);
-      requests.push(parsed);
-      response.writeHead(200, { 'content-type': 'text/event-stream' });
-      if (requests.length === 1) {
-        response.end(planResponse('Safe Plan'));
-      } else {
-        response.end(textResponse('Implementation started'));
-      }
-    });
-  });
-  await new Promise<void>((resolveReady) => server.listen(0, '127.0.0.1', resolveReady));
-  const address = server.address();
-  if (!address || typeof address === 'string') throw new Error('Fixture server did not start');
-  mkdirSync(userData, { recursive: true });
-  writeFileSync(join(userData, 'settings.json'), JSON.stringify({
-    schemaVersion: 1,
-    apiProfiles: [{ id: 'default', name: 'E2E', protocol: 'anthropic', baseUrl: `http://127.0.0.1:${address.port}`, models: ['e2e-model'], defaultModel: 'e2e-model', apiKeyPlain: 'e2e-key' }],
-    activeApiProfileId: 'default',
-  }));
-  const app = await electron.launch({
-    args: [resolve('out/main/index.js')],
-    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
-  });
+  const fixture = await launchApiFixture<AnthropicRequest>('deepseek-plan-e2e-', (requestIndex) => (
+    requestIndex === 1 ? planResponse('Safe Plan') : textResponse('Implementation started')
+  ));
+  const { page, requests } = fixture;
   try {
-    const page = await app.firstWindow();
-    await page.waitForLoadState('domcontentloaded');
     const composer = page.getByTestId('chat-input-composer').locator('textarea');
     await composer.fill('/plan build the feature');
     await composer.press('Enter');
     const indicator = page.getByTestId('plan-mode-indicator');
     await expect(indicator).toHaveText(/计划/);
     await expect(page.getByTestId('plan-approval-panel')).toBeVisible();
-    expect(requests[0].tools.map((tool: any) => tool.name)).toContain('submit_plan');
-    expect(requests[0].tools.map((tool: any) => tool.name)).not.toContain('edit_file');
-    expect(requests[0].tools.map((tool: any) => tool.name)).not.toContain('bash_exec');
-    expect(requests[0].tools.map((tool: any) => tool.name)).not.toContain('update_plan');
+    expect(requests[0].tools.map((tool) => tool.name)).toContain('submit_plan');
+    expect(requests[0].tools.map((tool) => tool.name)).not.toContain('edit_file');
+    expect(requests[0].tools.map((tool) => tool.name)).not.toContain('bash_exec');
+    expect(requests[0].tools.map((tool) => tool.name)).not.toContain('update_plan');
 
     await expect(page.getByTestId('plan-approve-fresh')).toBeEnabled();
     await page.getByTestId('plan-approve-fresh').click();
     await expect(indicator).toHaveCount(0);
     await expect(page.getByText('Implementation started')).toBeVisible();
-    expect(requests[1].tools.map((tool: any) => tool.name)).toContain('edit_file');
-    expect(requests[1].tools.map((tool: any) => tool.name)).not.toContain('submit_plan');
+    expect(requests[1].tools.map((tool) => tool.name)).toContain('edit_file');
+    expect(requests[1].tools.map((tool) => tool.name)).not.toContain('submit_plan');
     expect(JSON.stringify(requests[1].messages)).not.toContain('build the feature');
     expect(JSON.stringify(requests[1].messages)).toContain('Safe Plan');
   } finally {
-    await stopElectron(app);
-    stopServer(server);
+    await closeApiFixture(fixture);
   }
 });
 
 test('Rejection replans with a new version and same-context approval executes once', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-replan-e2e-'));
-  const requests: any[] = [];
-  const server = createServer((request, response) => {
-    let body = '';
-    request.on('data', (chunk) => { body += chunk; });
-    request.on('end', () => {
-      requests.push(JSON.parse(body));
-      response.writeHead(200, { 'content-type': 'text/event-stream' });
-      if (requests.length === 1) response.end(planResponse('Initial Plan'));
-      else if (requests.length === 2) response.end(planResponse('Revised Plan', 'Includes the rejection feedback'));
-      else response.end(textResponse('Same-context implementation started'));
-    });
+  const fixture = await launchApiFixture<AnthropicRequest>('deepseek-plan-replan-e2e-', (requestIndex) => {
+    if (requestIndex === 1) return planResponse('Initial Plan');
+    if (requestIndex === 2) return planResponse('Revised Plan', 'Includes the rejection feedback');
+    return textResponse('Same-context implementation started');
   });
-  await new Promise<void>((resolveReady) => server.listen(0, '127.0.0.1', resolveReady));
-  const address = server.address();
-  if (!address || typeof address === 'string') throw new Error('Fixture server did not start');
-  writeFileSync(join(userData, 'settings.json'), JSON.stringify({
-    schemaVersion: 1,
-    apiProfiles: [{ id: 'default', name: 'E2E', protocol: 'anthropic', baseUrl: `http://127.0.0.1:${address.port}`, models: ['e2e-model'], defaultModel: 'e2e-model', apiKeyPlain: 'e2e-key' }],
-    activeApiProfileId: 'default',
-  }));
-  const app = await electron.launch({
-    args: [resolve('out/main/index.js')],
-    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
-  });
+  const { page, requests } = fixture;
   try {
-    const page = await app.firstWindow();
     const composer = page.getByTestId('chat-input-composer').locator('textarea');
     await composer.fill('/plan preserve the original context');
     await composer.press('Enter');
@@ -222,8 +153,8 @@ test('Rejection replans with a new version and same-context approval executes on
     await expect(page.getByText('实施计划 · 等待批准')).toBeVisible();
     await expect(page.getByTestId('plan-approval-panel').getByText('v2')).toHaveCount(0);
     expect(JSON.stringify(requests[1].messages)).toContain('Add a rollback step');
-    expect(requests[1].tools.map((tool: any) => tool.name)).toContain('submit_plan');
-    expect(requests[1].tools.map((tool: any) => tool.name)).not.toContain('edit_file');
+    expect(requests[1].tools.map((tool) => tool.name)).toContain('submit_plan');
+    expect(requests[1].tools.map((tool) => tool.name)).not.toContain('edit_file');
 
     await expect(page.getByTestId('plan-approve-same')).toBeEnabled();
     await page.getByTestId('plan-approve-same').click();
@@ -232,35 +163,18 @@ test('Rejection replans with a new version and same-context approval executes on
     expect(JSON.stringify(requests[2].messages)).toContain('preserve the original context');
     expect(JSON.stringify(requests[2].messages)).toContain('Revised Plan');
   } finally {
-    await stopElectron(app);
-    stopServer(server);
+    await closeApiFixture(fixture);
   }
 });
 
 test('Pending plans recover after restart and stale plans cannot be approved', async () => {
-  const userData = mkdtempSync(join(tmpdir(), 'deepseek-plan-recovery-e2e-'));
-  const server = createServer((request, response) => {
-    request.resume();
-    request.on('end', () => {
-      response.writeHead(200, { 'content-type': 'text/event-stream' });
-      response.end(planResponse('Recoverable Plan'));
-    });
-  });
-  await new Promise<void>((resolveReady) => server.listen(0, '127.0.0.1', resolveReady));
-  const address = server.address();
-  if (!address || typeof address === 'string') throw new Error('Fixture server did not start');
-  writeFileSync(join(userData, 'settings.json'), JSON.stringify({
-    schemaVersion: 1,
-    apiProfiles: [{ id: 'default', name: 'E2E', protocol: 'anthropic', baseUrl: `http://127.0.0.1:${address.port}`, models: ['e2e-model'], defaultModel: 'e2e-model', apiKeyPlain: 'e2e-key' }],
-    activeApiProfileId: 'default',
-  }));
-  const launch = () => electron.launch({
-    args: [resolve('out/main/index.js')],
-    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
-  });
-  let app = await launch();
+  const fixture = await launchApiFixture<AnthropicRequest>(
+    'deepseek-plan-recovery-e2e-',
+    () => planResponse('Recoverable Plan'),
+  );
+  const launch = () => launchElectronApp(fixture.userData);
+  let { app, page } = fixture;
   try {
-    let page = await app.firstWindow();
     const composer = page.getByTestId('chat-input-composer').locator('textarea');
     await composer.fill('/plan survive restart');
     await composer.press('Enter');
@@ -272,8 +186,9 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
     });
     await stopElectron(app);
 
-    app = await launch();
-    page = await app.firstWindow();
+    const relaunched = await launch();
+    app = relaunched.app;
+    page = relaunched.page;
     const recovered = await page.evaluate(async (conversationId) => (
       window.deepseekApi.getConversationModeState(conversationId)
     ), beforeRestart.conversationId);
@@ -324,19 +239,12 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
     expect(staleDecision.rejected).toBe(true);
     expect(staleDecision.missingTokenRejected).toBe(true);
 
-    await page.evaluate(async ({ conversationId, contextEpoch }) => {
-      const turnId = crypto.randomUUID();
-      const content = 'create a branch-sensitive plan';
-      await window.deepseekApi.addMessage(
-        conversationId, 'user', content, undefined, undefined, undefined, undefined,
-        undefined, undefined, undefined, undefined, undefined, turnId, 0, 0, turnId,
-        undefined, contextEpoch, 'chat',
-      );
-      await window.deepseekApi.sendMessage(
-        [{ role: 'user', content }], 'e2e-model', conversationId,
-        undefined, undefined, turnId, 1,
-      );
-    }, { conversationId: recovered.conversationId, contextEpoch: recovered.contextEpoch });
+    await createPlanForConversation(
+      page,
+      recovered.conversationId,
+      recovered.contextEpoch,
+      'create a branch-sensitive plan',
+    );
     await expect.poll(async () => page.evaluate(async (conversationId) => {
       const state = await window.deepseekApi.getConversationModeState(conversationId);
       return state.activePlan;
@@ -356,19 +264,12 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
     ), recovered.conversationId);
     expect(afterBranchSwitch.activePlan).toBeNull();
 
-    await page.evaluate(async ({ conversationId, contextEpoch }) => {
-      const turnId = crypto.randomUUID();
-      const content = 'create a truncation-sensitive plan';
-      await window.deepseekApi.addMessage(
-        conversationId, 'user', content, undefined, undefined, undefined, undefined,
-        undefined, undefined, undefined, undefined, undefined, turnId, 0, 0, turnId,
-        undefined, contextEpoch, 'chat',
-      );
-      await window.deepseekApi.sendMessage(
-        [{ role: 'user', content }], 'e2e-model', conversationId,
-        undefined, undefined, turnId, 1,
-      );
-    }, { conversationId: recovered.conversationId, contextEpoch: recovered.contextEpoch });
+    await createPlanForConversation(
+      page,
+      recovered.conversationId,
+      recovered.contextEpoch,
+      'create a truncation-sensitive plan',
+    );
     await expect.poll(async () => page.evaluate(async (conversationId) => {
       const state = await window.deepseekApi.getConversationModeState(conversationId);
       return state.activePlan?.version ?? 0;
@@ -387,7 +288,6 @@ test('Pending plans recover after restart and stale plans cannot be approved', a
     ), recovered.conversationId);
     expect(afterTruncation.activePlan).toBeNull();
   } finally {
-    await stopElectron(app);
-    stopServer(server);
+    await closeApiFixture({ ...fixture, app });
   }
 });

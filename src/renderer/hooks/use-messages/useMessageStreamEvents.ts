@@ -19,7 +19,7 @@ interface ChunkBuffer {
   timeoutId: number | null;
 }
 
-export interface AssistantMessagePayload {
+interface AssistantMessagePayload {
   id?: string;
   content?: unknown;
   usage?: Message['usage'];

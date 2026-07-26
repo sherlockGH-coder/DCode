@@ -37,6 +37,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const project = useProject();
   const settings = useSettings();
   const rightPanel = useRightPanel();
+  const setRightPanelCollapsed = rightPanel.setCollapsed;
   const bottomPanel = useBottomPanel();
   const windowChrome = useWindowChrome();
   const [homeDir, setHomeDir] = useState('');
@@ -91,13 +92,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           setActiveTitle(nextPreviews[nextIndex].title);
         } else {
           setActiveTitle(null);
-          rightPanel.setCollapsed(true);
+          setRightPanelCollapsed(true);
         }
       } else {
         previewsRef.current = [];
         setPreviewsState([]);
         setActiveTitle(null);
-        rightPanel.setCollapsed(true);
+        setRightPanelCollapsed(true);
       }
       setActiveImage(null);
     } else if (item.type === 'image') {
@@ -112,9 +113,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         return next;
       });
       setActiveTitle(item.title);
-      rightPanel.setCollapsed(false);
+      setRightPanelCollapsed(false);
     }
-  }, [rightPanel.setCollapsed, setActiveTitle]);
+  }, [setRightPanelCollapsed, setActiveTitle]);
 
   const closeTab = useCallback((title: string) => {
     const currentPreviews = previewsRef.current;
@@ -128,10 +129,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setActiveTitle(nextPreviews[nextIndex].title);
       } else {
         setActiveTitle(null);
-        rightPanel.setCollapsed(true);
+        setRightPanelCollapsed(true);
       }
     }
-  }, [rightPanel.setCollapsed, setActiveTitle]);
+  }, [setRightPanelCollapsed, setActiveTitle]);
 
   const value = useMemo(() => ({
     sidebar,

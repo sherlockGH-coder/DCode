@@ -46,6 +46,9 @@ jobs:
       - name: Verify Electron native dependencies
         run: pnpm native:smoke
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Typecheck
         run: pnpm typecheck
 
@@ -54,3 +57,66 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  e2e:
+    name: E2E (macOS)
+    runs-on: macos-14
+
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.32.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Playwright 通过 _electron.launch 直接驱动应用自带的 Electron 二进制，
+      # 不需要额外下载浏览器
+      - name: Run Playwright E2E
+        run: pnpm test:e2e
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failures
+          path: test-results/
+          if-no-files-found: ignore
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    # 建议性质：先让结果可见，等基线漏洞被分类处理后再改为阻断
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.32.1
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Audit
+        run: pnpm audit --audit-level high

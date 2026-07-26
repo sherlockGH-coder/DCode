@@ -31,7 +31,7 @@ export function useModels() {
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
+    void (async () => {
       const [modelList, settings] = await Promise.all([
         window.deepseekApi.getModels().catch(() => FALLBACK),
         window.deepseekApi.getSettings().catch(() => null),
@@ -52,7 +52,7 @@ export function useModels() {
             defaultModel = legacy;
             await window.deepseekApi.patchSettings({ api: { defaultModel: legacy } });
           }
-        } catch {              }
+        } catch {}
       }
 
       if (!defaultModel) defaultModel = 'deepseek-chat';
@@ -70,7 +70,7 @@ export function useModels() {
       const nextKey = `${s.api.baseUrl}|${s.api.apiKeySet}|${s.api.models.join(',')}`;
       if (nextKey !== lastKeyRef.current) {
         lastKeyRef.current = nextKey;
-        fetchModels(s.api.defaultModel);
+        void fetchModels(s.api.defaultModel);
       }
 
       setSelectedModel((prev) => {
@@ -100,7 +100,7 @@ export function useModels() {
 
     window.deepseekApi.patchSettings({ api: { defaultModel: model } }).catch(() => {});
 
-    try { localStorage.setItem('selected-model', model); } catch {              }
+    try { localStorage.setItem('selected-model', model); } catch {}
   }, []);
 
   return useMemo(() => ({

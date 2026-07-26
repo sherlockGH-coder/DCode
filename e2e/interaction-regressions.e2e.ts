@@ -1,114 +1,24 @@
-import { _electron as electron, expect, test, type ElectronApplication, type Page } from '@playwright/test';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { createServer, type Server, type ServerResponse } from 'node:http';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-
-function sse(events: unknown[]): string {
-  return events.map((event) => `data: ${JSON.stringify(event)}\n\n`).join('');
-}
-
-function toolResponse(id: string, name: string, input: Record<string, unknown>): string {
-  return sse([
-    { type: 'message_start', message: { usage: { input_tokens: 10, output_tokens: 0 } } },
-    { type: 'content_block_start', index: 0, content_block: { type: 'tool_use', id, name, input: {} } },
-    { type: 'content_block_delta', index: 0, delta: { type: 'input_json_delta', partial_json: JSON.stringify(input) } },
-    { type: 'content_block_stop', index: 0 },
-    { type: 'message_delta', delta: { stop_reason: 'tool_use' }, usage: { output_tokens: 10 } },
-    { type: 'message_stop' },
-  ]);
-}
-
-function textResponse(text: string): string {
-  return sse([
-    { type: 'message_start', message: { usage: { input_tokens: 10, output_tokens: 0 } } },
-    { type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } },
-    { type: 'content_block_delta', index: 0, delta: { type: 'text_delta', text } },
-    { type: 'content_block_stop', index: 0 },
-    { type: 'message_delta', delta: { stop_reason: 'end_turn' }, usage: { output_tokens: 5 } },
-    { type: 'message_stop' },
-  ]);
-}
-
-async function stopElectron(app: ElectronApplication): Promise<void> {
-  const closed = new Promise<void>((resolveClosed) => app.once('close', () => resolveClosed()));
-  await app.evaluate(({ app: electronApp, BrowserWindow }) => {
-    for (const window of BrowserWindow.getAllWindows()) window.destroy();
-    electronApp.quit();
-  }).catch(() => undefined);
-  await closed;
-}
-
-function stopServer(server: Server): void {
-  server.closeAllConnections();
-  server.close();
-}
+import { expect, test, type Page } from '@playwright/test';
+import {
+  type ApiResponder,
+  captureVisualQa,
+  closeApiFixture as closeFixture,
+  launchApiFixture,
+  sse,
+  textResponse,
+  toolResponse,
+} from './support/electron';
 
 async function launchFixture(
-  responder: (
-    requestIndex: number,
-    body: Record<string, unknown>,
-    response: ServerResponse,
-  ) => string | undefined,
-): Promise<{
-  app: ElectronApplication;
-  page: Page;
-  requests: Record<string, unknown>[];
-  server: Server;
-}> {
-  const requests: Record<string, unknown>[] = [];
-  const server = createServer((request, response) => {
-    let body = '';
-    request.on('data', (chunk) => { body += chunk; });
-    request.on('end', () => {
-      const parsed = JSON.parse(body) as Record<string, unknown>;
-      requests.push(parsed);
-      response.writeHead(200, {
-        'content-type': 'text/event-stream',
-        connection: 'close',
-      });
-      const responseBody = responder(requests.length, parsed, response);
-      if (responseBody !== undefined) response.end(responseBody);
-    });
-  });
-  await new Promise<void>((resolveReady) => server.listen(0, '127.0.0.1', resolveReady));
-  const address = server.address();
-  if (!address || typeof address === 'string') throw new Error('Fixture server did not start');
-
-  const userData = mkdtempSync(join(tmpdir(), 'deepseek-interactions-e2e-'));
-  writeFileSync(join(userData, 'settings.json'), JSON.stringify({
-    schemaVersion: 1,
-    apiProfiles: [{
-      id: 'default',
-      name: 'E2E',
-      protocol: 'anthropic',
-      baseUrl: `http://127.0.0.1:${address.port}`,
-      models: ['e2e-model'],
-      defaultModel: 'e2e-model',
-      apiKeyPlain: 'e2e-key',
-    }],
-    activeApiProfileId: 'default',
-  }));
-  const app = await electron.launch({
-    args: [resolve('out/main/index.js')],
-    env: { ...process.env, DEEPSEEK_E2E_USER_DATA_DIR: userData },
-  });
-  const page = await app.firstWindow();
-  await page.waitForLoadState('domcontentloaded');
-  return { app, page, requests, server };
+  responder: ApiResponder<Record<string, unknown>>,
+) {
+  return launchApiFixture('deepseek-interactions-e2e-', responder);
 }
 
 async function sendMessage(page: Page, message: string): Promise<void> {
   const composer = page.getByTestId('chat-input-composer').locator('textarea');
   await composer.fill(message);
   await composer.press('Enter');
-}
-
-async function captureVisualQa(page: Page, name: string): Promise<void> {
-  const directory = process.env.DCODE_VISUAL_QA_DIR;
-  if (!directory) return;
-  mkdirSync(directory, { recursive: true });
-  await page.screenshot({ path: join(directory, `${name}.png`), fullPage: true });
 }
 
 test('Plan mode is selected from the plus menu and closes from its microphone-adjacent badge', async () => {
@@ -140,8 +50,7 @@ test('Plan mode is selected from the plus menu and closes from its microphone-ad
     await page.getByRole('menuitem', { name: '计划' }).click();
     await expect(page.getByTestId('plan-mode-indicator')).toHaveCount(0);
   } finally {
-    await stopElectron(fixture.app);
-    stopServer(fixture.server);
+    await closeFixture(fixture);
   }
 });
 
@@ -181,8 +90,7 @@ test('completed ask_user_question rows expand to show questions, options, answer
     await expect(detail).toContainText('已完成');
     await captureVisualQa(page, 'ask-user-question-detail');
   } finally {
-    await stopElectron(fixture.app);
-    stopServer(fixture.server);
+    await closeFixture(fixture);
   }
 });
 
@@ -214,8 +122,7 @@ test('approval options default to the first item, wrap with arrow keys, and exec
     await panel.press('Enter');
     await expect(page.getByText('Keyboard approval handled')).toBeVisible();
   } finally {
-    await stopElectron(fixture.app);
-    stopServer(fixture.server);
+    await closeFixture(fixture);
   }
 });
 
@@ -249,8 +156,7 @@ test('Tab opens rejection feedback, Enter inserts a newline, and Mod+Enter submi
     await expect(page.getByText('Rejection handled')).toBeVisible();
     expect(JSON.stringify(requests[1])).toContain('Keep the first line\\nAdd the second line');
   } finally {
-    await stopElectron(fixture.app);
-    stopServer(fixture.server);
+    await closeFixture(fixture);
   }
 });
 
@@ -327,8 +233,7 @@ test('streaming does not pull the viewport back down after the user scrolls up',
     expect(finalViewportAnchor).toBe(viewportAnchorAfterUserInput);
     expect(finalDistanceToBottom).toBeGreaterThan(20);
   } finally {
-    await stopElectron(fixture.app);
-    stopServer(fixture.server);
+    await closeFixture(fixture);
   }
 });
 
@@ -357,7 +262,6 @@ test('chat messages fade beneath the header edge in light and dark themes', asyn
     await expect(fade).toHaveCSS('background-image', /linear-gradient/);
     await captureVisualQa(page, 'chat-top-fade-dark');
   } finally {
-    await stopElectron(fixture.app);
-    stopServer(fixture.server);
+    await closeFixture(fixture);
   }
 });

@@ -15,7 +15,7 @@ export interface SubAgentRuntime extends AgentLoopConfig {
   toolRegistry: ToolRegistry;
 }
 
-export interface SpawnAgentInput {
+interface SpawnAgentInput {
   taskName: string;
   prompt: string;
   role?: string;

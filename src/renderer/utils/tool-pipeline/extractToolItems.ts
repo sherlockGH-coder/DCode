@@ -1,4 +1,4 @@
-import type { Message, ToolCall, ToolItem } from '../../../shared/types';
+import type { Message, ToolItem } from '../../../shared/types';
 import { reconstructToolItems } from '../toolItemHelpers';
 
 export function extractToolItems(messages: Message[]): ToolItem[] {

@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 
-export interface PanelConfig {
+interface PanelConfig {
   localStorageKey: string;
   defaultSize: number;
   minSize: number;
@@ -64,7 +64,7 @@ export function usePanel(config: PanelConfig) {
     if (!persistCollapsed) return;
     try {
       localStorage.setItem(`${localStorageKey}-collapsed`, next ? '1' : '0');
-    } catch {              }
+    } catch {}
   }, [localStorageKey, persistCollapsed]);
 
   const setSize = useCallback((next: number) => {
@@ -72,7 +72,7 @@ export function usePanel(config: PanelConfig) {
     setSizeState(clamped);
     try {
       localStorage.setItem(`${localStorageKey}-size`, String(clamped));
-    } catch {              }
+    } catch {}
   }, [localStorageKey, minSize, maxSize]);
 
   const handleResizeStart = useCallback((e: React.MouseEvent) => {
@@ -94,6 +94,8 @@ export function usePanel(config: PanelConfig) {
 
       if (isHorizontal) {
         panel.style.width = `${next}px`;
+        // 内层刚性宽度跟随拖拽实时更新（开合动画时它保持不变，内容整体滑动）
+        panel.style.setProperty('--panel-size', `${next}px`);
       } else {
         panel.style.height = `${next}px`;
       }
@@ -108,7 +110,7 @@ export function usePanel(config: PanelConfig) {
       setSizeState(sizeRef.current);
       try {
         localStorage.setItem(`${localStorageKey}-size`, String(sizeRef.current));
-      } catch {              }
+      } catch {}
 
       requestAnimationFrame(() => {
         panel.style.transition = '';
@@ -119,7 +121,7 @@ export function usePanel(config: PanelConfig) {
     document.addEventListener('mouseup', onUp);
     document.body.style.cursor = isHorizontal ? 'col-resize' : 'row-resize';
     document.body.style.userSelect = 'none';
-  }, [direction, localStorageKey, minSize, maxSize]);
+  }, [direction, invertDelta, localStorageKey, minSize, maxSize]);
 
   return useMemo(() => ({
     size,

@@ -45,7 +45,7 @@ describe('ToolCallCard', () => {
       }));
     });
 
-    const row = container.querySelector('[data-testid="tool-call-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-call-row"]');
     expect(row).not.toBeNull();
     expect(container.querySelector('[data-testid="tool-call-card"]')).toBeNull();
     expect(container.querySelector('[data-testid="tool-call-name"]')?.textContent).toContain('update_plan');
@@ -74,7 +74,7 @@ describe('ToolCallCard', () => {
       }));
     });
 
-    const row = container.querySelector('[data-testid="tool-call-row"]') as HTMLElement | null;
+    const row = container.querySelector('[data-testid="tool-call-row"]');
     expect(row).not.toBeNull();
     expect(row?.outerHTML).not.toMatch(/(blue|emerald|amber|violet|rose|cyan|sky|indigo)-/);
     expect(row?.outerHTML).toContain('text-text-secondary');

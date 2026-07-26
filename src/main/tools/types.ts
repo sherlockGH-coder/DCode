@@ -197,11 +197,11 @@ export class ToolRegistry {
       }
 
       if (!shouldSkipToolApproval(name, ctx, executor, outOfScope)) {
-        const approvalKind = approvalKindFor(name, args);
+        const approvalKind = approvalKindFor(name);
         if (approvalKind) {
 
           if (outOfScope && isPathAllowedInSession(ctx.conversationId, outOfScope.absolutePath)) {
-
+            // 本会话已经放行过该路径，直接执行
           } else if (ctx.approvalPolicy === 'auto-deny') {
 
             return {
@@ -211,7 +211,7 @@ export class ToolRegistry {
               error: true,
             };
           } else if (ctx.approvalPolicy === 'auto-approve') {
-
+            // 策略是自动批准，无需询问
           } else {
 
             const diffPreview = await approvalDiffPreview(name, args, ctx);
@@ -279,7 +279,7 @@ export class ToolRegistry {
   }
 }
 
-export const PLAN_MODE_ALLOWED_TOOLS = new Set([
+const PLAN_MODE_ALLOWED_TOOLS = new Set([
   'read_file',
   'grep',
   'glob',
@@ -338,7 +338,7 @@ function shouldSkipToolApproval(
   if (name === 'bash_exec') return false;
   if (name === 'ask_user_question') return true;
   if (LOCAL_STATE_TOOLS.has(name)) return true;
-  if (isApprovalFreeReadonlyTool(name, executor)) return true;
+  if (isApprovalFreeReadonlyTool(name)) return true;
   if (isProjectScopedReadonlyTool(name) && !outOfScope) return true;
   if (ctx.subAgent && isAllowedSubAgentTool(name, executor) && !outOfScope) return true;
 
@@ -351,12 +351,11 @@ function shouldSkipToolApproval(
   return false;
 }
 
-function isApprovalFreeReadonlyTool(name: string, executor: ToolExecutor): boolean {
-  if (APPROVAL_FREE_READONLY_TOOLS.has(name)) return true;
-  return false;
+function isApprovalFreeReadonlyTool(name: string): boolean {
+  return APPROVAL_FREE_READONLY_TOOLS.has(name);
 }
 
-function approvalKindFor(name: string, args: Record<string, unknown>): ApprovalRequest['kind'] | null {
+function approvalKindFor(name: string): ApprovalRequest['kind'] | null {
   switch (name) {
     case 'read_file':   return 'read_file';
     case 'write_file':  return 'write_file';
@@ -400,7 +399,7 @@ function approvalDisplayText(name: string, args: Record<string, unknown>): strin
 }
 
 function approvalDescriptionText(name: string, args: Record<string, unknown>): string | undefined {
-  if (approvalKindFor(name, args) === 'external_tool') {
+  if (approvalKindFor(name) === 'external_tool') {
     const preview = JSON.stringify(args).slice(0, 240);
     return preview ? `参数: ${preview}` : undefined;
   }
@@ -430,9 +429,7 @@ async function approvalDiffPreview(
           oldStartLine = content.slice(0, idx).split('\n').length;
         }
       }
-    } catch {
-
-    }
+    } catch {}
 
     return buildLineDiff(oldStr, newStr, oldStartLine, oldStartLine);
   }

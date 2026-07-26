@@ -191,7 +191,16 @@
 }
 
 .sidebar-frame {
-  position: relative;
+  /* 开合动画期间内容保持目标宽度：外壳只负责裁剪，呈现“整体滑出”而非逐帧压缩重排。
+     右锚定用绝对定位实现——flex 的 auto margin 在负剩余空间下会归零，锚不住。 */
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: var(--panel-size, 100%);
+}
+
+.right-panel-card-frame {
+  /* 同理：默认左锚定即可，折叠时整体向右滑出 */
+  width: var(--panel-size, 100%);
 }
 
 .mobile-sidebar-scrim {
@@ -229,6 +238,13 @@
     border: 0;
     background: rgba(0, 0, 0, 0.18);
     cursor: default;
+    opacity: 1;
+    transition: opacity 0.24s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .mobile-sidebar-scrim--hidden {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .dark .mobile-sidebar-scrim {

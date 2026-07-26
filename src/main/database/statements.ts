@@ -60,6 +60,14 @@ export function prepareStatements(database: Database.Database): Record<string, D
       DELETE FROM conversations WHERE id = ?
     `),
 
+    deletePlanArtifacts: database.prepare(`
+      DELETE FROM plan_artifacts WHERE conversation_id = ?
+    `),
+
+    deletePlanExecutionRuns: database.prepare(`
+      DELETE FROM plan_execution_runs WHERE conversation_id = ?
+    `),
+
     addMessage: database.prepare(`
       INSERT INTO messages (id, conversation_id, role, content, tool_calls, tool_call_id, metadata, reasoning_content, attachments, name, error, usage, duration, turn_id, attempt_no, seq, content_blocks, context_epoch, origin, plan_artifact_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -73,16 +81,9 @@ export function prepareStatements(database: Database.Database): Record<string, D
       DELETE FROM messages WHERE conversation_id = ?
     `),
 
-    getMaxAttemptNo: database.prepare(`
-      SELECT MAX(attempt_no) as maxNo FROM messages WHERE conversation_id = ? AND turn_id = ?
-    `),
-
     updateActiveAttempts: database.prepare(`
       UPDATE conversations SET active_attempts = ? WHERE id = ?
     `),
 
-    getAgentConversationsByRoot: database.prepare(`
-      SELECT * FROM conversations WHERE source = 'agent' AND root_conversation_id = ? ORDER BY updated_at DESC
-    `),
   };
 }

@@ -36,20 +36,11 @@ const WORKSPACE_MENU_CLASS = 'absolute right-0 top-full mt-1.5 z-[70] w-60 round
 const WORKSPACE_MENU_ITEM_CLASS = 'flex w-full items-center gap-3 rounded-[8px] border-0 bg-transparent px-2.5 py-2 text-left text-[13.5px] font-normal text-text-primary transition-colors hover:bg-bg-hover';
 const WORKSPACE_MENU_STATE_CLASS = 'px-3 py-3 text-center text-[12px] font-normal text-text-secondary';
 
-export interface RecentEdit {
-  path: string;
-  title: string;
-  diff: string;
-  label: string;
-}
-
 interface ArtifactPanelProps {
-  recentEdits?: RecentEdit[];
   activeProject?: string | null;
 }
 
 const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
-  recentEdits = [],
   activeProject = null,
 }) => {
   const { preview, setPreview, previews, activeTitle, setActiveTitle, closeTab, rightPanel, bottomPanel } = useAppContext();
@@ -193,7 +184,6 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
 
   const content = (
     <div className="flex flex-col h-full bg-bg-main">
-      {                               }
       <>
         <div className={`flex h-[44px] shrink-0 items-center justify-between bg-bg-main select-none py-1.5 pl-2.5 pr-2 ${!preview ? 'border-b border-hairline' : ''}`}>
           <div
@@ -262,7 +252,6 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5 [-webkit-app-region:no-drag]">
-            {                     }
             <button
               type="button"
               onClick={() => setFullscreen(!fullscreen)}
@@ -280,7 +269,6 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
               </svg>
             </button>
 
-            {                            }
             <button
               type="button"
               onClick={() => bottomPanel.setCollapsed(!bottomPanel.collapsed)}
@@ -291,7 +279,6 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
               <IconSidebarTerminal size={14} />
             </button>
 
-            {                                  }
             <button
               type="button"
               onClick={() => rightPanel.setCollapsed(!rightPanel.collapsed)}
@@ -366,7 +353,7 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleCopy();
+                          void handleCopy();
                         }}
                         className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-bg-hover transition-colors"
                       >
@@ -472,7 +459,6 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
         )}
       </>
 
-      {             }
       <div className="flex-1 overflow-auto bg-bg-main">
         {preview ? (
           contentEl

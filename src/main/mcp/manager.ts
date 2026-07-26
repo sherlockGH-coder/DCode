@@ -251,7 +251,7 @@ class McpManager {
     entry.registeredToolNames = [];
 
     if (entry.client) {
-      try { await entry.client.disconnect(); } catch {              }
+      try { await entry.client.disconnect(); } catch {}
       entry.client = null;
     }
   }

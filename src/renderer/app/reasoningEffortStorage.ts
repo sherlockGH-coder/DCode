@@ -13,7 +13,5 @@ export function persistReasoningEffort(effort: string | undefined): void {
       return;
     }
     localStorage.removeItem('reasoning-effort');
-  } catch {
-
-  }
+  } catch {}
 }

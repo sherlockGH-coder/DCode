@@ -1,7 +1,7 @@
 import type { ToolItem } from '../../shared/types';
 import { collapsePath } from './collapsePath';
 
-export interface ToolDescription {
+interface ToolDescription {
   /** 动作动词，sans-serif 渲染（"Ran" / "Reading" / "Finding files:"） */
   verb: string;
   /** 命令、路径、模式等可变内容，等宽字体渲染 */

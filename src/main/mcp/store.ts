@@ -61,7 +61,7 @@ export const mcpStore = {
   removeFile(scope: 'user' | 'project', projectRoot?: string): void {
     const filePath = scope === 'user' ? userPath() : (projectRoot ? projectPath(projectRoot) : null);
     if (filePath && existsSync(filePath)) {
-      try { unlinkSync(filePath); } catch {              }
+      try { unlinkSync(filePath); } catch {}
     }
   },
 

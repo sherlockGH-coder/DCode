@@ -109,7 +109,7 @@ describe('MessageBubble', () => {
       }));
     });
 
-    const bubble = container.querySelector('[data-testid="user-message-bubble"]') as HTMLElement | null;
+    const bubble = container.querySelector('[data-testid="user-message-bubble"]');
     expect(bubble).not.toBeNull();
 
     act(() => {
@@ -133,7 +133,7 @@ describe('MessageBubble', () => {
       }));
     });
 
-    const bubble = container.querySelector('[data-testid="user-message-bubble"]') as HTMLElement | null;
+    const bubble = container.querySelector('[data-testid="user-message-bubble"]');
     expect(bubble).not.toBeNull();
     expect(container.querySelector('button[title="编辑消息"]')).toBeNull();
     expect(container.querySelector('button[title="复制内容"]')).toBeNull();
@@ -142,12 +142,12 @@ describe('MessageBubble', () => {
       bubble?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    const textarea = container.querySelector('textarea[placeholder="编辑消息..."]') as HTMLTextAreaElement | null;
+    const textarea = container.querySelector<HTMLTextAreaElement>('textarea[placeholder="编辑消息..."]');
     expect(textarea).not.toBeNull();
     expect(textarea?.value).toBe('你是谁?');
 
-    const composer = container.querySelector('[data-testid="chat-input-composer"]') as HTMLElement | null;
-    const sendButton = container.querySelector('button[aria-label="发送"]') as HTMLButtonElement | null;
+    const composer = container.querySelector('[data-testid="chat-input-composer"]');
+    const sendButton = container.querySelector('button[aria-label="发送"]');
     expect(composer).not.toBeNull();
     expect(composer?.textContent).toContain('deepseek-v4-flash');
     expect(sendButton).not.toBeNull();
@@ -168,14 +168,14 @@ describe('MessageBubble', () => {
       }));
     });
 
-    const bubble = container.querySelector('[data-testid="user-message-bubble"]') as HTMLElement | null;
+    const bubble = container.querySelector('[data-testid="user-message-bubble"]');
     expect(bubble).not.toBeNull();
 
     act(() => {
       bubble?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    const composer = container.querySelector('[data-testid="chat-input-composer"]') as HTMLElement | null;
+    const composer = container.querySelector('[data-testid="chat-input-composer"]');
     expect(composer).not.toBeNull();
 
     act(() => {
@@ -254,8 +254,8 @@ describe('MessageBubble', () => {
       }));
     });
 
-    const unorderedList = container.querySelector('ul.markdown-list-unordered') as HTMLElement | null;
-    const orderedList = container.querySelector('ol.markdown-list-ordered') as HTMLElement | null;
+    const unorderedList = container.querySelector('ul.markdown-list-unordered');
+    const orderedList = container.querySelector('ol.markdown-list-ordered');
     expect(unorderedList).not.toBeNull();
     expect(orderedList).not.toBeNull();
     expect(unorderedList?.querySelectorAll('li')).toHaveLength(2);
@@ -276,7 +276,7 @@ describe('MessageBubble', () => {
       }));
     });
 
-    const link = container.querySelector('a.markdown-local-ref') as HTMLAnchorElement | null;
+    const link = container.querySelector('a.markdown-local-ref');
     expect(link).not.toBeNull();
     expect(link?.getAttribute('href')).toBe('/Users/conan/project/src/example.ts:2');
 
