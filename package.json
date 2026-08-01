@@ -1,6 +1,6 @@
 {
   "name": "deepseek-app",
-  "version": "0.13.0",
+  "version": "0.0.1",
   "description": "DeepSeek 桌面聊天应用 — 基于 Electron + React",
   "productName": "DeepSeek",
   "main": "./out/main/index.js",
