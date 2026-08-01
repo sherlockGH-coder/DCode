@@ -23,7 +23,7 @@ jobs:
         include:
           - name: macOS (Apple Silicon)
             os: macos-14
-            package_cmd: pnpm package
+            package_cmd: pnpm package --publish never
             artifact_name: DeepSeek-macOS-arm64
             artifact_path: |
               release/*.dmg
@@ -31,7 +31,7 @@ jobs:
               release/latest-mac.yml
           - name: Windows x64
             os: windows-2022
-            package_cmd: pnpm package-win
+            package_cmd: pnpm package-win --publish never
             artifact_name: DeepSeek-Windows-x64
             artifact_path: |
               release/*.exe
