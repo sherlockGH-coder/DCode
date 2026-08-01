@@ -5,6 +5,8 @@ DeepSeek App is a local-first desktop coding assistant for working with software
 > [!IMPORTANT]
 > DeepSeek App is an independent open-source project. It is not affiliated with, endorsed by, or an official client of DeepSeek.
 
+![DeepSeek App home screen](docs/screenshots/home-dark.png)
+
 ## Capabilities
 
 - **Project-aware coding workflows** - Open a local project, inspect its structure, search and read files, apply edits, and run commands without leaving the conversation.
@@ -15,6 +17,18 @@ DeepSeek App is a local-first desktop coding assistant for working with software
 - **Integrated development surfaces** - Review tool activity and file changes, preview common file types, use the built-in terminal, and undo eligible edits from a conversation turn.
 - **Rich input and context** - Attach files and images, use optional voice transcription and vision models, and compact long conversations when they approach the configured context limit.
 - **Local persistence** - Store conversations, projects, tasks, and settings on the local machine. API keys are kept out of the renderer process and use platform secure storage when available.
+- **Benchmark harness** - Run the same agent loop headlessly against terminal-bench 2.0 through a Harbor adapter (see [Terminal-Bench 2.0](#terminal-bench-20)).
+
+![Agent conversation with web search and rendered results](docs/screenshots/chat-web-search.png)
+
+## Download
+
+Prebuilt packages are published on the [Releases page](https://github.com/sherlockGH-coder/DCode/releases):
+
+- macOS (Apple silicon): `DeepSeek-<version>-arm64.dmg`
+- Windows x64: `DeepSeek-<version>-x64.exe`
+
+Builds are not code-signed yet. On first launch, macOS requires allowing the app under **System Settings > Privacy & Security**, and Windows SmartScreen requires choosing **More info > Run anyway**.
 
 ## Requirements
 
