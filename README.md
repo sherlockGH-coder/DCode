@@ -5,7 +5,7 @@ DeepSeek App is a local-first desktop coding assistant for working with software
 > [!IMPORTANT]
 > DeepSeek App is an independent open-source project. It is not affiliated with, endorsed by, or an official client of DeepSeek.
 
-![DeepSeek App home screen](docs/screenshots/home-dark.png)
+![DeepSeek App home screen](docs/screenshots/home.png)
 
 ## Capabilities
 
