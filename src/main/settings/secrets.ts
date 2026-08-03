@@ -22,7 +22,7 @@ function encryptSecret(plaintext: string, label: string): SecretPatch | null {
     const buf = safeStorage.encryptString(trimmed);
     return { encrypted: buf.toString('base64'), plain: undefined };
   }
-  console.warn(`[settings] safeStorage 不可用，${label} 将以明文存储`);
+  console.warn(`[settings] safeStorage is unavailable; storing ${label} as plaintext`);
   return { encrypted: undefined, plain: trimmed };
 }
 
@@ -32,7 +32,7 @@ function decryptSecret(encrypted: string | undefined, label: string): string | n
     const buf = Buffer.from(encrypted, 'base64');
     return safeStorage.decryptString(buf);
   } catch (err) {
-    console.warn(`[settings] ${label} 解密失败:`, err);
+    console.warn(`[settings] Failed to decrypt ${label}:`, err);
     return null;
   }
 }
@@ -40,7 +40,7 @@ function decryptSecret(encrypted: string | undefined, label: string): string | n
 export function setApiKeyForProfile(state: PersistedShape, profileId: string, plaintext: string): void {
   const index = state.apiProfiles.findIndex((profile) => profile.id === profileId);
   if (index < 0) {
-    throw new Error(`API 配置不存在: ${profileId}`);
+    throw new Error(`API profile does not exist: ${profileId}`);
   }
   const secret = encryptSecret(plaintext, 'API Key');
   state.apiProfiles[index] = {

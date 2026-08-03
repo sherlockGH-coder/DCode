@@ -36,7 +36,7 @@ const NumberStepper: React.FC<{
       step={5}
       value={value}
       onChange={(event) => onChange(Number(event.target.value))}
-      aria-label="最长录音时长"
+      aria-label="Maximum recording duration"
     />
     <div className="relative w-[92px] shrink-0">
       <input
@@ -48,7 +48,7 @@ const NumberStepper: React.FC<{
         onChange={(event) => onChange(Number(event.target.value))}
       />
       <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[11.5px] font-semibold text-[#8E8E93]">
-        秒
+        seconds
       </span>
     </div>
   </div>
@@ -67,7 +67,7 @@ const SummaryItem: React.FC<{ label: string; value: string; muted?: boolean }> =
 
 const SpeechSummary: React.FC<{ speech: AppSettings['speech']; clearKey: boolean }> = ({ speech, clearKey }) => {
   const ready = speech.apiKeySet && !clearKey;
-  const languageLabel = speech.language.trim() || '自动检测';
+  const languageLabel = speech.language.trim() || 'Auto-detect';
 
   return (
     <SettingsGroup className="overflow-visible">
@@ -78,15 +78,15 @@ const SpeechSummary: React.FC<{ speech: AppSettings['speech']; clearKey: boolean
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="truncate text-[14px] font-semibold text-[#1D2127] dark:text-white">麦克风转写</p>
-              <StatusPill tone={ready ? 'blue' : 'amber'} label={ready ? '已连接' : '需要密钥'} />
+              <p className="truncate text-[14px] font-semibold text-[#1D2127] dark:text-white">Microphone transcription</p>
+              <StatusPill tone={ready ? 'blue' : 'amber'} label={ready ? 'Connected' : 'Key required'} />
             </div>
             <p className="mt-1 truncate text-[12.5px] font-medium text-[#8E8E93] dark:text-white/42">
-              {speech.baseUrl || '未设置 Base URL'}
+              {speech.baseUrl || 'Base URL not set'}
             </p>
           </div>
         </div>
-        <SummaryItem label="Model" value={speech.model || '未设置'} muted={!speech.model} />
+        <SummaryItem label="Model" value={speech.model || 'Not set'} muted={!speech.model} />
         <SummaryItem label="Language" value={languageLabel} muted={!speech.language.trim()} />
       </div>
     </SettingsGroup>
@@ -134,7 +134,7 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
       setClearKey(false);
       showSaved();
     } catch (err) {
-      setError((err as Error).message || '保存失败');
+      setError((err as Error).message || 'Failed to save');
       setSaveState('idle');
     }
   };
@@ -142,37 +142,37 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
   const patchSpeech = (next: AppSettingsPatch['speech']) => {
     setError(null);
     void patch({ speech: next }).catch((err) => {
-      setError((err as Error).message || '保存失败');
+      setError((err as Error).message || 'Failed to save');
     });
   };
 
   return (
     <div className="pb-10">
       <SettingsPageHeader
-        title="语音输入"
+        title="Voice input"
         action={<SavePill state={saveState} error={error} />}
       />
 
       <div className="space-y-9">
         <section>
           <SectionTitle
-            aside={<StatusPill tone={isKeyConfigured ? 'blue' : 'neutral'} label={isKeyConfigured ? '转写可用' : '等待配置'} />}
+            aside={<StatusPill tone={isKeyConfigured ? 'blue' : 'neutral'} label={isKeyConfigured ? 'Transcription available' : 'Waiting for configuration'} />}
           >
-            当前状态
+            Current status
           </SectionTitle>
           <SpeechSummary speech={speech} clearKey={clearKey} />
         </section>
 
         <section>
           <SectionTitle
-            aside={<StatusPill tone={isKeyConfigured ? 'blue' : 'neutral'} label={isKeyConfigured ? '密钥已配置' : '未配置密钥'} />}
+            aside={<StatusPill tone={isKeyConfigured ? 'blue' : 'neutral'} label={isKeyConfigured ? 'Key configured' : 'Key not configured'} />}
           >
-            服务端点
+            Service endpoint
           </SectionTitle>
           <SettingsGroup>
             <SettingsRow
               title="Provider"
-              description="语音转文字接口协议"
+              description="Speech-to-text API protocol"
               icon={<IconMicrophone size={15} className="text-current" />}
             >
               <select
@@ -185,7 +185,7 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
             </SettingsRow>
             <SettingsRow
               title="Base URL"
-              description="例如 OpenAI 或本地兼容服务的地址"
+              description="For example, an OpenAI-compatible or local service URL"
               icon={<IconGlobe size={15} className="text-current" />}
             >
               <input
@@ -200,17 +200,17 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
 
         <section>
           <SectionTitle
-            aside={hasPendingSecretChange ? <StatusPill tone="amber" label="待保存" /> : undefined}
+            aside={hasPendingSecretChange ? <StatusPill tone="amber" label="Unsaved changes" /> : undefined}
           >
-            身份认证
+            Authentication
           </SectionTitle>
           <SettingsGroup>
             <SettingsRow
               title="API Key"
               description={
                 speech.apiKeySet
-                  ? '留空保持当前密钥，输入新值会替换已保存密钥'
-                  : '本地 localhost 服务可留空'
+                  ? 'Leave empty to keep the current key; enter a new value to replace it'
+                  : 'Can be left empty for a local localhost service'
               }
               icon={<IconKey size={15} className="text-current" />}
               tall
@@ -225,7 +225,7 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
                     setKeyDraft(next);
                     setClearKey(false);
                   }}
-                  placeholder={speech.apiKeySet ? '输入新密钥以替换' : 'sk-...'}
+                  placeholder={speech.apiKeySet ? 'Enter a new key to replace it' : 'sk-...'}
                   autoComplete="off"
                   spellCheck={false}
                 />
@@ -240,14 +240,14 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
                       }}
                       className="h-3.5 w-3.5 accent-[#3897F8]"
                     />
-                    清除已保存的密钥
+                    Clear the saved key
                   </label>
                 )}
               </div>
             </SettingsRow>
             <SettingsRow
-              title="密钥更改"
-              description={hasPendingSecretChange ? '保存后才会替换或清除本地密钥' : '普通转写参数会自动保存，密钥不会回显'}
+              title="Key changes"
+              description={hasPendingSecretChange ? 'The local key will be replaced or cleared after saving' : 'Regular transcription settings save automatically; the key is never shown'}
               icon={<IconKey size={15} className="text-current" />}
             >
               <div className="flex items-center justify-end gap-2">
@@ -260,7 +260,7 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
                     }}
                     disabled={saveState === 'saving'}
                   >
-                    取消
+                    Cancel
                   </SecondaryButton>
                 )}
                 <PrimaryButton
@@ -268,7 +268,7 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
                   onClick={handleSave}
                   disabled={saveState === 'saving' || !hasPendingSecretChange}
                 >
-                  {saveState === 'saving' ? '保存中...' : '保存更改'}
+                  {saveState === 'saving' ? 'Saving...' : 'Save changes'}
                 </PrimaryButton>
               </div>
             </SettingsRow>
@@ -276,11 +276,11 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
         </section>
 
         <section>
-          <SectionTitle>转写配置</SectionTitle>
+          <SectionTitle>Transcription settings</SectionTitle>
           <SettingsGroup>
             <SettingsRow
               title="Model"
-              description="转写模型名称"
+              description="Transcription model name"
               icon={<IconBolt size={15} className="text-current" />}
             >
               <input
@@ -290,7 +290,7 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
                 placeholder="whisper-1"
               />
             </SettingsRow>
-            <SettingsRow title="Language" description="留空时由服务自动检测语言">
+            <SettingsRow title="Language" description="Leave empty to let the service detect the language">
               <input
                 className={settingsMonoInputClass}
                 value={speech.language}
@@ -299,8 +299,8 @@ const SpeechSection: React.FC<Props> = ({ settings, patch, setSpeechApiKey }) =>
               />
             </SettingsRow>
             <SettingsRow
-              title="最长录音时长"
-              description="限制单次语音输入的录音窗口"
+              title="Maximum recording duration"
+              description="Limit the recording window for a single voice input"
               icon={<IconClock size={15} className="text-current" />}
             >
               <NumberStepper

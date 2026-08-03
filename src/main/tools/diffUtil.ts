@@ -4,11 +4,11 @@ interface DiffEntry {
 }
 
 /**
- * 生成两段文本的 LCS-based 行 diff。
- * 返回 unified-diff 字符串（首行 @@ header，后续行以 ' ' / '+' / '-' 开头）。
+ * Generate an LCS-based line diff between two text blocks.
+ * Return a unified-diff string with an @@ header followed by lines starting with ' ', '+', or '-'.
  *
- * @param oldStartLine oldText 在原始文件中的起始行号（1-based）
- * @param newStartLine newText 在目标文件中的起始行号（1-based）
+ * @param oldStartLine Starting line number of oldText in the original file, 1-based.
+ * @param newStartLine Starting line number of newText in the target file, 1-based.
  */
 export function buildLineDiff(
   oldText: string,
@@ -59,7 +59,7 @@ export function buildLineDiff(
   }).join('\n');
 }
 
-/** 整段视为新增（用于新文件 writeFile） */
+/** Treat the entire block as added, used for a new file write. */
 export function buildAllAddedDiff(text: string, startLine = 1): string {
   const lines = text.split('\n');
   const header = `@@ -0,0 +${startLine},${lines.length} @@`;

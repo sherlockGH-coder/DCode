@@ -26,22 +26,22 @@ interface SendMessageOptions {
   attachments?: Attachment[];
   conversationId: string | null;
   existingMessages: Message[];
-  /** 当前 conversation 每个 turn 的激活 attempt（用于过滤上下文） */
+  /** Active attempt for each turn in the current conversation, used to filter context. */
   activeAttempts: Record<string, number>;
   selectedModel: string;
-  /** 当前激活项目路径；新对话会绑定到此项目 */
+  /** Current active project path; new conversations are bound to it. */
   activeProject: string | null;
-  /** 工厂：给定 convId 返回绑定该对话的 setMessages */
+  /** Factory: return the setMessages function bound to a conversation ID. */
   bindSetMessages: (convId: string) => (updater: (prev: Message[]) => Message[]) => void;
   onConversationCreated?: (convId: string) => void;
   onConversationsReload?: () => Promise<void>;
-  /** 思考深度：high / max；不传 = 关闭思考 */
+  /** Reasoning effort: high or max; omit to disable reasoning. */
   reasoningEffort?: string;
   /**
-   * 重试模式：
-   *   - retryTurnId：要重新生成的 user 消息 id（同时也是 turnId）
-   *   - retryAttemptNo：本次新 attempt 的序号（= max(existing attemptNo for turn) + 1）
-   * 同时设置则进入重试分支：跳过 user 消息创建、激活态切到新 attempt、过滤掉该 turn 的旧 assistant/tool。
+   * Retry mode:
+   *   - retryTurnId: user message ID to regenerate, which is also the turnId.
+   *   - retryAttemptNo: sequence number for this new attempt (= max(existing attemptNo for turn) + 1).
+   * When both are set, enter the retry branch: skip creating a user message, switch to the new active attempt, and filter out the old assistant/tool messages for that turn.
   */
   retryTurnId?: string;
   retryAttemptNo?: number;
@@ -65,7 +65,7 @@ export function useMessages() {
     void window.deepseekApi.abortChat(conversationId ?? undefined);
   }, []);
 
-  /** 检查指定对话是否有活跃请求 */
+  /** Check whether the specified conversation has an active request. */
   const isConversationActive = useCallback((convId: string) => {
     return activeRequestsRef.current.has(convId);
   }, []);
@@ -100,14 +100,14 @@ export function useMessages() {
         if (!req) continue;
         if (shouldAutoApproveApproval(approvalReq)) {
           window.deepseekApi.approvalRespond(approvalReq.toolCallId, true).catch((err) => {
-            console.error('[useMessages] restored session auto-approve 失败:', err);
+            console.error('[useMessages] Restored session auto-approval failed:', err);
           });
           continue;
         }
         req.setMessages((prev) => applyApprovalToMessages(prev, approvalReq, req));
       }
     } catch (err) {
-      console.warn('[useMessages] 恢复 pending approval 失败:', err);
+          console.warn('[useMessages] Failed to restore pending approval:', err);
     }
   }, [getOrCreateActiveRequestForApproval]);
 
@@ -160,7 +160,7 @@ export function useMessages() {
           await onConversationsReload?.();
         } else {
 
-          alert('当前对话还不够长，暂时没有需要压缩的历史内容。');
+          alert('This conversation is not long enough to have history that needs compacting.');
         }
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
@@ -168,7 +168,7 @@ export function useMessages() {
           const updated = [...prev];
           const last = updated[updated.length - 1];
           if (last && last.role === 'assistant') {
-            updated[updated.length - 1] = { ...last, content: `Compact 失败: ${errMsg}` };
+            updated[updated.length - 1] = { ...last, content: `Compact failed: ${errMsg}` };
           }
           return updated;
         });
@@ -186,7 +186,7 @@ export function useMessages() {
 
     try {
       const isFirstMessageInConversation = !isRetry && existingMessages.length === 0;
-      const rawTitle = userInput.trim() || attachments?.[0]?.name || '附件';
+          const rawTitle = userInput.trim() || attachments?.[0]?.name || 'Attachment';
       const title = formatSlashCommandsForTitle(rawTitle).slice(0, 20);
 
       if (!currentConvId) {
@@ -198,7 +198,7 @@ export function useMessages() {
           await window.deepseekApi.updateConversationTitle(currentConvId, title);
           await onConversationsReload?.();
         } catch (err) {
-          console.warn('[useMessages] 更新预创建对话标题失败:', err);
+          console.warn('[useMessages] Failed to update the pre-created conversation title:', err);
         }
       }
 
@@ -338,17 +338,17 @@ export function useMessages() {
             pendingAttemptNo,
           );
         } catch (persistError) {
-          console.error('[useMessages] 持久化发送错误失败:', persistError);
+          console.error('[useMessages] Failed to persist send error:', persistError);
         }
       }
     }
   }, []);
 
   /**
-   * 审批确认：立即响应 + 将 ToolItem 状态从 awaiting_approval 改回 running
-   * 这样 ApprovalPanel 马上消失，用户可以继续审批下一个，工具在后台执行
+   * Approval confirmation: respond immediately and change the ToolItem state from awaiting_approval back to running.
+   * This removes ApprovalPanel immediately so the user can approve the next item while the tool runs in the background.
    *
-   * @param answers - AskUserQuestion 专用：用户作答映射
+   * @param answers - Answer mapping for AskUserQuestion.
    */
   const handleApprovalConfirm = useCallback((
     toolCallId: string,
@@ -361,7 +361,7 @@ export function useMessages() {
     window.deepseekApi
       .approvalRespond(toolCallId, allowed, feedback, rememberForSession, scope, answers)
       .catch((err) => {
-        console.error('[useMessages] approvalRespond 失败:', err);
+        console.error('[useMessages] approvalRespond failed:', err);
       });
     if (allowed) {
 

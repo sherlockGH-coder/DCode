@@ -7,13 +7,13 @@ import { ChevronGlyph } from './tool-item-card/chrome';
 type PlanArtifactItem = Extract<ToolItem, { kind: 'plan_artifact' }>;
 
 const STATUS_BADGES: Record<PlanArtifact['status'], { label: string; className: string }> = {
-  pending_approval: { label: '待审批', className: 'bg-accent-bg text-accent' },
-  approved: { label: '已批准', className: 'bg-diff-add-bg text-diff-add' },
-  rejected: { label: '已拒绝', className: 'bg-diff-del-bg text-diff-del' },
-  superseded: { label: '已作废', className: 'bg-bg-chip text-text-tertiary' },
+  pending_approval: { label: 'Awaiting approval', className: 'bg-accent-bg text-accent' },
+  approved: { label: 'Approved', className: 'bg-diff-add-bg text-diff-add' },
+  rejected: { label: 'Rejected', className: 'bg-diff-del-bg text-diff-del' },
+  superseded: { label: 'Superseded', className: 'bg-bg-chip text-text-tertiary' },
 };
 
-/** 聊天流中的计划留档卡片：折叠显示标题与状态，展开渲染完整计划 */
+/** Plan artifact card in the chat stream: show title/status collapsed and the full plan when expanded. */
 const PlanArtifactCard: React.FC<{ item: PlanArtifactItem }> = ({ item }) => {
   const [open, setOpen] = useState(false);
   const [plan, setPlan] = useState<PlanArtifact | undefined>(item.plan);
@@ -22,7 +22,7 @@ const PlanArtifactCard: React.FC<{ item: PlanArtifactItem }> = ({ item }) => {
     setPlan(item.plan);
   }, [item.plan]);
 
-  // 决策会改变计划状态；跟随 mode state 变化拉取最新状态
+  // Decisions change the plan status, so refresh when the mode state changes.
   useEffect(() => {
     const planId = item.plan?.id;
     if (!planId) return;
@@ -46,7 +46,7 @@ const PlanArtifactCard: React.FC<{ item: PlanArtifactItem }> = ({ item }) => {
     };
   }, [item.plan?.id, item.plan?.conversationId]);
 
-  const title = plan?.title ?? item.title ?? '实施计划';
+  const title = plan?.title ?? item.title ?? 'Implementation plan';
   const badge = plan ? STATUS_BADGES[plan.status] : undefined;
 
   return (
@@ -57,7 +57,7 @@ const PlanArtifactCard: React.FC<{ item: PlanArtifactItem }> = ({ item }) => {
         className="flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent px-3.5 py-2.5 text-left transition-colors hover:bg-bg-hover"
       >
         <IconPlan size={14} className="shrink-0 text-text-secondary" />
-        <span className="shrink-0 text-[12px] font-medium text-text-secondary">实施计划</span>
+        <span className="shrink-0 text-[12px] font-medium text-text-secondary">Implementation plan</span>
         <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-text-primary" title={title}>
           {title}
         </span>
@@ -80,7 +80,7 @@ const PlanArtifactCard: React.FC<{ item: PlanArtifactItem }> = ({ item }) => {
           {plan ? (
             <MarkdownBlock text={plan.markdown} isTail={false} components={{}} />
           ) : (
-            <p className="m-0 text-[12px] text-text-tertiary">计划内容不可用</p>
+            <p className="m-0 text-[12px] text-text-tertiary">Plan content is unavailable</p>
           )}
         </div>
       )}

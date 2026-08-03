@@ -74,7 +74,7 @@ describe('ToolItemCard', () => {
     expect(row?.outerHTML).toContain('h-7');
     expect(row?.outerHTML).toContain('bg-transparent');
     expect(row?.outerHTML).toContain('border-0');
-    expect(row?.textContent).toContain('已编辑');
+    expect(row?.textContent).toContain('Edited');
     expect(row?.textContent).toContain('ToolItemCard.tsx');
     expect(row?.textContent).toContain('+4');
     expect(row?.textContent).toContain('-2');
@@ -102,11 +102,11 @@ describe('ToolItemCard', () => {
 
     const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row).not.toBeNull();
-    expect(row?.textContent).toContain('已运行');
+    expect(row?.textContent).toContain('Ran');
     expect(row?.textContent).toContain('pnpm run dev');
-    expect(row?.textContent).not.toContain('15.7秒');
-    expect(row?.textContent).toContain('失败');
-    expect(row?.textContent).not.toContain('成功');
+    expect(row?.textContent).not.toContain('15.7s');
+    expect(row?.textContent).toContain('Failed');
+    expect(row?.textContent).not.toContain('Succeeded');
     expect(container.querySelector('[data-testid="tool-item-status"]')).toBeNull();
     expect(row?.outerHTML).not.toMatch(/(blue|emerald|amber|violet|rose|cyan|sky|indigo)-/);
     expect(row?.outerHTML).toContain('text-text-tertiary');
@@ -124,7 +124,7 @@ describe('ToolItemCard', () => {
     expect(detail?.className).not.toContain('ml-[25px]');
     expect(panel?.textContent).toContain('$ pnpm run dev');
     expect(panel?.textContent).toContain('electron-vite dev');
-    expect(panel?.textContent).toContain('退出码 1');
+    expect(panel?.textContent).toContain('Exit code 1');
   });
 
   it('does not show an inline status while a tool is executing', () => {
@@ -145,7 +145,7 @@ describe('ToolItemCard', () => {
     const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row).not.toBeNull();
     expect(container.querySelector('[data-testid="tool-item-status"]')).toBeNull();
-    expect(row?.textContent).not.toContain('执行中');
+    expect(row?.textContent).not.toContain('Running status');
   });
 
   it('frames only the expanded load_skill body', () => {
@@ -156,7 +156,7 @@ describe('ToolItemCard', () => {
       kind: 'tool',
       toolName: 'load_skill',
       input: JSON.stringify({ name: 'git-autocommit' }),
-      output: '# Skill: git-autocommit\n\n自动分析 Git 工作区变更。',
+      output: '# Skill: git-autocommit\n\nAutomatically analyze Git workspace changes.',
       status: 'done',
       timestamp: 0,
     };
@@ -213,7 +213,7 @@ describe('ToolItemCard', () => {
   it('frames expanded sub-agent details without changing the summary row', () => {
     const item: ToolItem = {
       id: 'agent-call_frame', toolCallId: 'call_agent_frame', name: 'spawn_agent', kind: 'agent',
-      action: 'spawn', agentId: 'agent-1', taskName: '检查回归', output: '{"agent":{"id":"agent-1"}}',
+      action: 'spawn', agentId: 'agent-1', taskName: 'Check regressions', output: '{"agent":{"id":"agent-1"}}',
       status: 'done', timestamp: 0,
     };
 
@@ -236,7 +236,7 @@ describe('ToolItemCard', () => {
       status: 'awaiting_approval',
       timestamp: 0,
       command: 'cd /Users/conan/Code/Learn && ls -la',
-      approvalDescription: '列出 Learn 目录内容',
+      approvalDescription: 'List the contents of the Learn directory',
     };
 
     act(() => {
@@ -246,9 +246,9 @@ describe('ToolItemCard', () => {
     const row = container.querySelector('[data-testid="tool-item-row"]');
 
     expect(row).not.toBeNull();
-    expect(row?.textContent).toContain('已运行');
+    expect(row?.textContent).toContain('Ran');
     expect(row?.textContent).toContain('cd /Users/conan/Code/Learn && ls -la');
-    expect(row?.textContent).not.toContain('待确认');
+    expect(row?.textContent).not.toContain('Awaiting approval');
     expect(container.querySelector('[data-testid="tool-item-status"]')).toBeNull();
   });
 
@@ -278,8 +278,8 @@ describe('ToolItemCard', () => {
 
     const panel = container.querySelector('[data-testid="exec-output-panel"]');
     expect(panel).not.toBeNull();
-    expect(panel?.textContent).not.toContain('成功');
-    expect(panel?.textContent).not.toContain('退出码 0');
+    expect(panel?.textContent).not.toContain('Succeeded');
+    expect(panel?.textContent).not.toContain('Exit code 0');
   });
 
   it('unwraps login shell commands and copies the visible shell transcript', async () => {
@@ -351,9 +351,9 @@ describe('ToolItemCard', () => {
 
     const row = container.querySelector('[data-testid="tool-item-row"]');
     expect(row).not.toBeNull();
-    expect(row?.textContent).toContain('已读取');
+    expect(row?.textContent).toContain('Read');
     expect(row?.textContent).toContain('TerminalPanel.tsx');
-    expect(row?.textContent).not.toContain('422 行');
+    expect(row?.textContent).not.toContain('422 rows');
     expect(row?.textContent).not.toContain('src/renderer/components/TerminalPanel.tsx');
     expect(row?.outerHTML).toContain('text-text-secondary');
     expect(row?.querySelector('.material-icon')).toBeNull();
@@ -407,14 +407,14 @@ describe('ToolItemCard', () => {
       status: 'done',
       timestamp: 0,
       agentId: 'agent-1',
-      taskName: '探索权限控制结构',
+      taskName: 'Explore the permission control structure',
       agentStatus: 'running',
       timedOut: true,
       output: JSON.stringify({
         agent: {
           id: 'agent-1',
           conversationId: 'conv-agent-1',
-          taskName: '探索权限控制结构',
+          taskName: 'Explore the permission control structure',
           role: 'architecture-reader',
           status: 'running',
         },
@@ -427,7 +427,7 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    expect(container.textContent).toContain('后台运行中');
+    expect(container.textContent).toContain('Running in background');
 
     const row = container.querySelector('button') as HTMLElement | null;
     act(() => {
@@ -436,7 +436,7 @@ describe('ToolItemCard', () => {
 
     expect(container.textContent).toContain('agent_id');
     expect(container.textContent).toContain('agent-1');
-    expect(container.textContent).toContain('稍后用 wait_agent');
+    expect(container.textContent).toContain('Use wait_agent');
     expect(container.textContent).toContain('Sub-agent is still running in background.');
     expect(container.textContent).not.toContain('"agent"');
     expect(container.textContent).not.toContain('"conversationId"');
@@ -456,14 +456,14 @@ describe('ToolItemCard', () => {
           {
             id: 'agent-1',
             conversationId: 'conv-agent-1',
-            taskName: '权限控制调研',
+            taskName: 'Research permission controls',
             role: 'code-reader',
             status: 'completed',
           },
           {
             id: 'agent-2',
             conversationId: 'conv-agent-2',
-            taskName: '工具展示检查',
+            taskName: 'Check tool rendering',
             role: 'ui-reader',
             status: 'running',
           },
@@ -475,16 +475,16 @@ describe('ToolItemCard', () => {
       root?.render(React.createElement(ToolItemCard, { item }));
     });
 
-    expect(container.textContent).toContain('子 Agent');
-    expect(container.textContent).toContain('2 个子 Agent');
+    expect(container.textContent).toContain('Child agent');
+    expect(container.textContent).toContain('2 child agents');
 
     const row = container.querySelector('button') as HTMLElement | null;
     act(() => {
       row?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    expect(container.textContent).toContain('权限控制调研');
-    expect(container.textContent).toContain('工具展示检查');
+    expect(container.textContent).toContain('Research permission controls');
+    expect(container.textContent).toContain('Check tool rendering');
     expect(container.textContent).not.toContain('"agents"');
     expect(container.textContent).not.toContain('"conversationId"');
   });
@@ -508,7 +508,7 @@ describe('ToolItemCard', () => {
     });
 
     const row = container.querySelector('[data-testid="tool-item-row"]');
-    expect(row?.textContent).toContain('已编辑');
+    expect(row?.textContent).toContain('Edited');
     expect(row?.textContent).toContain('ToolItemCard.tsx');
     expect(row?.textContent).toContain('+4');
     expect(row?.textContent).toContain('-2');
@@ -544,7 +544,7 @@ describe('ToolItemCard', () => {
     });
 
     const row = container.querySelector('[data-testid="tool-item-row"]');
-    expect(row?.textContent).toContain('已创建');
+    expect(row?.textContent).toContain('Created');
     expect(row?.textContent).toContain('NewFile.tsx');
     expect(row?.textContent).toContain('+0');
     expect(row?.textContent).toContain('-0');
@@ -574,12 +574,12 @@ describe('ToolItemCard', () => {
         multiSelect: false,
       }],
       answers: { 'Which implementation should be used?': 'Robust' },
-      output: '用户已作答。',
+      output: 'The user has answered.',
     };
 
     act(() => root?.render(React.createElement(ToolItemCard, { item })));
     const row = container.querySelector('[data-testid="tool-item-row"]') as HTMLElement;
-    expect(row.textContent).toContain('已提问');
+    expect(row.textContent).toContain('Asked');
     expect(container.querySelector('[data-testid="ask-user-question-detail"]')).toBeNull();
 
     act(() => row.dispatchEvent(new window.Event('click', { bubbles: true })));
@@ -587,8 +587,8 @@ describe('ToolItemCard', () => {
     expect(detail.textContent).toContain('Which implementation should be used?');
     expect(detail.textContent).toContain('Robust');
     expect(detail.textContent).toContain('Minimal');
-    expect(detail.textContent).toContain('用户选择：Robust');
-    expect(detail.textContent).toContain('已完成');
+    expect(detail.textContent).toContain('User selection:Robust');
+    expect(detail.textContent).toContain('Completed');
   });
 
 });

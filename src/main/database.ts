@@ -33,10 +33,10 @@ function ensureInitialized(): void {
 
   initializeSchema(_db);
 
-  // 先清掉历史遗留的孤儿行，再打开外键强制，避免旧数据触发约束错误
+  // Remove legacy orphan rows before enabling foreign-key enforcement so old data does not violate constraints.
   applyMigrations(_db);
 
-  // 必须在事务之外设置，且要在建表/清理之后
+  // This must be set outside a transaction, after schema creation and cleanup.
   _db.pragma('foreign_keys = ON');
 
   _stmts = prepareStatements(_db);
@@ -50,8 +50,8 @@ export function getDbPath(): string { ensureInitialized(); return _dbPath!; }
 export function getRawDatabase(): Database.Database { ensureInitialized(); return _db!; }
 
 /**
- * 退出前把 WAL 回写并关闭连接。
- * 不调用也不会丢数据，但 WAL 文件会一直留在 userData 里持续变大。
+ * Flush the WAL and close the connection before exit.
+ * Data is not lost when this is not called, but the WAL file remains in userData and keeps growing.
  */
 export function closeDatabase(): void {
   if (!_db) return;
@@ -73,7 +73,7 @@ interface CreateConversationOptions {
   agentTaskName?: string | null;
 }
 
-/** 创建新对话，返回对话 ID。projectPath 可为 null（未归类）。 */
+/** Create a conversation and return its ID. projectPath may be null for an unassigned conversation. */
 export function createConversation(
   title: string,
   projectPath: string | null,
@@ -100,10 +100,10 @@ export function createConversation(
 }
 
 /**
- * 获取对话列表。
- * - 不传参数 = 全部对话
- * - 传项目路径 = 只取该项目下的对话
- * - 传 null = 只取未归类对话
+ * Get the conversation list.
+ * - no argument = all conversations;
+ * - project path = conversations in that project;
+ * - null = unassigned conversations only.
  */
 export function getConversations(projectPath?: string | null) {
   ensureInitialized();
@@ -117,7 +117,7 @@ export function getConversations(projectPath?: string | null) {
   }));
 }
 
-/** 取单条对话（用于从 IPC 中读 project_path） */
+/** Get one conversation, used to read project_path from IPC. */
 export function getConversationById(id: string) {
   ensureInitialized();
   const row = stmts().getConversationById.get(id) as any;
@@ -166,13 +166,13 @@ function safeJsonParse<T>(json: string | null | undefined, fallback: T): T {
   }
 }
 
-/** 更新对话标题 */
+/** Update a conversation title. */
 export function updateConversationTitle(id: string, title: string) {
   ensureInitialized();
   stmts().updateConversationTitle.run(title, id);
 }
 
-/** 更新对话的上下文摘要和压缩截止消息 ID */
+/** Update a conversation's context summary and compaction boundary message ID. */
 export function updateConversationSummary(id: string, summary: string | null, compactedToMessageId: string | null): void {
   ensureInitialized();
   stmts().updateConversationSummary.run(summary, compactedToMessageId, id);
@@ -184,10 +184,10 @@ export function updateAgentConversationStatus(id: string, status: AgentRunStatus
 }
 
 /**
- * 删除对话及其全部从属数据。
+ * Delete a conversation and all dependent data.
  *
- * 外键级联现在已启用，但这里仍显式删除并包在一个事务里：
- * 显式删除让顺序与意图可读，事务保证不会在中途崩溃后留下半删除的对话。
+ * Foreign-key cascading is enabled, but deletion remains explicit and transactional:
+ * the explicit order keeps intent readable, and the transaction prevents a crash from leaving a half-deleted conversation.
  */
 export function deleteConversation(id: string) {
   ensureInitialized();
@@ -200,7 +200,7 @@ export function deleteConversation(id: string) {
   })();
 }
 
-/** 添加消息。可传入 id 让外部预生成（保持 renderer / main / DB 三方 id 一致）；不传则自生成。 */
+/** Add a message. An external ID may be supplied to keep renderer, main, and DB IDs aligned; otherwise generate one. */
 export function addMessage(
   conversationId: string,
   role: 'user' | 'assistant' | 'tool',
@@ -254,7 +254,7 @@ export function addMessage(
   return finalId;
 }
 
-/** 获取某对话的所有消息 */
+/** Get all messages for a conversation. */
 export function getMessages(conversationId: string) {
   ensureInitialized();
   const rows = stmts().getMessages.all(conversationId) as any[];
@@ -275,7 +275,7 @@ export function getMessages(conversationId: string) {
   }));
 }
 
-/** 读取对话的激活 attempt 映射 */
+/** Read the conversation's active-attempt mapping. */
 export function getActiveAttempts(conversationId: string): Record<string, number> {
   ensureInitialized();
   const row = stmts().getConversationById.get(conversationId) as { active_attempts?: string | null } | undefined;
@@ -287,7 +287,7 @@ export function getActiveAttempts(conversationId: string): Record<string, number
   }
 }
 
-/** 整体覆盖对话的激活 attempt 映射 */
+/** Replace the conversation's active-attempt mapping. */
 export function setActiveAttempts(conversationId: string, map: Record<string, number>): void {
   ensureInitialized();
   db().transaction(() => {
@@ -310,7 +310,7 @@ export function setActiveAttempts(conversationId: string, map: Record<string, nu
   })();
 }
 
-/** 删除指定消息及之后所有消息（用于编辑重试截断） */
+/** Delete a message and all following messages, used to truncate edit-and-retry history. */
 export function deleteMessagesFromId(conversationId: string, messageId: string): void {
   ensureInitialized();
   const stmt = db().prepare(`
@@ -322,7 +322,7 @@ export function deleteMessagesFromId(conversationId: string, messageId: string):
   stmts().updateConversationTime.run(conversationId);
 }
 
-/** 删除指定 turn 及之后所有消息（用于撤销并回滚后续时间线） */
+/** Delete a turn and all following messages, used to undo and roll back the later timeline. */
 export function deleteMessagesFromTurn(conversationId: string, turnId: string): void {
   ensureInitialized();
 

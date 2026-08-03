@@ -2,8 +2,8 @@ import { getOSInfo } from './utils/timeUtils';
 import type { DeepseekMdSource } from './prompts';
 
 /**
- * 返回「每日稳定」的日期字符串（含时区）。
- * 日期会作为尾部 reminder 注入，仍保持天粒度，避免无意义的逐秒变化。
+ * Return a daily-stable date string with its timezone.
+ * The date is injected as a tail reminder at day granularity to avoid meaningless per-second changes.
  */
 function getStableDateString(): string {
   const now = new Date();
@@ -18,25 +18,25 @@ function getStableDateString(): string {
 }
 
 interface SystemContext {
-  /** 操作系统信息（会话内不变） */
+  /** Operating-system information, stable within a session. */
   environmentInfo?: string;
-  /** 项目路径（会话内不变） */
+  /** Project path, stable within a session. */
   projectPath?: string;
 }
 
 /**
- * 获取 System Context（会话内不变的环境信息）
- * 这些信息会被追加到 system prompt，享受缓存优化
+ * Get the System Context, containing environment information stable within a session.
+ * This information is appended to the system prompt and benefits from caching.
  */
 export function getSystemContext(projectPath: string | null, environmentInfoOverride?: string): SystemContext {
   const context: SystemContext = {};
 
   const lines = environmentInfoOverride
     ? [environmentInfoOverride]
-    : [`- 操作系统: ${getOSInfo()}`];
+    : [`- Operating system: ${getOSInfo()}`];
   if (projectPath) {
-    lines.push(`- 项目路径: ${projectPath}`);
-    lines.push(`- 工具默认工作目录: ${projectPath}`);
+    lines.push(`- Project path: ${projectPath}`);
+    lines.push(`- Default tool working directory: ${projectPath}`);
   }
   context.environmentInfo = lines.join('\n');
 
@@ -48,42 +48,42 @@ export function getSystemContext(projectPath: string | null, environmentInfoOver
 }
 
 /**
- * 将 SystemContext 格式化为可追加到 system prompt 的文本
+ * Format SystemContext as text that can be appended to the system prompt.
  */
 export function formatSystemContext(context: SystemContext): string {
   const parts: string[] = [];
 
   if (context.environmentInfo) {
-    parts.push(`# 运行环境\n${context.environmentInfo}`);
+    parts.push(`# Runtime environment\n${context.environmentInfo}`);
   }
 
   return parts.join('\n\n');
 }
 
 interface UserContext {
-  /** DEEPSEEK.md 来源列表（包含文件路径、内容、scope） */
+  /** DEEPSEEK.md sources, including file path, contents, and scope. */
   deepseekMdSources?: DeepseekMdSource[];
-  /** 当前日期（每次请求时刷新） */
+  /** Current date, refreshed for every request. */
   currentDate?: string;
-  /** Memory 上下文（跨对话记忆） */
+  /** Memory context shared across conversations. */
   memoryContext?: string;
-  /** Skills 列表 */
+  /** Skills list. */
   skillsContext?: string;
-  /** MCP server 使用说明（已连接且声明 instructions 的 server） */
+  /** MCP server instructions for connected servers that declare them. */
   mcpInstructionsContext?: string;
-  /** 附件列表 */
+  /** Attachment list. */
   attachmentsContext?: string;
 }
 
 /**
- * 获取 User Context。
- * 稳定信息会作为首条隐藏 user 消息注入；动态/本轮信息会作为尾部隐藏 user 消息注入。
+ * Get the User Context.
+ * Stable information is injected as the first hidden user message; dynamic and turn-specific information is injected as a hidden tail user message.
  */
 export function getUserContext(options: {
   deepseekMdSources?: DeepseekMdSource[];
   memoryContext?: string;
   enabledSkills?: Array<{ name: string; description: string }>;
-  /** 已连接 MCP server 的使用说明（server 名 → instructions 文本） */
+  /** Instructions for connected MCP servers, keyed by server name. */
   mcpInstructions?: Array<{ serverName: string; instructions: string }>;
   attachments?: Array<{ path: string; mimeType: string; size: number; kind: string }>;
 }): UserContext {
@@ -93,7 +93,7 @@ export function getUserContext(options: {
     context.deepseekMdSources = options.deepseekMdSources;
   }
 
-  context.currentDate = `今天的日期: ${getStableDateString()}`;
+  context.currentDate = `Today's date: ${getStableDateString()}`;
 
   if (options.memoryContext) {
     context.memoryContext = options.memoryContext;
@@ -103,7 +103,7 @@ export function getUserContext(options: {
     const lines = options.enabledSkills
       .map((s) => `- ${s.name}: ${s.description}`)
       .join('\n');
-    context.skillsContext = `当下列 skill 与用户请求匹配时，先调用 \`load_skill(name)\` 获取完整指令再执行（必要时同一回合内可串行加载多个）：\n${lines}`;
+    context.skillsContext = `When one of the following skills matches the user's request, call \`load_skill(name)\` first to load its full instructions, then execute it. Multiple skills may be loaded sequentially in the same turn when needed:\n${lines}`;
   }
 
   if (options.mcpInstructions && options.mcpInstructions.length > 0) {
@@ -120,16 +120,16 @@ export function getUserContext(options: {
         return `- ${a.path} (${a.mimeType}, ${sizeKb}KB, ${a.kind})`;
       })
       .join('\n');
-    context.attachmentsContext = `本次消息附加了以下文件。文本、PDF/Office 等文档可使用 read_file 按需读取。\n${lines}`;
+    context.attachmentsContext = `The current message includes the following files. Use read_file to inspect text, PDF, Office, and other documents as needed.\n${lines}`;
   }
 
   return context;
 }
 
 /**
- * 将稳定 UserContext 格式化为前置 <system-reminder> 消息内容
+ * Format stable UserContext as the leading <system-reminder> message content.
  *
- * 仅放低频稳定内容，避免本轮附件、日期、skill 发现列表等变化击穿缓存前缀。
+ * Include only low-frequency stable content so turn-specific attachments, dates, and skill discovery do not invalidate the cached prefix.
  */
 export function formatUserContext(context: UserContext): string {
   const parts: string[] = [];
@@ -150,30 +150,30 @@ export function formatUserContext(context: UserContext): string {
   }
 
   if (context.mcpInstructionsContext) {
-    parts.push(`# MCP Server Instructions\n当前已连接以下 MCP server，使用其工具时请遵循对应的使用说明：\n\n${context.mcpInstructionsContext}`);
+    parts.push(`# MCP Server Instructions\nThe following MCP servers are connected. Follow their instructions when using their tools:\n\n${context.mcpInstructionsContext}`);
   }
 
   if (parts.length === 0) return '';
 
   return `<system-reminder>
-作为 AI 助手，回答用户问题时可以使用以下稳定上下文信息：
+As an AI assistant, use the following stable context when answering the user's question:
 
 ${parts.join('\n\n')}
 
-重要提示：此上下文信息可能与当前任务相关或无关，请根据实际情况判断是否使用。
+Important: this context may or may not be relevant to the current task. Use your judgment.
 </system-reminder>`;
 }
 
 /**
- * 将动态 UserContext 格式化为尾部 <system-reminder> 消息内容。
+ * Format dynamic UserContext as the trailing <system-reminder> message content.
  *
- * 这些内容变化更频繁，放在对话尾部可以保住前面的缓存前缀。
+ * These values change more often, so placing them at the end preserves the cached prefix above.
  */
 export function formatTailUserContext(context: UserContext): string {
   const parts: string[] = [];
 
   if (context.memoryContext) {
-    parts.push(`# Memory\n以下是跨对话记忆，包含用户偏好和项目背景等信息，回答时参考但无需主动提及：\n${context.memoryContext}`);
+    parts.push(`# Memory\nThe following cross-conversation memory contains user preferences and project background. Refer to it when answering, but do not mention it unless needed:\n${context.memoryContext}`);
   }
 
   if (context.skillsContext) {
@@ -181,20 +181,20 @@ export function formatTailUserContext(context: UserContext): string {
   }
 
   if (context.attachmentsContext) {
-    parts.push(`# 附件清单\n${context.attachmentsContext}`);
+    parts.push(`# Attachments\n${context.attachmentsContext}`);
   }
 
   if (context.currentDate) {
-    parts.push(`# 当前日期\n${context.currentDate}`);
+    parts.push(`# Current date\n${context.currentDate}`);
   }
 
   if (parts.length === 0) return '';
 
   return `<system-reminder>
-作为 AI 助手，回答用户问题时可以使用以下本轮上下文信息：
+As an AI assistant, use the following turn-specific context when answering the user's question:
 
 ${parts.join('\n\n')}
 
-重要提示：此上下文信息可能与当前任务相关或无关，请根据实际情况判断是否使用。
+Important: this context may or may not be relevant to the current task. Use your judgment.
 </system-reminder>`;
 }

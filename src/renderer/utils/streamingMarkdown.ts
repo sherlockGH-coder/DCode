@@ -19,20 +19,20 @@ function countSingleUnderscoreMarkers(text: string): number {
 }
 
 /**
- * 流式 Markdown 预处理
+ * Preprocess streaming Markdown.
  *
- * 在把文本丢给 react-markdown 之前调用此函数
- * 它会检测未闭合的 Markdown 结构并补上闭合符号
+ * Call this function before passing text to react-markdown.
+ * It detects unfinished Markdown structures and adds the closing markers.
  *
- * @param text - 可能不完整的 Markdown 文本
- * @returns 预处理后的"完整" Markdown 文本
+ * @param text - Possibly incomplete Markdown text.
+ * @returns Preprocessed "complete" Markdown text.
  *
  * @example
  *   closeMarkdown('```python\nprint("hello")')
  *   // → '```python\nprint("hello")\n```'
  *
- *   closeMarkdown('**粗体')
- *   // → '**粗体**'
+ *   closeMarkdown('**bold')
+ *   // -> '**bold**'
  */
 export function closeMarkdown(text: string): string {
   let result = text;

@@ -7,11 +7,11 @@ const BOTTOM_THRESHOLD_PX = 2;
 interface ChatPanelProps {
   messages?: Message[];
   renderMessage?: (message: Message) => React.ReactNode;
-  /** 扁平渲染模式：直接传入预构建的 ReactNode 列表 */
+  /** Flat rendering mode: receive a prebuilt list of React nodes. */
   items?: ReactNode[];
-  /** 内容变化信号：仅在真实新增/切换内容时变化，用于控制自动追尾 */
+  /** Content change signal: changes only when content is added or switched, to control auto-follow. */
   contentVersion?: string | number;
-  /** 底部占位高度（px），用于适配不同高度的底部面板 */
+  /** Bottom spacer height in pixels for bottom panels of different heights. */
   bottomPadding?: number;
 }
 
@@ -122,7 +122,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
           ref={scrollContainerRef}
           className={`${panelClass} py-5 px-4 md:px-8`}
           role="region"
-          aria-label="对话内容"
+          aria-label="Conversation content"
           tabIndex={0}
         >
           <div className={`${contentClass} h-full flex flex-col items-center justify-center`} />
@@ -134,7 +134,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         ref={scrollContainerRef}
         className={`${panelClass} pt-6 pb-4 px-4 md:px-8`}
         role="region"
-        aria-label="对话内容"
+          aria-label="Conversation content"
         tabIndex={0}
       >
         <div className={`${contentClass} flex flex-col gap-3`}>
@@ -152,7 +152,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
         ref={scrollContainerRef}
         className={`${panelClass} pt-6 pb-4 px-4 md:px-8`}
         role="region"
-        aria-label="对话内容"
+          aria-label="Conversation content"
         tabIndex={0}
       >
         <div className={`${contentClass} h-full flex flex-col items-center justify-center`} />
@@ -165,7 +165,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
       ref={scrollContainerRef}
       className={`${panelClass} pt-6 pb-4 px-4 md:px-8`}
       role="region"
-      aria-label="对话内容"
+      aria-label="Conversation content"
       tabIndex={0}
     >
       <div className={contentClass}>

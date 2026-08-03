@@ -63,7 +63,7 @@ describe('CollapsedSegment', () => {
     act(() => {
       root?.render(React.createElement(CollapsedSegment, {
         units,
-        summary: '已编辑 1 个文件',
+        summary: 'Edited 1 file',
       }));
     });
 
@@ -105,7 +105,7 @@ describe('CollapsedSegment', () => {
     act(() => {
       root?.render(React.createElement(CollapsedSegment, {
         units,
-        summary: '已读取 1 个文件，已运行 1 个命令',
+        summary: 'Read 1 file, Ran 1 command',
       }));
     });
 
@@ -119,8 +119,8 @@ describe('CollapsedSegment', () => {
     });
 
     expect(container.querySelectorAll('[data-testid="tool-item-kind-icon"]')).toHaveLength(0);
-    expect(container.textContent).toContain('已运行');
-    expect(container.textContent).toContain('已读取');
+    expect(container.textContent).toContain('Ran');
+    expect(container.textContent).toContain('Read');
   });
 
   it('renders exploration groups as flat child rows when a collapsed segment is expanded', () => {
@@ -128,7 +128,7 @@ describe('CollapsedSegment', () => {
       {
         kind: 'exploration-group',
         segmentIndex: 0,
-        summary: '已搜索 1 次和已列出文件',
+        summary: 'Searched 1 times and listed files',
         items: [
           {
             id: 'grep-call_1',
@@ -158,7 +158,7 @@ describe('CollapsedSegment', () => {
     act(() => {
       root?.render(React.createElement(CollapsedSegment, {
         units,
-        summary: '已搜索代码并列出文件',
+        summary: 'Searched code and listed files',
       }));
     });
 
@@ -170,7 +170,7 @@ describe('CollapsedSegment', () => {
     expect(container.querySelector('[data-testid="exploration-summary"]')).toBeNull();
     expect(container.querySelectorAll('[data-testid="tool-item-row"]')).toHaveLength(2);
     expect(container.querySelectorAll('[data-testid="tool-item-kind-icon"]')).toHaveLength(0);
-    expect(container.textContent).toContain('已搜索');
-    expect(container.textContent).toContain('已检索');
+    expect(container.textContent).toContain('Searched');
+    expect(container.textContent).toContain('Found files');
   });
 });

@@ -171,7 +171,7 @@ export function registerSettingsIpc(): void {
   ipcMain.handle('dialog:openFiles', async (): Promise<Attachment[]> => {
     const result = await dialog.showOpenDialog({
       properties: ['openFile', 'multiSelections'],
-      title: '选择要附加的文件',
+      title: 'Choose files to attach',
     });
     if (result.canceled || result.filePaths.length === 0) return [];
     const attachments = await Promise.all(
@@ -191,7 +191,7 @@ export function registerSettingsIpc(): void {
 
   ipcMain.handle('file:open', async (_event, filePath: string) => {
     const finalPath = await resolveFileForAction(filePath);
-    if (!finalPath) throw new Error('文件不存在，或不在已注册项目范围内。');
+    if (!finalPath) throw new Error('The file does not exist or is outside the registered project.');
     const result = await openResolvedPath(finalPath, 'default');
     if (!result.success) throw new Error(result.error);
   });
@@ -205,7 +205,7 @@ export function registerSettingsIpc(): void {
   ipcMain.handle('file:openWith', async (_event, filePath: string, optionId: string): Promise<FileOpenResult> => {
     const finalPath = await resolveFileForAction(filePath);
     if (!finalPath) {
-      return { success: false, target: 'default', error: '文件不存在，或不在已注册项目范围内。' };
+      return { success: false, target: 'default', error: 'The file does not exist or is outside the registered project.' };
     }
     return openResolvedPath(finalPath, optionId);
   });

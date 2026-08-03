@@ -17,8 +17,8 @@ async function streamToString(stream: ReadableStream<Uint8Array>): Promise<strin
 }
 
 /**
- * FileIcon 现在是懒加载的，同步的 renderToStaticMarkup 只会渲染 Suspense 占位。
- * 用 React 19 的 prerender 等待 Suspense 边界解析完再取标记。
+ * FileIcon is lazy-loaded, so synchronous renderToStaticMarkup only renders the Suspense placeholder.
+ * Use React 19's prerender to wait for the Suspense boundary before reading the markup.
  */
 async function renderIconTitle(ext: string, filename: string): Promise<string> {
   const { prelude } = await prerender(
@@ -38,7 +38,7 @@ describe('getFileIcon', () => {
   });
 
   it('renders a placeholder glyph before the icon chunk resolves', () => {
-    // 同步渲染路径下应当拿到占位符而不是崩溃
+    // The synchronous render path should return a placeholder instead of crashing.
     const element = getFileIcon('ts', 'index.ts');
     expect(element).toBeTruthy();
   });

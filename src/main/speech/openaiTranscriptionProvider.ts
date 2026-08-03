@@ -37,13 +37,13 @@ export class OpenAITranscriptionProvider implements SpeechToTextProvider {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');
-      throw new Error(`语音转写请求失败: HTTP ${response.status} ${errorText}`.trim());
+      throw new Error(`Speech transcription request failed: HTTP ${response.status} ${errorText}`.trim());
     }
 
     const payload = await response.json() as { text?: unknown };
     const text = typeof payload.text === 'string' ? payload.text.trim() : '';
     if (!text) {
-      throw new Error('语音转写没有返回文本');
+      throw new Error('Speech transcription returned no text');
     }
 
     return {

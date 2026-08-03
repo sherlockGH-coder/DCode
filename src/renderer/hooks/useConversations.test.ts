@@ -25,7 +25,7 @@ describe('useConversations', () => {
       getConversations: vi.fn(async () => [
         {
           id: 'conv_empty',
-          title: '新对话',
+          title: 'New conversation',
           project_path: '/project',
           created_at: '2026-06-17 00:00:00',
           updated_at: '2026-06-17 00:00:00',
@@ -69,7 +69,7 @@ describe('useConversations', () => {
       await current?.handleNewConversation('/project');
     });
 
-    expect(window.deepseekApi.createConversation).toHaveBeenCalledWith('新对话', '/project');
+    expect(window.deepseekApi.createConversation).toHaveBeenCalledWith('New conversation', '/project');
     expect(window.deepseekApi.getConversations).toHaveBeenCalledTimes(2);
     expect(current?.conversationId).toBe('conv_empty');
     expect(current?.messages).toEqual([]);

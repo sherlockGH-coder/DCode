@@ -55,7 +55,7 @@ describe('glob tool', () => {
 
       expect(first.content).toContain('src/newer.ts');
       expect(first.content).not.toContain('src/older.ts');
-      expect(first.content).toContain('offset: 1');
+      expect(first.content).toContain('use offset 1');
       expect(second.content).toContain('src/older.ts');
       expect(second.metadata).toMatchObject({ kind: 'glob', pattern: 'src/**/*.ts', matchCount: 2 });
     });

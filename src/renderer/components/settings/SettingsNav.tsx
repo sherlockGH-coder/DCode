@@ -26,25 +26,25 @@ type NavGroup = { title: string; items: NavItem[] };
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    title: '个人',
+    title: 'Personal',
     items: [
-      { id: 'appearance', label: '外观', Icon: IconPanels },
-      { id: 'models', label: '配置', Icon: IconGear },
-      { id: 'speech', label: '语音输入', Icon: IconMicrophone },
-      { id: 'search', label: '网络搜索', Icon: IconGlobe },
+      { id: 'appearance', label: 'Appearance', Icon: IconPanels },
+      { id: 'models', label: 'Configuration', Icon: IconGear },
+      { id: 'speech', label: 'Voice input', Icon: IconMicrophone },
+      { id: 'search', label: 'Web search', Icon: IconGlobe },
     ],
   },
   {
-    title: '集成',
+    title: 'Integrations',
     items: [
-      { id: 'skills', label: '技能', Icon: IconLayers },
-      { id: 'mcp', label: 'MCP 服务器', Icon: IconPlug },
+      { id: 'skills', label: 'Skills', Icon: IconLayers },
+      { id: 'mcp', label: 'MCP servers', Icon: IconPlug },
     ],
   },
   {
-    title: '控制',
+    title: 'Controls',
     items: [
-      { id: 'permissions', label: '权限控制', Icon: IconShield },
+      { id: 'permissions', label: 'Permissions', Icon: IconShield },
     ],
   },
 ];
@@ -87,7 +87,7 @@ const SettingsNav: React.FC<Props> = ({
             className="group flex h-8 w-full items-center gap-2.5 rounded-[6px] bg-transparent px-2 text-[14px] font-semibold text-[#4B5058] transition-all duration-150 hover:bg-black/[0.04] hover:text-[#1D2127] dark:text-white/60 dark:hover:text-white/90"
           >
             <IconChevronLeft size={16} className="text-current transition-colors" />
-            <span>返回应用</span>
+            <span>Return to app</span>
           </button>
         )}
       </div>
@@ -102,8 +102,8 @@ const SettingsNav: React.FC<Props> = ({
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="搜索设置..."
-            aria-label="搜索设置"
+            placeholder="Search settings..."
+            aria-label="Search settings"
             className="h-8 w-full rounded-[6px] border border-black/[0.08] bg-white pl-8 pr-3 text-[14px] font-normal text-[#1D2127] outline-none transition-all placeholder:text-[#8E8E93] focus:border-black/[0.15] dark:border-white/[0.08] dark:bg-white/[0.08] dark:text-white dark:placeholder:text-white/35 dark:focus:bg-white/[0.11]"
           />
         </label>
@@ -149,7 +149,7 @@ const SettingsNav: React.FC<Props> = ({
         ))}
         {filteredGroups.length === 0 && (
           <div className="px-3 pt-8 text-[14px] font-medium text-[#9A9EA3] dark:text-white/38">
-            没有匹配的设置项
+            No matching settings
           </div>
         )}
       </div>

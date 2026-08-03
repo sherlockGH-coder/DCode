@@ -74,9 +74,9 @@ const SearchModal: React.FC<SearchModalProps> = ({
   }, [isOpen, filtered, selectedIndex, onClose, onSelect]);
 
   const getProjectName = (path: string | null) => {
-    if (!path) return '未归类';
+    if (!path) return 'Unassigned';
     const proj = projects.find(p => p.path === path);
-    return proj ? proj.name : path.split('/').pop() || '未知';
+    return proj ? proj.name : path.split('/').pop() || 'Unknown';
   };
 
   if (!isOpen) return null;
@@ -100,7 +100,7 @@ const SearchModal: React.FC<SearchModalProps> = ({
                 <input
                   ref={inputRef}
                   className="flex-1 bg-transparent border-none outline-none text-[15px] text-text-primary placeholder-text-tertiary"
-                  placeholder="搜索对话"
+                  placeholder="Search conversations"
                   value={query}
                   onChange={e => setQuery(e.target.value)}
                 />
@@ -109,12 +109,12 @@ const SearchModal: React.FC<SearchModalProps> = ({
 
               <div className="flex-1 overflow-y-auto max-h-[400px] p-2 bg-bg-main pb-3">
                 <div className="text-[12px] font-normal text-text-tertiary mb-1.5 px-2.5 mt-2">
-                  {query.trim() ? '搜索结果' : '近期对话'}
+                  {query.trim() ? 'Search results' : 'Recent conversations'}
                 </div>
 
                 {filtered.length === 0 ? (
                   <div className="px-2.5 py-8 text-center text-[13px] text-text-tertiary">
-                    无匹配对话
+                    No matching conversations
                   </div>
                 ) : (
                   <ul className="list-none m-0 p-0">

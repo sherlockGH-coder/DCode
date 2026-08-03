@@ -22,14 +22,14 @@ const OutputPreview: React.FC<{ output: string }> = ({ output }) => {
       </pre>
       {isLarge && (
         <div className="mt-1.5 flex items-center gap-2 px-3 pb-2 text-[11px] text-text-tertiary">
-          <span>{totalLines} 行 · {(totalChars / 1024).toFixed(1)} KB</span>
+          <span>{totalLines} lines · {(totalChars / 1024).toFixed(1)} KB</span>
           {!showFull && (
             <button
               type="button"
               onClick={() => setShowFull(true)}
               className="font-medium text-text-secondary hover:text-text-primary hover:underline cursor-pointer"
             >
-              加载全部
+              Load all
             </button>
           )}
         </div>

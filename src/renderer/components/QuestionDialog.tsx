@@ -68,10 +68,10 @@ const QuestionDialog: React.FC<QuestionDialogProps> = ({ item, onSubmit }) => {
       <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <div className="min-w-0">
           <div className="text-[13.5px] font-medium leading-5 text-text-primary">
-            需要你的选择
+            Your choice is needed
           </div>
           <div className="mt-0.5 text-[12px] text-text-tertiary">
-            已回答 {answeredCount}/{states.length}
+            Answered {answeredCount}/{states.length}
           </div>
         </div>
         <button
@@ -80,7 +80,7 @@ const QuestionDialog: React.FC<QuestionDialogProps> = ({ item, onSubmit }) => {
           onClick={handleSubmit}
           className="inline-flex h-8 shrink-0 items-center justify-center rounded-[8px] border-0 bg-accent px-3.5 text-[13px] font-medium text-white transition-colors hover:bg-accent-hover cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {submitting ? '提交中...' : '提交'}
+          {submitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
 
@@ -122,11 +122,11 @@ const QuestionBlock: React.FC<QuestionBlockProps> = ({
   <section className="border-t border-hairline py-3 first:border-t-0 first:pt-0">
     <div className="mb-2.5 flex items-start gap-2">
       <span className="mt-0.5 max-w-[120px] shrink-0 truncate rounded-[5px] bg-accent-bg px-2 py-0.5 text-[11px] font-medium text-accent">
-        {state.header || (compact ? '问题' : `问题 ${index + 1}`)}
+        {state.header || (compact ? 'Question' : `Question ${index + 1}`)}
       </span>
       {state.multiSelect && (
         <span className="mt-0.5 shrink-0 rounded-[5px] bg-bg-chip px-2 py-0.5 text-[11px] font-normal text-text-tertiary">
-          多选
+          Multiple choice
         </span>
       )}
       <p className="min-w-0 flex-1 text-[14px] font-medium leading-6 text-text-primary">
@@ -212,7 +212,7 @@ const CustomOptionRow: React.FC<CustomOptionRowProps> = ({ state, disabled, onTo
     >
       <ChoiceMark selected={state.useCustom} multiSelect={false} />
       <span className="min-w-0 flex-1 text-[13.5px] font-medium leading-5 text-text-primary">
-        自定义回答
+        Custom answer
       </span>
       {state.useCustom && (
         <CheckIcon className="shrink-0 text-accent" />
@@ -224,7 +224,7 @@ const CustomOptionRow: React.FC<CustomOptionRowProps> = ({ state, disabled, onTo
           type="text"
           value={state.customInput}
           onChange={(event) => onChange(event.target.value)}
-          placeholder="输入你的答案"
+          placeholder="Enter your answer"
           className="h-9 w-full rounded-[8px] border border-hairline bg-bg-main px-3 text-[13px] text-text-primary outline-none transition-colors placeholder:text-text-tertiary focus:border-accent/45 focus:ring-[3px] focus:ring-accent-bg"
           autoFocus
         />

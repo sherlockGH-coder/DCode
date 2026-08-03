@@ -30,7 +30,7 @@ const VoiceInputPanel: React.FC<{ voiceInput: VoiceInputState }> = ({ voiceInput
                 className="ml-auto h-6 px-2 rounded-md border-none bg-transparent text-[12px] text-text-tertiary hover:text-text-secondary hover:bg-bg-hover cursor-pointer"
                 onClick={voiceInput.resetError}
               >
-                关闭
+                Close
               </button>
             </>
           ) : (
@@ -46,7 +46,7 @@ const VoiceInputPanel: React.FC<{ voiceInput: VoiceInputState }> = ({ voiceInput
                 ))}
               </div>
               <span className="font-mono text-[12px] text-text-secondary tabular-nums">
-                {voiceInput.isRecording ? formatDuration(voiceInput.elapsedMs) : '转写中'}
+                {voiceInput.isRecording ? formatDuration(voiceInput.elapsedMs) : 'Transcribing'}
               </span>
               <div className="ml-auto flex items-center gap-1">
                 {voiceInput.isRecording && (
@@ -56,14 +56,14 @@ const VoiceInputPanel: React.FC<{ voiceInput: VoiceInputState }> = ({ voiceInput
                       className="h-6 px-2 rounded-md border-none bg-transparent text-[12px] text-text-tertiary hover:text-text-secondary hover:bg-bg-hover cursor-pointer"
                       onClick={voiceInput.cancelRecording}
                     >
-                      取消
+                      Cancel
                     </button>
                     <button
                       type="button"
                       className="h-6 px-2 rounded-md border-none bg-accent text-white text-[12px] hover:bg-accent-hover cursor-pointer"
                       onClick={() => void voiceInput.stopAndTranscribe()}
                     >
-                      完成
+                      Done
                     </button>
                   </>
                 )}

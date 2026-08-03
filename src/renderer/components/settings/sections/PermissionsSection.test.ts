@@ -51,8 +51,8 @@ describe('PermissionsSection', () => {
     const radios = container.querySelectorAll('[role="radio"]');
     expect(radios).toHaveLength(3);
     expect(radios[0]?.getAttribute('aria-checked')).toBe('true');
-    expect(container.textContent).toContain('文件操作自动放行');
-    expect(container.textContent).toContain('完全访问');
+    expect(container.textContent).toContain('Auto-allow file operations');
+    expect(container.textContent).toContain('Full access');
   });
 
   it('saves ordinary modes immediately', async () => {
@@ -63,7 +63,7 @@ describe('PermissionsSection', () => {
     })));
 
     const autoReview = [...container.querySelectorAll<HTMLButtonElement>('[role="radio"]')]
-      .find((button) => button.textContent?.includes('文件操作自动放行'));
+      .find((button) => button.textContent?.includes('Auto-allow file operations'));
     await act(async () => {
       autoReview?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
@@ -79,7 +79,7 @@ describe('PermissionsSection', () => {
     })));
 
     const fullAccess = [...container.querySelectorAll<HTMLButtonElement>('[role="radio"]')]
-      .find((button) => button.textContent?.includes('完全访问'));
+      .find((button) => button.textContent?.includes('Full access'));
     act(() => fullAccess?.dispatchEvent(new window.Event('click', { bubbles: true })));
 
     const dialog = container.querySelector('[role="dialog"]') as HTMLElement;
@@ -88,14 +88,14 @@ describe('PermissionsSection', () => {
     expect(patch).not.toHaveBeenCalled();
 
     const cancel = [...dialog.querySelectorAll<HTMLButtonElement>('button')]
-      .find((button) => button.textContent === '取消');
+      .find((button) => button.textContent === 'Cancel');
     act(() => cancel?.dispatchEvent(new window.Event('click', { bubbles: true })));
     expect(container.querySelector('[role="dialog"]')).toBeNull();
     expect(patch).not.toHaveBeenCalled();
 
     act(() => fullAccess?.dispatchEvent(new window.Event('click', { bubbles: true })));
     const confirm = [...container.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')]
-      .find((button) => button.textContent === '启用完全访问');
+      .find((button) => button.textContent === 'Enable full access');
     await act(async () => {
       confirm?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
@@ -110,28 +110,28 @@ describe('PermissionsSection', () => {
       patch: vi.fn(),
     })));
 
-    expect(container.textContent).toContain('完全访问已启用');
-    expect(container.textContent).toContain('高风险');
+    expect(container.textContent).toContain('Full access is enabled');
+    expect(container.textContent).toContain('Risk notice');
   });
 
   it('keeps the confirmation open when enabling full access fails', async () => {
-    const patch = vi.fn(async () => { throw new Error('保存失败'); });
+    const patch = vi.fn(async () => { throw new Error('Save failed'); });
     act(() => root?.render(React.createElement(PermissionsSection, {
       settings: settingsWithPolicy('default'),
       patch,
     })));
 
     const fullAccess = [...container.querySelectorAll<HTMLButtonElement>('[role="radio"]')]
-      .find((button) => button.textContent?.includes('完全访问'));
+      .find((button) => button.textContent?.includes('Full access'));
     act(() => fullAccess?.dispatchEvent(new window.Event('click', { bubbles: true })));
     const confirm = [...container.querySelectorAll<HTMLButtonElement>('[role="dialog"] button')]
-      .find((button) => button.textContent === '启用完全访问');
+      .find((button) => button.textContent === 'Enable full access');
 
     await act(async () => {
       confirm?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
     expect(container.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(container.textContent).toContain('保存失败');
+    expect(container.textContent).toContain('Save failed');
   });
 });

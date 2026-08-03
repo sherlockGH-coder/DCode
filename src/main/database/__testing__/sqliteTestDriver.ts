@@ -2,13 +2,12 @@ import { DatabaseSync } from 'node:sqlite';
 import type Database from 'better-sqlite3';
 
 /**
- * 测试用的 SQLite 驱动适配层。
+ * SQLite driver adapter for tests.
  *
- * 生产环境用 better-sqlite3，但它的原生模块是按 Electron 的 ABI 编译的，
- * 在 vitest（系统 Node）里加载会因 NODE_MODULE_VERSION 不匹配而失败。
- * 这里用 Node 内置的 `node:sqlite` —— 同样是真正的 SQLite 引擎 —— 补出
- * schema/migration 代码用到的那一小部分 better-sqlite3 接口，
- * 这样测试跑的是真实 SQL，而不是 mock。
+ * Production uses better-sqlite3, whose native module is compiled for Electron's ABI
+ * and fails to load in vitest using system Node because NODE_MODULE_VERSION does not match.
+ * Use Node's built-in `node:sqlite`, also a real SQLite engine, and implement only the small
+ * subset of the better-sqlite3 interface used by schema and migration code so tests run real SQL instead of mocks.
  */
 
 function parsePragmaAssignment(source: string): { name: string; value: string | null } {
@@ -18,14 +17,14 @@ function parsePragmaAssignment(source: string): { name: string; value: string | 
 }
 
 /**
- * `path` 省略时用内存库。注意内存库不支持 WAL —— 需要验证 journal_mode 的
- * 测试必须传入真实文件路径。
+ * When `path` is omitted, use an in-memory database. In-memory databases do not support WAL,
+ * so tests that verify journal_mode must provide a real file path.
  */
 export function createTestDatabase(path = ':memory:'): Database.Database {
   const raw = new DatabaseSync(path);
 
-  // node:sqlite 默认打开外键，better-sqlite3 默认关闭。
-  // 对齐生产默认值，好让「历史遗留孤儿行」的场景能被构造出来。
+  // node:sqlite enables foreign keys by default while better-sqlite3 disables them.
+  // Match the production default so legacy orphan-row scenarios can be constructed.
   raw.exec('PRAGMA foreign_keys = OFF');
 
   const adapter = {

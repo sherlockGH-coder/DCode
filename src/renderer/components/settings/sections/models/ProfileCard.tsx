@@ -55,7 +55,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
           <span>{getModelSourceLabel(profile)}</span>
           <span className="hidden h-1 w-1 rounded-full bg-text-tertiary/40 sm:inline-flex" />
           <span className="truncate">
-            默认 <span className="font-mono text-text-secondary">{getDefaultModelLabel(profile)}</span>
+            Default <span className="font-mono text-text-secondary">{getDefaultModelLabel(profile)}</span>
           </span>
         </div>
       </div>
@@ -63,12 +63,12 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
       <div className="col-span-2 flex items-center justify-between gap-2 md:col-span-1 md:justify-end">
         {profile.protocol === 'legacy-openai' ? (
           <span className="inline-flex h-7 items-center rounded-[7px] bg-amber-500/12 px-2.5 text-[11.5px] font-semibold text-amber-700 dark:text-amber-300">
-            {active ? '当前配置 · 需迁移' : '编辑后迁移'}
+            {active ? 'Current profile · migration required' : 'Migrate after editing'}
           </span>
         ) : active ? (
           <span className="inline-flex h-7 items-center gap-1.5 rounded-[7px] bg-[#3897F8]/10 px-2.5 text-[11.5px] font-semibold text-[#147CE5]">
             <IconCheck size={12} className="text-current" />
-            使用中
+            In use
           </span>
         ) : (
           <button
@@ -76,13 +76,13 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
             onClick={onActivate}
             className="inline-flex h-7 items-center rounded-[7px] border border-black/[0.08] bg-white px-2.5 text-[11.5px] font-semibold text-text-secondary transition-all duration-150 hover:border-[#3897F8]/35 hover:text-[#147CE5] dark:border-white/[0.1] dark:bg-white/[0.05]"
           >
-            设为当前
+            Set as current
           </button>
         )}
         <div className="flex items-center gap-0.5 rounded-[7px] bg-black/[0.035] px-0.5 py-0.5 dark:bg-white/[0.06]">
-          <IconButton label="编辑" onClick={onEdit}><IconEdit size={14} /></IconButton>
-          <IconButton label="复制" onClick={onDuplicate}><IconCopy size={14} /></IconButton>
-          <IconButton label="删除" onClick={onDelete} disabled={!canDelete} danger><IconTrash size={14} /></IconButton>
+          <IconButton label="Edit" onClick={onEdit}><IconEdit size={14} /></IconButton>
+          <IconButton label="Duplicate" onClick={onDuplicate}><IconCopy size={14} /></IconButton>
+          <IconButton label="Delete" onClick={onDelete} disabled={!canDelete} danger><IconTrash size={14} /></IconButton>
         </div>
       </div>
     </div>
@@ -108,14 +108,14 @@ export const ProfileSummaryPanel: React.FC<ProfileSummaryPanelProps> = ({
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-text-tertiary">当前配置</span>
+            <span className="text-[11px] font-semibold text-text-tertiary">Current profile</span>
             <span className="rounded-md bg-black/[0.04] px-1.5 py-0.5 text-[10.5px] font-semibold text-text-secondary dark:bg-white/[0.06]">
-              {profileCount} 个配置
+              {profileCount} profiles
             </span>
           </div>
           <div className="mt-1 flex min-w-0 items-center gap-2">
             <h3 className="truncate text-[16px] font-semibold text-text-primary">
-              {profile?.name ?? '未选择'}
+              {profile?.name ?? 'None selected'}
             </h3>
             {profile && <KeyBadge active={profile.apiKeySet} />}
             {profile && <ProtocolBadge protocol={profile.protocol} />}
@@ -125,8 +125,8 @@ export const ProfileSummaryPanel: React.FC<ProfileSummaryPanelProps> = ({
       </div>
 
       <div className="grid grid-cols-2 gap-2 lg:min-w-[360px] lg:grid-cols-3">
-        <SummaryMetric label="默认模型" value={profile ? getDefaultModelLabel(profile) : '-'} />
-        <SummaryMetric label="协议" value={profile?.protocol === 'legacy-openai' ? '需迁移' : 'Anthropic Messages'} />
+        <SummaryMetric label="Default model" value={profile ? getDefaultModelLabel(profile) : '-'} />
+        <SummaryMetric label="Protocol" value={profile?.protocol === 'legacy-openai' ? 'Migration required' : 'Anthropic Messages'} />
         <button
           type="button"
           onClick={onEditActive}
@@ -134,13 +134,13 @@ export const ProfileSummaryPanel: React.FC<ProfileSummaryPanelProps> = ({
           className="col-span-2 inline-flex h-8 items-center justify-center gap-1.5 rounded-[7px] border border-black/[0.08] bg-white text-[13px] font-semibold text-[#3A3A3C] transition-all duration-150 hover:border-[#3897F8]/35 hover:text-[#147CE5] disabled:cursor-not-allowed disabled:opacity-50 lg:col-span-1 dark:border-white/[0.1] dark:bg-white/[0.05] dark:text-white/75"
         >
           <IconEdit size={14} />
-          编辑
+          Edit
         </button>
       </div>
     </div>
     {profile?.protocol === 'legacy-openai' && (
       <div className="mt-4 rounded-[9px] border border-amber-500/20 bg-amber-500/[0.08] px-3.5 py-3 text-[12px] leading-relaxed text-amber-900 dark:text-amber-200">
-        此配置来自旧版 OpenAI Chat Completions。为避免把 Anthropic 请求误发到旧端点，聊天与模型拉取已暂停；请编辑配置完成迁移。
+        This profile comes from the legacy OpenAI Chat Completions API. Chat and model loading are paused to prevent Anthropic requests from being sent to the old endpoint; edit the profile to complete the migration.
       </div>
     )}
   </section>

@@ -2,7 +2,7 @@ const FENCE_RE = /^ {0,3}(```|~~~)/;
 const LIST_ITEM_RE = /^ {0,3}(?:[-*+]|\d{1,9}[.)])\s/;
 const INDENT_CONTINUATION_RE = /^ {4,}\S/;
 
-/** 段落末尾（忽略尾随空行）是否为列表项，用于判断松散列表续块 */
+/** Whether the paragraph ends with a list item after ignoring trailing blank lines, used to detect a continuation of a loose list. */
 function endsWithListItem(block: string): boolean {
   const lines = block.split('\n');
   for (let i = lines.length - 1; i >= 0; i--) {

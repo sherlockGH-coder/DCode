@@ -16,10 +16,10 @@ interface Props {
 
 function formatDuration(ms: number): string {
   const seconds = Math.max(0, Math.floor(ms / 1000));
-  if (seconds < 60) return `${seconds}秒`;
+  if (seconds < 60) return `${seconds}s`;
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
-  return rest > 0 ? `${minutes}分${rest}秒` : `${minutes}分钟`;
+  return rest > 0 ? `${minutes}m ${rest}s` : `${minutes}m`;
 }
 
 function summaryFor(activities: ExplorationActivity[]): string {
@@ -37,15 +37,15 @@ function summaryFor(activities: ExplorationActivity[]): string {
   const parts: string[] = [];
 
   if (thoughtCount > 0) {
-    parts.push(thoughtMs > 0 ? `思考了 ${formatDuration(thoughtMs)}` : '已深度思考');
+    parts.push(thoughtMs > 0 ? `Thought for ${formatDuration(thoughtMs)}` : 'Thought deeply');
   }
-  if (readCount > 0) parts.push(`读取 ${readCount} 个文件`);
-  if (searchCount > 0) parts.push(`搜索 ${searchCount} 次`);
-  if (directoryCount > 0) parts.push(`浏览 ${directoryCount} 个目录`);
-  if (webCount > 0) parts.push(`查看 ${webCount} 个网页`);
-  if (visionCount > 0) parts.push(`查看 ${visionCount} 张图片`);
+  if (readCount > 0) parts.push(`Read ${readCount} files`);
+  if (searchCount > 0) parts.push(`Searched ${searchCount} times`);
+  if (directoryCount > 0) parts.push(`Browsed ${directoryCount} directories`);
+  if (webCount > 0) parts.push(`Viewed ${webCount} web pages`);
+  if (visionCount > 0) parts.push(`Viewed ${visionCount} images`);
 
-  return parts.join('，') || '已探索';
+  return parts.join(', ') || 'Explored';
 }
 
 function summaryIcon(activities: ExplorationActivity[]): { key: string; iconType?: ToolIconType } {
@@ -60,7 +60,7 @@ const ReasoningActivityRow: React.FC<{
 }> = ({ activity }) => {
   const [expanded, setExpanded] = useState(activity.isStreaming === true);
   const effectiveExpanded = activity.isStreaming ? true : expanded;
-  const duration = activity.durationMs && activity.durationMs > 0 ? `，思考了 ${formatDuration(activity.durationMs)}` : '';
+  const duration = activity.durationMs && activity.durationMs > 0 ? ` · thought for ${formatDuration(activity.durationMs)}` : '';
 
   useEffect(() => {
     setExpanded(activity.isStreaming === true);
@@ -76,7 +76,7 @@ const ReasoningActivityRow: React.FC<{
           <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center opacity-75">
             <IconDeepThinking size={15} className="text-current" />
           </span>
-          <span className="min-w-0 text-[13.5px]">正在深度思考</span>
+          <span className="min-w-0 text-[13.5px]">Thinking deeply</span>
         </div>
         <div
           data-testid="reasoning-activity-content"
@@ -100,7 +100,7 @@ const ReasoningActivityRow: React.FC<{
         <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center opacity-75">
           <IconDeepThinking size={15} className="text-current" />
         </span>
-        <span className="min-w-0 text-[13.5px]">已深度思考{duration}</span>
+        <span className="min-w-0 text-[13.5px]">Thought deeply{duration}</span>
         <IconChevronRight
           size={12}
           className={`shrink-0 text-current transition-transform duration-150 ${effectiveExpanded ? 'rotate-90' : ''}`}

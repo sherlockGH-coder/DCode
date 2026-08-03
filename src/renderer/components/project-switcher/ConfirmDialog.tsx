@@ -42,7 +42,7 @@ const ConfirmDialog: React.FC<{
             className="px-4 py-2 text-[13px] font-medium border border-border rounded-lg bg-transparent text-text-primary cursor-pointer hover:bg-bg-hover transition-colors duration-150"
             onClick={onCancel}
           >
-            取消
+            Cancel
           </button>
           <button
             ref={confirmBtnRef}

@@ -33,7 +33,7 @@ export function applyTaskIdPatch(currentIds: string[], addedIds?: string[], remo
 
 export function assertScopeProjectPath(scope: TaskScope, projectPath: string | null): void {
   if (scope === 'project' && !projectPath) {
-    throw new TaskValidationError('project 作用域任务必须绑定有效项目路径');
+    throw new TaskValidationError('Project-scoped tasks must be bound to a valid project path');
   }
 }
 
@@ -58,7 +58,7 @@ export function assertBatchCanBeCreated(existingTasks: Map<string, Task>, tasks:
   const activeTasks = Array.from(existingTasks.values()).filter((task) => task.status === 'in_progress');
   const activeBatchTasks = tasks.filter((task) => task.status === 'in_progress');
   if (activeTasks.length + activeBatchTasks.length > 1) {
-    throw new TaskValidationError('任意时刻只能有一个任务处于 in_progress 状态');
+    throw new TaskValidationError('Only one task may be in progress at a time');
   }
 }
 
@@ -79,7 +79,7 @@ export function assertTaskCanBeUpdated(
 function assertAllowedStatusTransition(currentStatus: TaskStatus, nextStatus: TaskStatus): void {
   if (currentStatus === nextStatus) return;
   if (ALLOWED_STATUS_TRANSITIONS[currentStatus]?.includes(nextStatus)) return;
-  throw new TaskValidationError(`非法任务状态流转: ${currentStatus} -> ${nextStatus}`);
+  throw new TaskValidationError(`Invalid task status transition: ${currentStatus} -> ${nextStatus}`);
 }
 
 function assertReferencedTasksExist(
@@ -91,10 +91,10 @@ function assertReferencedTasksExist(
 ): void {
   for (const relatedTaskId of [...blockedBy, ...blocks]) {
     if (relatedTaskId === taskId) {
-      throw new TaskValidationError('任务不能依赖或阻塞自身');
+      throw new TaskValidationError('A task cannot depend on or block itself');
     }
     if (!ignoredTaskIds.has(relatedTaskId) && !tasks.has(relatedTaskId)) {
-      throw new TaskValidationError(`依赖任务不存在: ${relatedTaskId}`);
+      throw new TaskValidationError(`Dependency task does not exist: ${relatedTaskId}`);
     }
   }
 }
@@ -106,7 +106,7 @@ function assertBlockersResolved(tasks: Map<string, Task>, taskId: string, status
     return !blocker || !FINISHED_STATUSES.has(blocker.status);
   });
   if (unresolved.length > 0) {
-    throw new TaskValidationError(`任务 ${taskId} 仍被未完成任务阻塞: ${unresolved.join(', ')}`);
+    throw new TaskValidationError(`Task ${taskId} is still blocked by unfinished tasks: ${unresolved.join(', ')}`);
   }
 }
 
@@ -116,7 +116,7 @@ function assertNoCompetingInProgress(tasks: Map<string, Task>, taskId: string, s
     return task.id !== taskId && task.status === 'in_progress';
   });
   if (activeTask) {
-    throw new TaskValidationError(`已有任务处于 in_progress 状态: ${activeTask.id}`);
+    throw new TaskValidationError(`Another task is already in progress: ${activeTask.id}`);
   }
 }
 
@@ -126,7 +126,7 @@ function assertNoDependencyCycle(tasks: Map<string, Task>, taskId: string, block
   for (const blockedId of blocks) addEdge(adjacency, taskId, blockedId);
 
   if (hasCycle(adjacency)) {
-    throw new TaskValidationError('依赖关系会形成循环');
+    throw new TaskValidationError('The dependency relationship would create a cycle');
   }
 }
 
@@ -138,7 +138,7 @@ function assertNoBatchDependencyCycle(existingTasks: Map<string, Task>, tasks: T
   }
 
   if (hasCycle(adjacency)) {
-    throw new TaskValidationError('依赖关系会形成循环');
+    throw new TaskValidationError('The dependency relationship would create a cycle');
   }
 }
 

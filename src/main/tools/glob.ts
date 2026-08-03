@@ -69,7 +69,7 @@ export const globTool: ToolExecutor = {
     const limit = numberArg(args.limit, 100);
     const offset = numberArg(args.offset, 0);
     const respectGitignore = !boolArg(args.no_ignore, false);
-    debugLog('tool', '查找文件:', pattern, 'in', rawPath);
+    debugLog('tool', 'Finding files:', pattern, 'in', rawPath);
 
     if (typeof pattern !== 'string' || pattern.trim().length === 0) {
       throw new Error('glob requires a non-empty pattern');
@@ -83,7 +83,7 @@ export const globTool: ToolExecutor = {
         throw new Error(`Path is not a directory: ${searchPath}`);
       }
 
-      // 编译一次，避免在 per-file 谓词里反复构造正则
+      // Compile once instead of rebuilding the regex in the per-file predicate.
       const regex = globToRegex(pattern);
 
       const ignore = createIgnoreFilter(respectGitignore);
@@ -108,22 +108,22 @@ export const globTool: ToolExecutor = {
         .sort((a, b) => b.mtimeMs - a.mtimeMs || a.path.localeCompare(b.path));
       const paged = limit === 0 ? matched.slice(offset) : matched.slice(offset, offset + limit);
       const truncated = limit !== 0 && matched.length > offset + limit;
-      const suffix = truncated ? `\n（还有更多结果，使用 offset: ${offset + limit} 翻页）` : '';
+      const suffix = truncated ? `\n(More results are available; use offset ${offset + limit} to paginate.)` : '';
 
       if (matched.length === 0) {
         return {
-          content: `未找到匹配 "${pattern}" 的文件`,
+          content: `No files matched "${pattern}"`,
           metadata: { kind: 'glob', pattern, matchCount: 0 },
         };
       }
 
       return {
-        content: `找到 ${matched.length} 个文件${truncated ? '（已截断）' : ''}:\n${paged.map((file) => file.path).join('\n')}${suffix}`,
+          content: `Found ${matched.length} files${truncated ? ' (truncated)' : ''}:\n${paged.map((file) => file.path).join('\n')}${suffix}`,
         metadata: { kind: 'glob', pattern, matchCount: matched.length },
       };
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);
-      throw new Error(`查找文件失败: ${error}`);
+      throw new Error(`Failed to find files: ${error}`);
     }
   },
 };

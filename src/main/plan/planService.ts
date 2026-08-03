@@ -144,8 +144,8 @@ function renderPlan(document: PlanDocument): string {
   const tests = document.testPlan.map((test) => `- ${test}`).join('\n');
   const assumptions = document.assumptions.length
     ? document.assumptions.map((assumption) => `- ${assumption}`).join('\n')
-    : '- 无';
-  return `# ${document.title}\n\n${document.summary}\n\n## 实施步骤\n\n${steps}\n\n## 测试与验收\n\n${tests}\n\n## 假设\n\n${assumptions}`;
+    : '- None';
+  return `# ${document.title}\n\n${document.summary}\n\n## Implementation steps\n\n${steps}\n\n## Testing and acceptance\n\n${tests}\n\n## Assumptions\n\n${assumptions}`;
 }
 
 export function submitPlanArtifact(input: {
@@ -252,7 +252,7 @@ export function decidePlan(request: PlanDecisionRequest, webContentsId: number):
       throw new Error('Plan was invalidated by newer user input');
     }
     if (request.decision === 'reject') {
-      const feedback = request.feedback?.trim() || '请根据我的反馈重新规划。';
+      const feedback = request.feedback?.trim() || 'Please replan based on my feedback.';
       database.prepare(`
         UPDATE plan_artifacts SET status = 'rejected', decision_feedback = ?, decided_at = CURRENT_TIMESTAMP
         WHERE id = ?
@@ -287,7 +287,7 @@ export function decidePlan(request: PlanDecisionRequest, webContentsId: number):
   revokeConversationGrants(request.conversationId);
   const state = getConversationModeState(request.conversationId);
   if (request.decision === 'reject') {
-    return { state, replanFeedback: request.feedback?.trim() || '请根据我的反馈重新规划。' };
+    return { state, replanFeedback: request.feedback?.trim() || 'Please replan based on my feedback.' };
   }
   const planRow = getRawDatabase().prepare('SELECT * FROM plan_artifacts WHERE id = ?').get(request.planId);
   const plan = mapPlan(planRow);

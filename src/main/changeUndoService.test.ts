@@ -72,6 +72,6 @@ describe('changeUndoService', () => {
     await expect(readFile(filePath, 'utf-8')).resolves.toBe('user change\n');
     expect(result.success).toBe(false);
     expect(result.reverted).toEqual([]);
-    expect(result.error).toContain('不能安全恢复');
+    expect(result.error).toContain('cannot be safely restored');
   });
 });

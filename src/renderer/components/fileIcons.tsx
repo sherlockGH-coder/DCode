@@ -1,16 +1,16 @@
 import React from 'react';
 
 /**
- * `react-material-icon-theme` 内联了整套 Material 文件图标，压缩前约 1.1MB，
- * 占渲染包近三成，而首屏（欢迎页）根本用不到它。
- * 这里改成按需加载，未就绪时用一个同尺寸的中性字形占位，避免布局抖动。
+ * `react-material-icon-theme` inlines the complete Material file-icon set, about 1.1 MB before compression,
+ * which accounts for nearly a third of the renderer bundle even though the welcome screen does not use it.
+ * Load it on demand and show a same-size neutral glyph until it is ready to avoid layout shifts.
  */
 const LazyFileIcon = React.lazy(async () => {
   const mod = await import('react-material-icon-theme');
   return { default: mod.FileIcon };
 });
 
-/** 与 FileIcon 同尺寸的占位字形，仅在图标包加载完成前短暂出现。 */
+/** Same-size placeholder glyph for FileIcon, shown briefly while the icon package loads. */
 const FileIconPlaceholder: React.FC = () => (
   <svg width={14} height={14} viewBox="0 0 16 16" fill="none" aria-hidden>
     <path

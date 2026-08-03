@@ -42,7 +42,7 @@ const SearchSection: React.FC<Props> = ({ tavilyApiKeySet, setTavilyApiKey }) =>
       setShowKey(false);
       showSaved();
     } catch (err) {
-      setError((err as Error).message || '保存失败');
+      setError((err as Error).message || 'Failed to save');
       setSaveState('idle');
     }
   };
@@ -56,7 +56,7 @@ const SearchSection: React.FC<Props> = ({ tavilyApiKeySet, setTavilyApiKey }) =>
       setShowKey(false);
       showSaved();
     } catch (err) {
-      setError((err as Error).message || '清除失败');
+      setError((err as Error).message || 'Failed to clear');
       setSaveState('idle');
     }
   };
@@ -70,32 +70,32 @@ const SearchSection: React.FC<Props> = ({ tavilyApiKeySet, setTavilyApiKey }) =>
   return (
     <div className="pb-10">
       <SettingsPageHeader
-        title="网络搜索"
+        title="Web search"
         action={<SavePill state={saveState} error={error} />}
       />
 
       <div className="space-y-9">
         <section>
-          <SectionTitle>连接状态</SectionTitle>
+          <SectionTitle>Connection status</SectionTitle>
           <SettingsGroup>
             <SettingsRow
-              title={tavilyApiKeySet ? '联网搜索已启用' : '联网搜索未启用'}
-              description={tavilyApiKeySet ? 'AI 可以在对话中实时搜索网络并读取网页内容。' : '配置 Tavily API Key 后即可启用 web_search 工具。'}
+              title={tavilyApiKeySet ? 'Web search is enabled' : 'Web search is not enabled'}
+              description={tavilyApiKeySet ? 'AI can search the web and read pages in real time during conversations.' : 'Configure a Tavily API key to enable the web_search tool.'}
               icon={<IconGlobe size={15} className="text-current" />}
             >
               <div className="flex justify-end">
-                <StatusPill tone={tavilyApiKeySet ? 'blue' : 'amber'} label={tavilyApiKeySet ? '可用' : '需要密钥'} />
+                <StatusPill tone={tavilyApiKeySet ? 'blue' : 'amber'} label={tavilyApiKeySet ? 'Available' : 'Key required'} />
               </div>
             </SettingsRow>
           </SettingsGroup>
         </section>
 
         <section>
-          <SectionTitle>密钥配置</SectionTitle>
+          <SectionTitle>Key configuration</SectionTitle>
           <SettingsGroup>
             <SettingsRow
               title="Tavily API Key"
-              description="web_search 必需；web_fetch 配置后优先使用 Tavily，已保存的密钥不会回显"
+              description="Required for web_search; web_fetch prefers Tavily when configured. Saved keys are never shown."
               icon={<IconKey size={15} className="text-current" />}
               tall
             >
@@ -106,19 +106,19 @@ const SearchSection: React.FC<Props> = ({ tavilyApiKeySet, setTavilyApiKey }) =>
                     value={draftKey}
                     configured={tavilyApiKeySet}
                     onValueChange={setDraftKey}
-                    placeholder={tavilyApiKeySet ? '输入新密钥以替换' : 'tvly-...'}
+                    placeholder={tavilyApiKeySet ? 'Enter a new key to replace it' : 'tvly-...'}
                     autoComplete="off"
                     spellCheck={false}
                     className={settingsMonoInputClass}
                   />
                   <SecondaryButton type="button" onClick={() => setShowKey((value) => !value)} className="shrink-0">
-                    {showKey ? '隐藏' : '显示'}
+                    {showKey ? 'Hide' : 'Show'}
                   </SecondaryButton>
                 </div>
                 <div className="flex items-center justify-end gap-2">
                   {tavilyApiKeySet && (
                     <SecondaryButton type="button" onClick={handleClear} disabled={saveState === 'saving'}>
-                      清除
+                      Clear
                     </SecondaryButton>
                   )}
                   <PrimaryButton
@@ -126,12 +126,12 @@ const SearchSection: React.FC<Props> = ({ tavilyApiKeySet, setTavilyApiKey }) =>
                     onClick={handleSave}
                     disabled={!hasDraftKey || saveState === 'saving'}
                   >
-                    {saveState === 'saving' ? '保存中...' : '保存更改'}
+                    {saveState === 'saving' ? 'Saving...' : 'Save changes'}
                   </PrimaryButton>
                 </div>
               </div>
             </SettingsRow>
-            <SettingsRow title="获取密钥" description="打开 Tavily 控制台创建或管理搜索 API Key">
+            <SettingsRow title="Get a key" description="Open the Tavily console to create or manage a search API key">
               <div className="flex justify-end">
                 <a
                   href="https://tavily.com"
@@ -139,7 +139,7 @@ const SearchSection: React.FC<Props> = ({ tavilyApiKeySet, setTavilyApiKey }) =>
                   rel="noopener noreferrer"
                   className="inline-flex h-8 items-center justify-end gap-1.5 text-[13px] font-semibold text-[#147CE5] transition-colors hover:text-[#0A66C2]"
                 >
-                  Tavily 控制台
+                  Tavily console
                   <IconExternalOpen size={12} className="text-current" />
                 </a>
               </div>

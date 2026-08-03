@@ -16,8 +16,8 @@ interface UseSkillsResult {
 }
 
 /**
- * 监听三层 skill 列表 + 提供管理操作。
- * projectPath 变化时自动重 list。
+ * Listen to the three skill scopes and provide management operations.
+ * Reload the list automatically when projectPath changes.
  */
 export function useSkills(projectPath: string | null): UseSkillsResult {
   const [skills, setSkills] = useState<SkillSummary[]>([]);

@@ -84,8 +84,8 @@ function inferMimeAndKind(filePath: string): { mime: string; kind: AttachmentKin
 }
 
 /**
- * 给定路径 stat 校验 + 推断元信息；不存在或非文件返回 null。
- * 路径会被 resolve 成绝对路径。
+ * Validate a path with stat and infer metadata; return null when it does not exist or is not a file.
+ * Resolve the path to an absolute path.
  */
 export async function inferAttachmentFromPath(rawPath: string): Promise<Attachment | null> {
   const resolved = resolve(rawPath);

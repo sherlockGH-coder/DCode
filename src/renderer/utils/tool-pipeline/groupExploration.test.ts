@@ -49,7 +49,7 @@ describe('groupExploration', () => {
     expect(units[1].kind).toBe('exploration-group');
     if (units[1].kind !== 'exploration-group') return;
     expect(units[1].items).toHaveLength(2);
-    expect(units[1].summary).toContain('已搜索');
-    expect(units[1].summary).toContain('已列出文件');
+    expect(units[1].summary).toContain('Searched');
+    expect(units[1].summary).toContain('Listed files');
   });
 });

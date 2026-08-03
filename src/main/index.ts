@@ -55,7 +55,7 @@ if (!gotTheLock) {
 
   app.on('open-file', (event, path) => {
     event.preventDefault();
-    debugLog('App', '收到 open-file 事件，路径:', path);
+    debugLog('App', 'Received open-file event, path:', path);
 
     let targetDir = path;
     try {
@@ -71,12 +71,12 @@ if (!gotTheLock) {
         folderToOpenOnStart = targetDir;
       }
     } catch (err) {
-      console.warn('[App] open-file 路径解析失败:', path, err);
+      console.warn('[App] Failed to resolve open-file path:', path, err);
     }
   });
 
   app.on('second-instance', (event, argv, workingDirectory) => {
-    debugLog('App', '收到 second-instance 调用，参数:', argv);
+    debugLog('App', 'Received second-instance invocation, arguments:', argv);
     const win = createMainWindow();
     win.show();
     win.focus();
@@ -123,7 +123,7 @@ if (!gotTheLock) {
       }
     });
 
-    // 必须在建窗之前挂上，否则首个文档的响应头拿不到 CSP
+      // Install before creating windows or the first document cannot receive the CSP response header.
     applyContentSecurityPolicy();
 
     setupDockIcon();
@@ -131,15 +131,15 @@ if (!gotTheLock) {
     createMainWindow();
 
     if (folderToOpenOnStart) {
-      // 先取出本地常量：safeRun 的回调是延迟执行的，闭包里拿不到窄化后的类型
+      // Capture the local constant first: safeRun callbacks run later and cannot access the narrowed type from the closure.
       const pendingFolder = folderToOpenOnStart;
-      debugLog('App', '应用已就绪，正在激活冷启动暂存路径:', pendingFolder);
+      debugLog('App', 'App is ready; activating the cold-start pending path:', pendingFolder);
       safeRun('open folder', () => handleOpenFolder(pendingFolder));
       folderToOpenOnStart = null;
     }
 
-    // MCP server 会拉起子进程，task 加载会读盘——两者都不是首帧的前置依赖，
-    // 放到建窗之后启动，避免和渲染进程抢 CPU。
+    // MCP servers spawn child processes and task loading reads from disk; neither is required for the first frame.
+    // Start both after creating the window to avoid competing with the renderer for CPU.
     const activeProject = projectManager.getState().activeProject;
     safeRun('mcp loadAll', () => mcpManager.loadAll(activeProject));
     safeRun('task loadAll', () => taskManager.loadAll(activeProject));
@@ -155,7 +155,7 @@ if (!gotTheLock) {
 
   app.on('before-quit', () => {
     safeRun('mcp stopAll', () => mcpManager.stopAll());
-    // 回收 PTY 子进程，并把 WAL 回写进主库
+    // Reap PTY child processes and flush the WAL into the main database.
     try { killAllTerminalSessions(); } catch (err) { console.error('[App] terminal cleanup failed:', err); }
     try { closeDatabase(); } catch (err) { console.error('[App] database close failed:', err); }
   });

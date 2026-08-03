@@ -35,6 +35,6 @@ export function kindIcon(kind: Attachment['kind']): string {
 
 export const cleanErrorText = (content: string) => {
   return content
-    .replace(/^❌\s*(?:错误)?\s*:?\s*/i, '')
+    .replace(/^❌\s*(?:error|\u9519\u8bef)?\s*:?\s*/i, '')
     .replace(/^Error:\s*/i, '');
 };

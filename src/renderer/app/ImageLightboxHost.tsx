@@ -154,7 +154,7 @@ const ImageLightboxHost: React.FC<ImageLightboxHostProps> = ({
           >
             <div className="min-w-0 flex-1">
               <div className="text-white/86 text-[13.5px] font-medium truncate drop-shadow-sm">
-                {activeImage.title || '图片预览'}
+                {activeImage.title || 'Image preview'}
               </div>
               {imageNaturalSize && (
                 <div className="mt-0.5 text-white/42 text-[11px] tabular-nums leading-none">
@@ -167,8 +167,8 @@ const ImageLightboxHost: React.FC<ImageLightboxHostProps> = ({
                 type="button"
                 onClick={() => zoomLightboxImage(1 / IMAGE_ZOOM_STEP)}
                 className="flex h-8 w-8 items-center justify-center rounded-full border-none bg-transparent text-white/76 transition-all duration-150 hover:bg-white/12 hover:text-white active:scale-95 disabled:opacity-35 disabled:cursor-default"
-                aria-label="缩小"
-                title="缩小"
+                aria-label="Zoom out"
+                title="Zoom out"
                 disabled={imageZoom <= IMAGE_ZOOM_MIN}
               >
                 <IconZoomOut size={15} />
@@ -180,8 +180,8 @@ const ImageLightboxHost: React.FC<ImageLightboxHostProps> = ({
                 type="button"
                 onClick={() => zoomLightboxImage(IMAGE_ZOOM_STEP)}
                 className="flex h-8 w-8 items-center justify-center rounded-full border-none bg-transparent text-white/76 transition-all duration-150 hover:bg-white/12 hover:text-white active:scale-95 disabled:opacity-35 disabled:cursor-default"
-                aria-label="放大"
-                title="放大"
+                aria-label="Zoom in"
+                title="Zoom in"
                 disabled={imageZoom >= IMAGE_ZOOM_MAX}
               >
                 <IconZoomIn size={15} />
@@ -191,8 +191,8 @@ const ImageLightboxHost: React.FC<ImageLightboxHostProps> = ({
                 type="button"
                 onClick={resetImageView}
                 className="flex h-8 w-8 items-center justify-center rounded-full border-none bg-transparent text-white/76 transition-all duration-150 hover:bg-white/12 hover:text-white active:scale-95"
-                aria-label="适应窗口"
-                title="适应窗口"
+                aria-label="Fit to window"
+                title="Fit to window"
               >
                 <IconFitImage size={15} />
               </button>
@@ -200,8 +200,8 @@ const ImageLightboxHost: React.FC<ImageLightboxHostProps> = ({
                 type="button"
                 onClick={setActualImageSize}
                 className="flex h-8 w-8 items-center justify-center rounded-full border-none bg-transparent text-white/76 transition-all duration-150 hover:bg-white/12 hover:text-white active:scale-95"
-                aria-label="原始尺寸"
-                title="原始尺寸"
+                aria-label="Original size"
+                title="Original size"
               >
                 <IconActualSize size={15} />
               </button>
@@ -210,8 +210,8 @@ const ImageLightboxHost: React.FC<ImageLightboxHostProps> = ({
               type="button"
               onClick={() => setActiveImage(null)}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white/90 transition-all duration-150 hover:bg-white/20 active:scale-95 cursor-pointer focus:outline-none"
-              aria-label="关闭预览"
-              title="关闭"
+              aria-label="Close preview"
+              title="Close"
             >
               <IconX size={16} />
             </button>
@@ -251,7 +251,7 @@ const ImageLightboxHost: React.FC<ImageLightboxHostProps> = ({
             className="absolute bottom-5 text-white/40 text-[11px] select-none"
             onClick={(e) => e.stopPropagation()}
           >
-            点击空白处关闭
+            Click outside to close
           </div>
         </div>
       )}

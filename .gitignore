@@ -8,7 +8,7 @@ benchmark/jobs/
 *.rdb
 .DS_Store
 
-# 文档：除根目录 README.md 和内置技能外，其他 markdown 不入版本控制
+# Documentation: keep only the root README.md and built-in skills under version control.
 *.md
 !README.md
 !docs/dependency-management.md
@@ -23,10 +23,10 @@ benchmark/jobs/
 __pycache__/
 *.py[cod]
 
-# 构建产物
+# Build artifacts
 release/
 
-# 设计探索与原型：本地保留，不入版本控制（约 9.5MB 的 HTML/PNG）
+# Design explorations and prototypes: keep locally, do not commit (about 9.5 MB of HTML/PNG).
 design-explorations/
 prototypes/
 settings-prototype/

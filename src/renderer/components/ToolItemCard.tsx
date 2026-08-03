@@ -45,11 +45,11 @@ type AskUserQuestionItem = Extract<ToolItem, { kind: 'ask_user_question' }>;
 
 function questionStatusLabel(item: AskUserQuestionItem): string {
   switch (item.status) {
-    case 'done': return '已完成';
-    case 'error': return item.output?.includes('问题已失效') ? '已失效' : '未完成';
-    case 'awaiting_approval': return '等待回答';
-    case 'running': return '处理中';
-    case 'pending': return '准备中';
+    case 'done': return 'Completed';
+    case 'error': return item.output?.includes('Question expired') ? 'Expired' : 'Incomplete';
+    case 'awaiting_approval': return 'Awaiting answer';
+    case 'running': return 'Processing';
+    case 'pending': return 'Preparing';
   }
 }
 
@@ -58,7 +58,7 @@ const AskUserQuestionDetail: React.FC<{ item: AskUserQuestionItem }> = ({ item }
   return (
     <ToolDetailFrame testId="ask-user-question-detail" className="divide-y divide-hairline">
       <div className="flex items-center justify-between gap-3 px-3 py-2">
-        <span className="text-[12px] font-medium text-text-secondary">问答详情</span>
+        <span className="text-[12px] font-medium text-text-secondary">Question details</span>
         <span className={`text-[11px] font-medium ${item.status === 'error' ? 'text-diff-del' : 'text-text-tertiary'}`}>
           {questionStatusLabel(item)}
         </span>
@@ -76,7 +76,7 @@ const AskUserQuestionDetail: React.FC<{ item: AskUserQuestionItem }> = ({ item }
           <section key={`${question.question}-${index}`} className="px-3 py-2.5">
             <div className="flex items-start gap-2">
               <span className="mt-0.5 max-w-[120px] shrink-0 truncate rounded-[5px] bg-bg-chip px-1.5 py-0.5 text-[10.5px] font-medium text-text-secondary">
-                {question.header || `问题 ${index + 1}`}
+                {question.header || `Question ${index + 1}`}
               </span>
               <p className="min-w-0 flex-1 text-[13px] font-medium leading-5 text-text-primary">
                 {question.question}
@@ -109,15 +109,15 @@ const AskUserQuestionDetail: React.FC<{ item: AskUserQuestionItem }> = ({ item }
               })}
             </div>
             <div className="mt-2 text-[12px] leading-5 text-text-secondary">
-              <span className="font-medium">用户选择：</span>
+              <span className="font-medium">User selection:</span>
               <span className={answer ? 'text-text-primary' : 'text-text-tertiary'}>
-                {answer || (item.status === 'awaiting_approval' ? '等待选择' : '未作答')}
+                {answer || (item.status === 'awaiting_approval' ? 'Awaiting selection' : 'Not answered')}
               </span>
             </div>
           </section>
         );
       }) : (
-        <div className="px-3 py-2.5 text-[12px] text-text-tertiary">没有可展示的问题内容</div>
+        <div className="px-3 py-2.5 text-[12px] text-text-tertiary">No question content to display</div>
       )}
     </ToolDetailFrame>
   );
@@ -225,7 +225,7 @@ const ToolItemCard: React.FC<ToolItemCardProps> = ({ item, hideIcon = false }) =
               </span>
             )}
             {renderDetail(detail)}
-            {item.status === 'error' && <span className="shrink-0 text-[13px] text-diff-del">失败</span>}
+            {item.status === 'error' && <span className="shrink-0 text-[13px] text-diff-del">Failed</span>}
           </span>
           {hasExpandableContent && (
             <span className="shrink-0 text-[10px] text-text-tertiary">
@@ -252,8 +252,8 @@ const ToolItemCard: React.FC<ToolItemCardProps> = ({ item, hideIcon = false }) =
               {item.kind === 'tool' && !output && (
                 <div className="px-3 py-2 text-[12px] leading-[1.6] text-text-tertiary">
                   {item.status === 'running' || item.status === 'pending'
-                    ? '工具执行中…'
-                    : `已调用工具 ${item.name || displayName}`}
+                    ? 'Tool is running…'
+                    : `Called tool ${item.name || displayName}`}
                 </div>
               )}
               {diff && <DiffView diff={diff} filename={target} maxHeight="320px" className="" />}

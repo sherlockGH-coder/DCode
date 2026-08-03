@@ -15,34 +15,34 @@ test('full access requires confirmation before it is persisted', async () => {
   const { app, page } = await launchElectronApp(userData);
 
   try {
-    await page.getByRole('button', { name: '系统设置' }).click();
-    await page.getByRole('button', { name: '权限控制' }).click();
+    await page.getByRole('button', { name: 'Settings' }).click();
+    await page.getByRole('button', { name: 'Permissions' }).click();
 
-    const policyGroup = page.getByRole('radiogroup', { name: '工具审批策略' });
+    const policyGroup = page.getByRole('radiogroup', { name: 'Tool approval policy' });
     await expect(policyGroup.getByRole('radio')).toHaveCount(3);
-    const defaultPolicy = policyGroup.getByRole('radio', { name: /默认审批/ });
-    const fullAccess = policyGroup.getByRole('radio', { name: /完全访问/ });
+    const defaultPolicy = policyGroup.getByRole('radio', { name: /Default approval/ });
+    const fullAccess = policyGroup.getByRole('radio', { name: /Full access/ });
     await expect(defaultPolicy).toHaveAttribute('aria-checked', 'true');
     await captureVisualQa(page, 'permissions-default', 200);
 
     await fullAccess.click();
-    const dialog = page.getByRole('dialog', { name: '启用完全访问模式？' });
+    const dialog = page.getByRole('dialog', { name: 'Enable full access mode?' });
     await expect(dialog).toBeVisible();
     await expect(dialog.locator('svg')).toHaveCount(0);
     await captureVisualQa(page, 'permissions-full-access-confirm', 200);
-    await dialog.getByRole('button', { name: '取消' }).click();
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
     await expect(dialog).toHaveCount(0);
     await expect(defaultPolicy).toHaveAttribute('aria-checked', 'true');
 
     await fullAccess.click();
-    await page.getByRole('dialog', { name: '启用完全访问模式？' })
-      .getByRole('button', { name: '启用完全访问' })
+    await page.getByRole('dialog', { name: 'Enable full access mode?' })
+      .getByRole('button', { name: 'Enable full access' })
       .click();
 
-    await expect(page.getByRole('dialog', { name: '启用完全访问模式？' })).toHaveCount(0);
+    await expect(page.getByRole('dialog', { name: 'Enable full access mode?' })).toHaveCount(0);
     await expect(fullAccess).toHaveAttribute('aria-checked', 'true');
-    await expect(page.getByText('完全访问已启用')).toBeVisible();
-    await expect(page.getByText('高风险')).toBeVisible();
+    await expect(page.getByText('Full access is enabled')).toBeVisible();
+    await expect(page.getByText('High risk')).toBeVisible();
     await captureVisualQa(page, 'permissions-full-access-active', 200);
     await expect.poll(() => {
       if (!existsSync(settingsPath)) return undefined;

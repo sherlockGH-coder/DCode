@@ -66,18 +66,18 @@ export interface ToolItemBase {
   toolCallId: string;
   name: string;
   /**
-   * pending           — 工具刚收到尚未真正运行
-   * awaiting_approval — 等待用户确认（目前仅 bash_exec 触发）
-   * running           — 已批准并在执行
-   * done / error      — 终态
+   * pending           - tool just received and has not actually run.
+   * awaiting_approval - waiting for user confirmation; currently triggered only by bash_exec.
+   * running           - approved and executing.
+   * done / error      - terminal state.
    */
   status: 'pending' | 'awaiting_approval' | 'running' | 'done' | 'error';
   timestamp: number;
-  /** 工具提供的操作说明（审批面板展示用） */
+  /** Operation description supplied by the tool, shown in the approval panel. */
   approvalDescription?: string;
-  /** 审批面板的 diff 预览（unified-diff 格式，仅 edit/write 工具有值） */
+  /** Approval-panel diff preview in unified-diff format, populated only for edit/write tools. */
   approvalDiffPreview?: string;
-  /** 项目外路径提示（write/edit 工具操作项目外路径时由主进程填充） */
+  /** Out-of-project path notice, populated by the main process for write/edit operations outside the project. */
   approvalOutOfScope?: {
     absolutePath: string;
     projectRoot: string | null;

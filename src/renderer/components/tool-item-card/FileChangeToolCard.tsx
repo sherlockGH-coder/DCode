@@ -18,9 +18,9 @@ function getFileChangeAction(item: Extract<ToolItem, { kind: 'write' | 'edit' }>
 }
 
 const FILE_CHANGE_LABEL: Record<FileChangeAction, string> = {
-  created: '已创建',
-  edited: '已编辑',
-  deleted: '已删除',
+  created: 'Created',
+  edited: 'Edited',
+  deleted: 'Deleted',
 };
 
 function getDiffStats(item: Extract<ToolItem, { kind: 'write' | 'edit' }>): { added: number; deleted: number } {
@@ -63,7 +63,7 @@ const FileChangeDetail: React.FC<{
           <DiffStat added={added} deleted={deleted} />
           <button
             type="button"
-            title="复制 diff"
+            title="Copy diff"
             className="ml-auto inline-flex h-6 w-6 items-center justify-center rounded-[6px] border-0 bg-transparent text-text-tertiary hover:bg-bg-hover hover:text-text-primary"
             onClick={async () => {
               if (!item.diff) return;
@@ -76,7 +76,7 @@ const FileChangeDetail: React.FC<{
         {item.diff ? (
           <DiffView diff={item.diff} filename={item.path} maxHeight="360px" className="border-0" />
         ) : (
-          <div className="px-4 py-4 text-[12px] text-text-tertiary">无可见代码改动</div>
+          <div className="px-4 py-4 text-[12px] text-text-tertiary">No visible code changes</div>
         )}
       </div>
     </div>
@@ -91,7 +91,7 @@ const FileChangeToolCard: React.FC<{
   const [open, setOpen] = useState(false);
   const action = getFileChangeAction(item);
   const isRunning = item.status === 'running' || item.status === 'pending';
-  const label = isRunning ? (action === 'created' ? '创建中' : action === 'deleted' ? '删除中' : '编辑中') : FILE_CHANGE_LABEL[action];
+  const label = isRunning ? (action === 'created' ? 'Creating' : action === 'deleted' ? 'Deleting' : 'Editing') : FILE_CHANGE_LABEL[action];
   const { added, deleted } = getDiffStats(item);
   const fileName = getFileName(item.path);
   const hasDetail = !!item.diff;

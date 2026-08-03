@@ -1,11 +1,11 @@
 const sessionAllowedKeys = new Set<string>();
 
-/** 取命令的第一个 token（例如 `git status -s` → `git`） */
+/** Take the first token of a command, for example `git status -s` -> `git`. */
 function firstToken(command: string): string {
   return command.trim().split(/\s+/)[0] ?? '';
 }
 
-/** 根据 approval 请求计算会话白名单 key */
+/** Calculate the session allowlist key from an approval request. */
 export function keyForApproval(kind: string, command: string): string {
   if (kind === 'bash_exec') {
     const token = firstToken(command);

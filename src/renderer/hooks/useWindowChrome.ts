@@ -12,7 +12,7 @@ export function useWindowChrome() {
     void window.electronEnv?.isFullScreen().then((v) => {
       if (!disposed) setIsFullscreen(v);
     }).catch(() => {
-      // 拿不到初始全屏状态就沿用默认值
+      // Keep the default value when the initial fullscreen state is unavailable.
     });
 
     const unsubscribe = window.electronEnv?.onFullscreenChanged((v) => {

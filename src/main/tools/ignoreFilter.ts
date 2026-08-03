@@ -1,13 +1,13 @@
 /**
- * `.gitignore` 感知的目录/文件过滤器，供 `glob` 与 `grep` 的目录遍历共用。
+ * A `.gitignore`-aware directory/file filter shared by `glob` and `grep` traversal.
  *
- * 语义对齐 ripgrep：内置若干总是跳过的目录，再叠加仓库里的 `.gitignore` 规则
- * （含根目录与遍历过程中遇到的嵌套 `.gitignore`），后匹配的规则覆盖先匹配的，
- * `!` 前缀表示取消忽略。
+ * Semantics align with ripgrep: always-skipped directories plus repository `.gitignore` rules,
+ * including root and nested files encountered during traversal. Later matching rules override earlier ones;
+ * the `!` prefix negates an ignore rule.
  *
- * 只实现 gitignore 的常用子集：注释、空行、`!` 取反、结尾 `/` 限定目录、
- * 开头或中间 `/` 表示锚定到该 `.gitignore` 所在目录，以及 `*` / `**` / `?` 通配。
- * 不支持 `[a-z]` 字符类（按字面量处理）。
+ * Implement the common gitignore subset: comments, blank lines, `!` negation, a trailing `/` directory-only rule,
+ * a leading or middle `/` anchored to the directory containing that `.gitignore`, and `*` / `**` / `?` wildcards.
+ * Character classes such as `[a-z]` are not supported and are treated literally.
  */
 
 const DEFAULT_IGNORE_DIRS = new Set([
@@ -127,8 +127,8 @@ export class IgnoreFilter {
   }
 
   /**
-   * 判断相对搜索根的 posix 路径是否被忽略。
-   * `isDir` 影响仅限目录的规则（结尾带 `/`）。
+   * Check whether a POSIX path relative to the search root is ignored.
+   * `isDir` affects directory-only rules, which end with `/`.
    */
   ignores(relPath: string, isDir: boolean): boolean {
     if (!this.enabled || this.ruleSets.length === 0) return false;

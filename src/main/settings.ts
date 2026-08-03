@@ -70,7 +70,7 @@ class SettingsManager {
         this.syncActiveApiToLegacy();
       }
     } catch (err) {
-      console.warn('[settings] 加载失败，使用默认值:', err);
+      console.warn('[settings] Failed to load; using defaults:', err);
       this.state = defaults();
       this.syncActiveApiToLegacy();
     }
@@ -81,7 +81,7 @@ class SettingsManager {
     try {
       writeFileSync(this.statePath, JSON.stringify(this.state, null, 2), 'utf-8');
     } catch (err) {
-      console.error('[settings] 保存失败:', err);
+      console.error('[settings] Failed to save:', err);
     }
   }
 
@@ -95,7 +95,7 @@ class SettingsManager {
     try {
       return loadExternalSettings(this.externalSettingsPath);
     } catch (error) {
-      console.warn('[settings] 外部设置无效，已忽略:', error instanceof Error ? error.message : error);
+      console.warn('[settings] Invalid external settings; ignoring:', error instanceof Error ? error.message : error);
       return null;
     }
   }
@@ -221,7 +221,7 @@ class SettingsManager {
 
   private patchApiProfiles(profiles: AppSettingsPatch['apiProfiles']): void {
     if (!profiles || profiles.length === 0) {
-      throw new Error('至少保留一个 API 配置');
+      throw new Error('At least one API profile must remain');
     }
     const previousById = new Map(this.state.apiProfiles.map((profile) => [profile.id, profile]));
     const seenIds = new Set<string>();
@@ -237,7 +237,7 @@ class SettingsManager {
         index === 0 ? DEFAULT_PROFILE_ID : randomUUID(),
       );
       if (seenIds.has(normalized.id)) {
-        throw new Error(`API 配置 ID 重复: ${normalized.id}`);
+        throw new Error(`Duplicate API profile ID: ${normalized.id}`);
       }
       seenIds.add(normalized.id);
       return normalized;
@@ -251,7 +251,7 @@ class SettingsManager {
   private setActiveApiProfile(id: string): void {
     const nextId = id.trim();
     if (!this.state.apiProfiles.some((profile) => profile.id === nextId)) {
-      throw new Error(`API 配置不存在: ${id}`);
+      throw new Error(`API profile does not exist: ${id}`);
     }
     this.state.activeApiProfileId = nextId;
   }
@@ -283,7 +283,7 @@ class SettingsManager {
     this.save();
   }
 
-  /** 真实可用的 API Key（解密后）；用户未设置时回退到 env */
+  /** Actual usable API key after decryption; falls back to env when the user has not set one. */
   getApiKey(): string {
     const active = this.activeProfile;
     return getApiKeyForProfile({
@@ -293,7 +293,7 @@ class SettingsManager {
     });
   }
 
-  /** 用户是否设置了自己的 key（不算 env 兜底） */
+  /** Whether the user has set a key, excluding the env fallback. */
   hasUserApiKey(): boolean {
     return this.hasApiKeyForProfile(this.activeProfile);
   }
@@ -301,7 +301,7 @@ class SettingsManager {
   getActiveApiCompatibilityError(): string | null {
     const active = this.activeProfile;
     if (active.protocol !== 'legacy-openai') return null;
-    return `配置“${active.name}”来自旧版 OpenAI Chat Completions，当前版本仅支持 Anthropic Messages。请在设置中更新 Base URL 与模型，并确认转换后再使用。`;
+    return `Profile "${active.name}" uses the legacy OpenAI Chat Completions API, while this version supports only Anthropic Messages. Update the Base URL and model in settings, then confirm the conversion before using it.`;
   }
 
   assertActiveApiProfileSupported(): void {
@@ -373,12 +373,12 @@ class SettingsManager {
     return [...env.ANTHROPIC_MODELS];
   }
 
-  /** 用户自定义模型列表（空表示走自动拉取） */
+  /** User-defined model list; empty means load models automatically. */
   getUserModels(): string[] {
     return [...this.state.api.models];
   }
 
-  /** 用户在设置 UI 里写的覆盖文本（trim 前的原文）；空字符串 = 走默认 .md */
+  /** Override text entered in the settings UI before trimming; an empty string uses the default .md. */
   getSystemPromptOverride(): string {
     return this.state.prompt.systemPromptOverride;
   }

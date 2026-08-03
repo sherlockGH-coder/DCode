@@ -3,8 +3,8 @@ import { formatSlashCommandsForTitle, parseLeadingSlashCommand } from './slashCo
 
 describe('slashCommands', () => {
   it('formats slash command markers in titles', () => {
-    expect(formatSlashCommandsForTitle('/frontend-design 优化一下')).toBe('$frontend-design 优化一下');
-    expect(formatSlashCommandsForTitle('先 /compact 再继续')).toBe('先 $compact 再继续');
+    expect(formatSlashCommandsForTitle('/frontend-design optimize this')).toBe('$frontend-design optimize this');
+    expect(formatSlashCommandsForTitle('Run /compact first, then continue')).toBe('Run $compact first, then continue');
   });
 
   it('does not treat file paths as slash commands', () => {
@@ -12,9 +12,9 @@ describe('slashCommands', () => {
   });
 
   it('parses a leading slash command for user message display', () => {
-    expect(parseLeadingSlashCommand('/frontend-design 优化一下')).toEqual({
+    expect(parseLeadingSlashCommand('/frontend-design optimize this')).toEqual({
       name: 'frontend-design',
-      rest: '优化一下',
+      rest: 'optimize this',
     });
     expect(parseLeadingSlashCommand('/Users/conan/Code')).toBeNull();
   });

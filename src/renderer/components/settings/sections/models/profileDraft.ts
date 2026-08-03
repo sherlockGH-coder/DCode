@@ -50,9 +50,9 @@ export function getProfileInitial(name: string): string {
 }
 
 export function getModelSourceLabel(profile: Pick<ApiProfile, 'models'>): string {
-  return profile.models.length > 0 ? `${profile.models.length} 个自定义模型` : '自动拉取模型';
+  return profile.models.length > 0 ? `${profile.models.length} custom models` : 'Load models automatically';
 }
 
 export function getDefaultModelLabel(profile: Pick<ApiProfile, 'defaultModel'>): string {
-  return profile.defaultModel || '按协议默认';
+  return profile.defaultModel || 'Protocol default';
 }

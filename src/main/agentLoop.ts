@@ -15,7 +15,7 @@ import { runAnthropicRound } from './agent-loop/anthropicRound';
 export { convertMessagesToAnthropic } from './agent-loop/anthropicFormat';
 
 /**
- * Agent Loop 核心函数
+ * Core Agent Loop function.
  */
 export async function agentLoop(
   messages: Message[],
@@ -187,19 +187,19 @@ Return a concise structured result with:
 
   workingMessages.push(...buildRequestMessages(messages));
 
-  log('开始 | model=%s | baseUrl=%s | tools=%d | 附件=%d | skills=%d',
+  log('Start | model=%s | baseUrl=%s | tools=%d | attachments=%d | skills=%d',
     model, baseUrl, tools.length, whitelistMap?.size ?? 0, enabledSkills?.length ?? 0);
 
   while (true) {
 
     if (signal?.aborted) {
-      log('⏹ 已中断（轮次开始前）');
+    log('⏹ Aborted before the round started');
       break;
     }
 
     roundCount++;
     const roundStart = Date.now();
-    log(`▶ 第 ${roundCount} 轮 | 消息数=${workingMessages.length}`);
+    log(`▶ Round ${roundCount} | messages=${workingMessages.length}`);
 
     const pairedMessages = ensureToolResultPairing(workingMessages);
     const roundResult = await runAnthropicRound({
@@ -237,7 +237,7 @@ Return a concise structured result with:
       toolCalls,
     } = roundResult;
 
-    log(`✓ 本轮完成 | stop_reason=${stopReason ?? 'N/A'} | chunks=${chunkCount} | 文本=${assistantContent.length}字 | 思维=${reasoningContent.length}字 | 耗时=${Date.now() - roundStart}ms`);
+      log(`✓ Round complete | stop_reason=${stopReason ?? 'N/A'} | chunks=${chunkCount} | text=${assistantContent.length} characters | reasoning=${reasoningContent.length} characters | duration=${Date.now() - roundStart}ms`);
 
     if (lastUsage) {
       const hitTokens = lastUsage.prompt_cache_hit_tokens ?? 0;
@@ -255,12 +255,12 @@ Return a concise structured result with:
       if (hitTokens > 0 || missTokens > 0) {
         const total = cumulativeCacheHit + cumulativeCacheMiss;
         const rate = total > 0 ? ((cumulativeCacheHit / total) * 100).toFixed(1) : '0.0';
-        log(`💰 缓存: 本轮 hit=${hitTokens} miss=${missTokens} | 累计 hit=${cumulativeCacheHit} miss=${cumulativeCacheMiss} | 命中率=${rate}%`);
+        log(`💰 Cache: round hit=${hitTokens} miss=${missTokens} | total hit=${cumulativeCacheHit} miss=${cumulativeCacheMiss} | hit rate=${rate}%`);
       }
     }
 
     if (stopReason === 'tool_use' && toolCalls.length > 0) {
-      log(`收到工具调用 ${toolCalls.length} 个: [${toolCalls.map(t => t.function.name).join(', ')}]`);
+      log(`Received ${toolCalls.length} tool calls: [${toolCalls.map(t => t.function.name).join(', ')}]`);
 
       const assistantMessage: Message = {
         id: randomUUID(),
@@ -304,7 +304,7 @@ Return a concise structured result with:
 
       if (roundCount >= maxRounds) {
         finalContent = assistantContent;
-        log(`达到最大工具轮数 ${maxRounds}，停止继续调用工具`);
+        log(`Maximum tool rounds reached (${maxRounds}); stopping further tool calls`);
         break;
       }
 
@@ -345,7 +345,7 @@ Return a concise structured result with:
     break;
   }
 
-  log(`■ 结束 | 总轮次=${roundCount} | 最终输出=${finalContent.length}字${signal?.aborted ? ' | 被中断' : ''}`);
+  log(`■ End | total rounds=${roundCount} | final output=${finalContent.length} characters${signal?.aborted ? ' | aborted' : ''}`);
 
   callbacks.onDone(finalContent);
   return finalContent;

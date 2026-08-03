@@ -80,8 +80,8 @@ describe('DevDashboard', () => {
       gitPush: vi.fn(),
     };
     taskMocks.tasks = [
-      task('task_1', '改工具调用行', 'in_progress'),
-      task('task_2', '整理右侧面板', 'pending'),
+      task('task_1', 'Adjust the tool call row', 'in_progress'),
+      task('task_2', 'Organize the right panel', 'pending'),
     ];
     container = window.document.getElementById('root') as HTMLElement;
     root = createRoot(container);
@@ -136,11 +136,11 @@ describe('DevDashboard', () => {
       }));
     });
 
-    expect(container.textContent).toContain('改工具调用行');
-    expect(container.textContent).toContain('变更');
-    expect(container.textContent).toContain('外部资源');
-    expect(container.textContent).toContain('待办事项');
-    expect(container.textContent).not.toContain('任务监控');
+    expect(container.textContent).toContain('Adjust the tool call row');
+    expect(container.textContent).toContain('Changes');
+    expect(container.textContent).toContain('External resources');
+    expect(container.textContent).toContain('Task list');
+    expect(container.textContent).not.toContain('Task monitoring');
     expect(onActiveTodoPresenceChange).toHaveBeenLastCalledWith(true);
   });
 
@@ -155,9 +155,9 @@ describe('DevDashboard', () => {
     });
 
     const text = container.textContent || '';
-    expect(text).toContain('运行环境');
+    expect(text).toContain('Runtime environment');
     expect(text).toContain('main');
-    expect(text.indexOf('运行环境')).toBeLessThan(text.indexOf('变更'));
+    expect(text.indexOf('Runtime environment')).toBeLessThan(text.indexOf('Changes'));
 
     const commitButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent?.includes('Commit or push'));
     act(() => commitButton?.dispatchEvent(new window.Event('click', { bubbles: true })));
@@ -181,8 +181,8 @@ describe('DevDashboard', () => {
       await Promise.resolve();
     });
 
-    expect(container.querySelector('[aria-label="展开 变更"]')?.getAttribute('aria-expanded')).toBe('false');
-    expect(container.querySelector('[aria-label="展开 外部资源"]')?.getAttribute('aria-expanded')).toBe('false');
+    expect(container.querySelector('[aria-label="Expand Changes"]')?.getAttribute('aria-expanded')).toBe('false');
+    expect(container.querySelector('[aria-label="Expand External resources"]')?.getAttribute('aria-expanded')).toBe('false');
 
     const writeItem: ToolItem = {
       id: 'write_auto_expand',
@@ -211,12 +211,12 @@ describe('DevDashboard', () => {
       await Promise.resolve();
     });
 
-    expect(container.querySelector('[aria-label="折叠 变更"]')?.getAttribute('aria-expanded')).toBe('true');
-    expect(container.querySelector('[aria-label="折叠 外部资源"]')?.getAttribute('aria-expanded')).toBe('true');
+    expect(container.querySelector('[aria-label="Collapse Changes"]')?.getAttribute('aria-expanded')).toBe('true');
+    expect(container.querySelector('[aria-label="Collapse External resources"]')?.getAttribute('aria-expanded')).toBe('true');
   });
 
   it('removes the todo section after all plan steps and session tasks are completed', () => {
-    taskMocks.tasks = [task('task_done', '已完成的任务', 'completed')];
+    taskMocks.tasks = [task('task_done', 'Completed task', 'completed')];
     const onActiveTodoPresenceChange = vi.fn();
     const completedPlan: ToolItem = {
       id: 'plan_done',
@@ -225,7 +225,7 @@ describe('DevDashboard', () => {
       kind: 'plan_update',
       status: 'done',
       timestamp: 0,
-      plan: [{ step: '完成界面调整', status: 'completed' }],
+      plan: [{ step: 'Complete the UI adjustment', status: 'completed' }],
     };
 
     act(() => {
@@ -237,10 +237,10 @@ describe('DevDashboard', () => {
       }));
     });
 
-    expect(container.textContent).toContain('变更');
-    expect(container.textContent).toContain('外部资源');
-    expect(container.textContent).not.toContain('待办事项');
-    expect(container.textContent).not.toContain('已完成的任务');
+    expect(container.textContent).toContain('Changes');
+    expect(container.textContent).toContain('External resources');
+    expect(container.textContent).not.toContain('Task list');
+    expect(container.textContent).not.toContain('Completed task');
     expect(onActiveTodoPresenceChange).toHaveBeenLastCalledWith(false);
   });
 

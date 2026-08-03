@@ -93,7 +93,7 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('复制失败:', err);
+      console.error('Copy failed:', err);
     }
   }, [preview]);
 
@@ -115,12 +115,12 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
 
       const previewItem = await buildPreviewFromAttachment(attachment);
       if (!previewItem) {
-        console.warn('[ArtifactPanel] 无法读取工作区文件:', attachment.path);
+        console.warn('[ArtifactPanel] Could not read workspace file:', attachment.path);
         return;
       }
       setPreview(previewItem);
     } catch (err) {
-      console.error('[ArtifactPanel] 打开本地文件失败:', err);
+      console.error('[ArtifactPanel] Failed to open local file:', err);
     }
   }, [setPreview]);
 
@@ -137,11 +137,11 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
     try {
       const options = await window.deepseekApi.getFileOpenOptions(preview.filePath);
       setOpenOptions(options);
-      if (options.length === 0) showOpenFeedback('文件不可打开或不存在');
+      if (options.length === 0) showOpenFeedback('File cannot be opened or does not exist');
     } catch (err) {
-      console.error('[ArtifactPanel] 获取打开方式失败:', err);
+      console.error('[ArtifactPanel] Failed to get open-with options:', err);
       setOpenOptions([]);
-      showOpenFeedback('获取打开方式失败');
+      showOpenFeedback('Failed to get open-with options');
     } finally {
       setOpenOptionsLoading(false);
     }
@@ -153,15 +153,15 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
     try {
       const result = await window.deepseekApi.openFileWith(preview.filePath, optionId);
       if (!result.success) {
-        const label = result.name ?? optionName ?? '打开方式';
-        console.error(`[ArtifactPanel] 打开文件失败 (${label}):`, result.error);
-        showOpenFeedback(result.error ?? `${label} 打开失败`);
+        const label = result.name ?? optionName ?? 'application';
+        console.error(`[ArtifactPanel] Failed to open file (${label}):`, result.error);
+        showOpenFeedback(result.error ?? `${label} failed to open the file`);
         return;
       }
-      showOpenFeedback(`已发送到 ${result.name ?? optionName ?? '打开方式'}`);
+      showOpenFeedback(`Sent to ${result.name ?? optionName ?? 'application'}`);
     } catch (err) {
-      console.error(`[ArtifactPanel] 打开文件失败 (${optionId}):`, err);
-      showOpenFeedback(err instanceof Error ? err.message : '打开失败');
+      console.error(`[ArtifactPanel] Failed to open file (${optionId}):`, err);
+      showOpenFeedback(err instanceof Error ? err.message : 'Failed to open');
     }
   }, [preview?.filePath, showOpenFeedback]);
 
@@ -180,7 +180,7 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
 
   const folderPath = dirPathFromFilePath(preview?.filePath);
   const defaultOpenOption = openOptions.find((option) => option.id === 'default');
-  const revealTargetLabel = window.electronEnv?.platform === 'darwin' ? '在 Finder 中显示' : '在文件管理器中显示';
+  const revealTargetLabel = window.electronEnv?.platform === 'darwin' ? 'Show in Finder' : 'Show in file manager';
 
   const content = (
     <div className="flex flex-col h-full bg-bg-main">
@@ -190,12 +190,12 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
             className="flex h-full min-w-0 flex-1 items-center overflow-x-auto scrollbar-none gap-1"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             role="tablist"
-            aria-label="工作区标签"
+            aria-label="Workspace tabs"
           >
             {previews.length === 0 ? (
               <div className="inline-flex h-7 items-center gap-1.5 rounded-[7px] bg-bg-hover px-2.5 text-text-primary">
                 <span className="min-w-0 truncate text-[12.5px] font-medium">
-                  工作区
+                  Workspace
                 </span>
               </div>
             ) : previews.map((item) => {
@@ -228,8 +228,8 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                         closeTab(item.title);
                       }}
                       className="absolute inset-0 flex items-center justify-center rounded-full text-text-secondary opacity-0 transition-opacity duration-150 hover:bg-bg-hover hover:text-text-primary group-hover:opacity-100 focus:opacity-100"
-                      title="关闭标签页"
-                      aria-label="关闭标签页"
+                      title="Close tab"
+                      aria-label="Close tab"
                     >
                       <IconX size={8} className="stroke-[3]" />
                     </button>
@@ -244,8 +244,8 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                 type="button"
                 onClick={handleAddLocalFile}
                 className={`${WORKSPACE_ICON_ACTION_CLASS} ml-1`}
-                title="打开文件到工作区"
-                aria-label="打开文件到工作区"
+                title="Open file in workspace"
+                aria-label="Open file in workspace"
               >
                 <IconPlus size={13} />
               </button>
@@ -257,8 +257,8 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
               onClick={() => setFullscreen(!fullscreen)}
               disabled={!preview}
               className={`${WORKSPACE_ICON_ACTION_CLASS} ${fullscreen ? WORKSPACE_ICON_ACTION_ACTIVE_CLASS : ''}`}
-              title={fullscreen ? '退出全屏' : '全屏'}
-              aria-label={fullscreen ? '退出全屏' : '全屏'}
+              title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+              aria-label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 {fullscreen ? (
@@ -273,8 +273,8 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
               type="button"
               onClick={() => bottomPanel.setCollapsed(!bottomPanel.collapsed)}
               className={`${WORKSPACE_ICON_ACTION_CLASS} ${!bottomPanel.collapsed ? WORKSPACE_ICON_ACTION_ACTIVE_CLASS : ''}`}
-              title={!bottomPanel.collapsed ? '隐藏终端' : '显示终端'}
-              aria-label={!bottomPanel.collapsed ? '隐藏终端' : '显示终端'}
+              title={!bottomPanel.collapsed ? 'Hide terminal' : 'Show terminal'}
+              aria-label={!bottomPanel.collapsed ? 'Hide terminal' : 'Show terminal'}
             >
               <IconSidebarTerminal size={14} />
             </button>
@@ -283,8 +283,8 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
               type="button"
               onClick={() => rightPanel.setCollapsed(!rightPanel.collapsed)}
               className={`${WORKSPACE_ICON_ACTION_CLASS} ${!rightPanel.collapsed ? WORKSPACE_ICON_ACTION_ACTIVE_CLASS : ''}`}
-              title="收起工作区"
-              aria-label="收起工作区"
+              title="Collapse workspace"
+              aria-label="Collapse workspace"
             >
               <IconPanelsRight size={14} />
             </button>
@@ -339,9 +339,9 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                     setOpenWithMenuOpen(false);
                     setActionMenuOpen((v) => !v);
                   }}
-                  title="更多操作"
+                  title="More actions"
                   className={`${WORKSPACE_ICON_ACTION_CLASS} relative`}
-                  aria-label="更多操作"
+                  aria-label="More actions"
                 >
                   <IconDots size={13} className="text-current" />
                 </button>
@@ -362,7 +362,7 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                         ) : (
                           <IconCopy size={14} className="text-text-secondary shrink-0" />
                         )}
-                        <span>{copied ? '已复制' : '复制内容'}</span>
+                        <span>{copied ? 'Copied' : 'Copy content'}</span>
                       </button>
                       <button
                         type="button"
@@ -375,7 +375,7 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                         <svg className="text-text-secondary shrink-0" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
                         </svg>
-                        <span>下载文件</span>
+                        <span>Download file</span>
                       </button>
                     </div>
                   </>
@@ -387,15 +387,15 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                   onClick={handleOpenFile}
                   disabled={!preview.filePath}
                   className={WORKSPACE_OPEN_MAIN_CLASS}
-                  title="用系统默认应用打开"
-                  aria-label="用系统默认应用打开"
+                  title="Open with the default application"
+                  aria-label="Open with the default application"
                 >
                   {defaultOpenOption?.iconDataUrl ? (
                     <img src={defaultOpenOption.iconDataUrl} alt="" className="h-4 w-4 shrink-0 rounded-[4px]" />
                   ) : (
                     <IconExternalOpen size={14} className="shrink-0 text-text-secondary" />
                   )}
-                  <span className="leading-none">打开</span>
+                  <span className="leading-none">Open</span>
                 </button>
                 <button
                   type="button"
@@ -407,8 +407,8 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                   }}
                   disabled={!preview.filePath}
                   className={WORKSPACE_OPEN_TOGGLE_CLASS}
-                  title="选择打开方式"
-                  aria-label="选择打开方式"
+                  title="Choose an application"
+                  aria-label="Choose an application"
                   aria-haspopup="menu"
                   aria-expanded={openWithMenuOpen}
                 >
@@ -417,11 +417,11 @@ const ArtifactPanel: React.FC<ArtifactPanelProps> = memo(({
                 {openWithMenuOpen && (
                   <>
                     <div className="fixed inset-0 z-[60]" onClick={() => setOpenWithMenuOpen(false)} />
-                    <div className={WORKSPACE_MENU_CLASS} role="menu" aria-label="打开方式">
+                    <div className={WORKSPACE_MENU_CLASS} role="menu" aria-label="Open with">
                       {openOptionsLoading ? (
-                        <div className={WORKSPACE_MENU_STATE_CLASS}>正在获取打开方式...</div>
+                        <div className={WORKSPACE_MENU_STATE_CLASS}>Loading applications...</div>
                       ) : openOptions.length === 0 ? (
-                        <div className={WORKSPACE_MENU_STATE_CLASS}>文件不可打开或不存在</div>
+                        <div className={WORKSPACE_MENU_STATE_CLASS}>File cannot be opened or does not exist</div>
                       ) : openOptions.map((option) => (
                         <button
                           key={option.id}

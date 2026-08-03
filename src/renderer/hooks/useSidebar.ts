@@ -53,7 +53,7 @@ export function useSidebar() {
       const next = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, startW + (ev.clientX - startX)));
       widthRef.current = next;
       el.style.width = `${next}px`;
-      // 内层刚性宽度跟随拖拽实时更新（开合动画时它保持不变，内容整体滑动）
+      // Keep the inner fixed width in sync with dragging; during the open/close animation it stays fixed while the content slides as a whole.
       el.style.setProperty('--panel-size', `${next}px`);
     };
 

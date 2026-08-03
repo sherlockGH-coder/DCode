@@ -30,14 +30,14 @@ const ReasoningPanel: React.FC<{
             <span className="relative inline-flex rounded-full h-2 w-2 bg-text-primary animate-thinking-pulse"></span>
           </div>
           <span className="text-[13.5px] font-normal text-text-primary">
-            正在深度思考
+            Thinking deeply
           </span>
         </div>
       ) : (
         <div className="flex items-center gap-1.5">
           <IconDeepThinking size={15} className="shrink-0 text-text-secondary group-hover:text-text-primary transition-colors" />
           <span className="text-[13.5px] font-normal text-text-secondary group-hover:text-text-primary transition-colors">
-            已深度思考
+            Thought deeply
           </span>
         </div>
       )}

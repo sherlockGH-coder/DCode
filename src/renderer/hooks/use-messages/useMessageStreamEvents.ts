@@ -28,8 +28,8 @@ interface AssistantMessagePayload {
 }
 
 /**
- * 把一轮结束时主进程发来的 assistant-message 合并进消息数组。
- * 纯工具轮的 content 为空串，空串不得覆盖已流式输出的正文。
+ * Merge the assistant message sent by the main process at the end of a turn into the message array.
+ * A tool-only turn has an empty content string, which must not overwrite streamed text.
  */
 export function applyAssistantMessageToMessages(
   prev: Message[],
@@ -309,7 +309,7 @@ export function useMessageStreamEvents({
       }
       if (shouldAutoApproveApproval(approvalReq)) {
         window.deepseekApi.approvalRespond(approvalReq.toolCallId, true).catch((err) => {
-          console.error('[useMessages] session auto-approve 失败:', err);
+          console.error('[useMessages] Session auto-approval failed:', err);
         });
         return;
       }

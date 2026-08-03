@@ -26,8 +26,8 @@ import type { Attachment, Project, ProjectCreateInput, ToolItem, Message, Conver
 import type { NavView } from '../hooks/useNavHistory';
 
 /**
- * xterm 及其 webgl addon 约 560KB，而底部终端面板默认是折叠的。
- * 推迟到用户第一次展开时再加载，首屏就不用解析这部分代码。
+ * xterm and its webgl addon are about 560KB, while the bottom terminal panel is collapsed by default.
+ * Defer loading until the user opens it for the first time so the initial screen does not parse it.
  */
 const TerminalPanel = React.lazy(() => import('../components/TerminalPanel'));
 
@@ -216,7 +216,7 @@ const AppView: React.FC<AppViewProps> = ({
   handlers,
 }) => {
   const isWelcomeMode = chatItems.length === 0 && view !== 'settings';
-  // 终端面板默认折叠：第一次展开前不挂载，展开过之后保持挂载以留住回滚缓冲
+  // The terminal is collapsed by default: mount it after first use and keep it mounted to preserve scrollback.
   const shouldMountTerminal = useMountAfterFirstUse(!bottomPanel.collapsed);
   return (
     <div className={`app-stage flex flex-row h-screen w-full bg-transparent relative overflow-hidden ${isWelcomeMode ? 'has-welcome-stage' : ''}`}>
@@ -253,19 +253,19 @@ const AppView: React.FC<AppViewProps> = ({
       <button
         type="button"
         className={`sidebar-resize-handle group absolute right-1 top-2 bottom-2 z-50 w-2 m-0 p-0 border-none cursor-col-resize bg-transparent transition-opacity duration-[0.22s] ${sidebar.collapsed ? 'opacity-0 pointer-events-none' : ''}`}
-        aria-label="调整侧栏宽度"
+        aria-label="Resize sidebar"
         onMouseDown={sidebar.handleResizeStart}
         disabled={sidebar.collapsed}
         tabIndex={sidebar.collapsed ? -1 : 0}
       >
         <span className="absolute inset-y-0 -left-1 -right-1 cursor-col-resize" />
-        <span className="sidebar-resize-indicator absolute top-3 bottom-3 left-1/2 w-px -translate-x-1/2 bg-transparent transition-[width,background-color] duration-150 group-hover:w-[3px] group-hover:bg-black/[0.06] dark:group-hover:bg-white/[0.07] group-active:w-[3px] group-active:bg-black/[0.1] dark:group-active:bg-white/[0.11]" />
+        <span className="sidebar-resize-indicator absolute top-3 bottom-3 left-1/2 w-px -translate-x-1/2 bg-transparent transition-[width,background-color] duration-150 group-active:w-[3px] group-active:bg-black/[0.1] dark:group-active:bg-white/[0.11]" />
       </button>
     </div>
     <button
       type="button"
       className={`mobile-sidebar-scrim${sidebar.collapsed ? ' mobile-sidebar-scrim--hidden' : ''}`}
-      aria-label="收起侧栏"
+      aria-label="Collapse sidebar"
       aria-hidden={sidebar.collapsed}
       inert={sidebar.collapsed ? true : undefined}
       tabIndex={sidebar.collapsed ? -1 : 0}
@@ -377,7 +377,7 @@ const AppView: React.FC<AppViewProps> = ({
                               />
                             )
                           ) : planModeTransitioning ? (
-                            <div className="rounded-[10px] border border-hairline bg-bg-main px-4 py-3 text-[12px] text-text-secondary">正在切换模式…</div>
+                            <div className="rounded-[10px] border border-hairline bg-bg-main px-4 py-3 text-[12px] text-text-secondary">Switching mode…</div>
                           ) : undefined}
                         />
                       </div>
@@ -390,7 +390,7 @@ const AppView: React.FC<AppViewProps> = ({
             <button
               type="button"
               className="shrink-0 h-1.5 m-0 p-0 border-none cursor-row-resize bg-transparent self-stretch transition-opacity duration-200 hover:bg-accent/10 active:bg-accent/20"
-              aria-label="调整底板高度"
+              aria-label="Resize bottom panel"
               onMouseDown={bottomPanel.handleResizeStart}
               disabled={bottomPanel.collapsed}
               tabIndex={bottomPanel.collapsed ? -1 : 0}
@@ -426,7 +426,7 @@ const AppView: React.FC<AppViewProps> = ({
         <button
           type="button"
           className={`right-panel-resize-handle group absolute left-1 top-2 bottom-2 z-50 w-2 m-0 p-0 border-none cursor-col-resize bg-transparent transition-opacity duration-[0.22s] ${rightPanel.collapsed ? 'opacity-0 pointer-events-none' : ''}`}
-          aria-label="调整右面板宽度"
+          aria-label="Resize right panel"
           onMouseDown={rightPanel.handleResizeStart}
           disabled={rightPanel.collapsed}
           tabIndex={rightPanel.collapsed ? -1 : 0}
@@ -446,7 +446,7 @@ const AppView: React.FC<AppViewProps> = ({
     <OverlayView
       isOpen={view === 'settings'}
       onClose={handlers.handleCloseOverlay}
-      title="设置"
+      title="Settings"
       isMacOS={isMacOS}
       isFullscreen={isFullscreen}
       hideHeader={true}

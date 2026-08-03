@@ -25,7 +25,7 @@ function readFile(filePath: string): Record<string, McpServerConfig> {
     const parsed = JSON.parse(raw) as Partial<PersistedShape>;
     return parsed.mcpServers ?? {};
   } catch (err) {
-    console.warn('[mcp] 配置文件解析失败:', filePath, err);
+    console.warn('[mcp] Failed to parse configuration file:', filePath, err);
     return {};
   }
 }
@@ -37,7 +37,7 @@ function writeFile(filePath: string, map: Record<string, McpServerConfig>): void
     const shape: PersistedShape = { mcpServers: map };
     writeFileSync(filePath, JSON.stringify(shape, null, 2), 'utf-8');
   } catch (err) {
-    console.error('[mcp] 配置写入失败:', filePath, err);
+    console.error('[mcp] Failed to write configuration file:', filePath, err);
   }
 }
 

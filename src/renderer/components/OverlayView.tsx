@@ -61,12 +61,12 @@ const OverlayView: React.FC<OverlayViewProps> = ({
             <button
               type="button"
               className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-[7px] bg-transparent text-[12.5px] font-medium text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors duration-150 cursor-pointer"
-              title="返回应用"
-              aria-label="返回应用"
+              title="Return to app"
+              aria-label="Return to app"
               onClick={onClose}
             >
               <IconCode size={16} />
-              <span>返回应用</span>
+              <span>Return to app</span>
             </button>
           </div>
 

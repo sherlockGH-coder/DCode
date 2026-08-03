@@ -4,11 +4,11 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
 /**
- * 规则取向：只开「能抓到真 bug」的那部分，不做风格约束。
+ * Policy: enable only rules that catch real bugs; do not enforce style.
  *
- * 重点是两类之前完全没人检查的问题：
- *   - react-hooks 的依赖数组（这个代码库手写 useEffect 很多）
- *   - 浮空的 Promise（主进程大量 async IPC / 工具调用，漏掉 await 会静默吞掉错误）
+ * Focus on two classes of issues that were previously unchecked:
+ *   - react-hooks dependency arrays; this codebase has many hand-written useEffect calls.
+ *   - floating Promises; the main process has many async IPC and tool calls, and a missing await silently hides errors.
  */
 export default tseslint.config(
   {
@@ -40,7 +40,7 @@ export default tseslint.config(
       },
     },
     rules: {
-      // --- 真正想拦的东西 ---
+      // --- Things we actually want to catch ---
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-misused-promises': [
@@ -48,25 +48,25 @@ export default tseslint.config(
         { checksVoidReturn: false },
       ],
 
-      // 代码库大量使用 `try { … } catch {}` 表示「失败就忽略」，这是有意为之
+      // The codebase intentionally uses `try { … } catch {}` to mean "ignore failures".
       'no-empty': ['error', { allowEmptyCatch: true }],
 
-      // 处理 ANSI 转义序列必然要匹配控制字符
+      // Handling ANSI escape sequences necessarily matches control characters.
       'no-control-regex': 'off',
 
-      // 与 Electron / node 的回调式 API 配合时误报多，价值低
+      // Produces too many false positives with callback-based Electron and Node APIs.
       '@typescript-eslint/unbound-method': 'off',
 
-      // 命中的都是转发已有 rejection（`.then(ok, err => reject(err))`）和
-      // 转发 AbortSignal.reason，不是构造非 Error 的拒绝值
+      // Matches are forwarding existing rejections (`.then(ok, err => reject(err))`)
+      // or forwarding AbortSignal.reason, not constructing non-Error rejection values.
       '@typescript-eslint/prefer-promise-reject-errors': 'off',
 
-      // 命中的都是对 YAML frontmatter / JSON 解析结果的防御性 String() 强转，
-      // 输入本就不可信，退化成 "[object Object]" 是可接受的降级而非 bug
+      // Matches are defensive String() conversions of YAML frontmatter and JSON parse results.
+      // The input is untrusted, so degrading to "[object Object]" is acceptable rather than a bug.
       '@typescript-eslint/no-base-to-string': 'off',
 
-      // --- 噪音太大、且不影响正确性的先关掉 ---
-      // 这个代码库大量使用 any 与 IPC 边界上的动态结构，全量收敛属于独立工程
+      // --- Disable rules that are too noisy and do not affect correctness ---
+      // This codebase uses any and dynamic structures at IPC boundaries; fully converging them is a separate project.
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
@@ -78,7 +78,7 @@ export default tseslint.config(
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
 
-      // 未使用变量：允许下划线前缀显式忽略
+      // Unused variables: allow an underscore prefix as an explicit ignore marker.
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -90,7 +90,7 @@ export default tseslint.config(
     },
   },
 
-  // --- 渲染进程：额外加 react-hooks ---
+  // --- Renderer: add react-hooks rules ---
   {
     files: ['src/renderer/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
@@ -101,13 +101,13 @@ export default tseslint.config(
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
 
-      // 渲染层降级为 warn：`useEffect(() => { load(); }, [])` 是 React 的常规写法，
-      // 且这里的失败通常会在界面上显现。主进程保持 error——那边吞掉的错误没有任何出口。
+      // Downgrade renderer violations to warn: `useEffect(() => { load(); }, [])` is common React usage,
+      // and failures usually appear in the UI. Keep main-process violations as errors because swallowed errors have no other outlet.
       '@typescript-eslint/no-floating-promises': 'warn',
     },
   },
 
-  // --- 主进程 / preload：Node 全局 ---
+  // --- Main process / preload: Node globals ---
   {
     files: ['src/main/**/*.ts', 'src/preload/**/*.ts'],
     languageOptions: {
@@ -115,7 +115,7 @@ export default tseslint.config(
     },
   },
 
-  // --- 测试文件放宽 ---
+  // --- Relaxations for test files ---
   {
     files: ['**/*.test.ts', '**/*.test.tsx', 'e2e/**/*.ts'],
     languageOptions: {
@@ -127,8 +127,8 @@ export default tseslint.config(
     },
   },
 
-  // --- 不在任何 tsconfig 里的文件：只做语法级检查 ---
-  // e2e 由 playwright 直接运行，resources/mcp 下是 MCP 运行时的 ESM 垫片
+  // --- Files outside every tsconfig: syntax-level checks only ---
+  // e2e runs directly through Playwright; resources/mcp contains ESM shims for the MCP runtime.
   {
     files: ['e2e/**/*.ts', 'resources/**/*.mjs', 'resources/**/*.js'],
     extends: [tseslint.configs.disableTypeChecked],

@@ -41,7 +41,7 @@ class SkillsManager {
     return join(projectPath, '.agents', 'skills');
   }
 
-  /** 给 IPC 用：把 scope + projectPath 解析为绝对目录（项目 + 没选项目时返回 null） */
+  /** For IPC: resolve scope and projectPath to an absolute directory; return null for project scope without a selected project. */
   resolveDir(scope: SkillScope, projectPath: string | null): string | null {
     if (scope === 'builtin') return this.builtinDir();
     if (scope === 'user') return this.userDir();
@@ -55,7 +55,7 @@ class SkillsManager {
     try {
       entries = readdirSync(dir);
     } catch (err) {
-      console.warn('[skills] 读取目录失败:', dir, err);
+      console.warn('[skills] Failed to read directory:', dir, err);
       return [];
     }
 
@@ -101,7 +101,7 @@ class SkillsManager {
           enabled: !disabled.includes(name),
         });
       } catch (err) {
-        console.warn('[skills] 解析失败:', filePath, err);
+        console.warn('[skills] Failed to parse:', filePath, err);
       }
     }
     return items;
@@ -118,7 +118,7 @@ class SkillsManager {
     return Array.from(map.values());
   }
 
-  /** 仅启用的 skill — agentLoop 注入用 */
+  /** Enabled skills only, used for injection into agentLoop. */
   getEnabled(projectPath: string | null): SkillSummary[] {
     return this.scan(projectPath).filter((s) => s.enabled);
   }
@@ -131,7 +131,7 @@ class SkillsManager {
       const { body } = parseFrontmatter(raw);
       return { ...summary, body };
     } catch (err) {
-      console.warn('[skills] 读取正文失败:', summary.filePath, err);
+      console.warn('[skills] Failed to read body:', summary.filePath, err);
       return null;
     }
   }
@@ -152,12 +152,12 @@ class SkillsManager {
       this.scheduleBroadcast();
       return true;
     } catch (err) {
-      console.error('[skills] 写入失败:', dir, name, err);
+      console.error('[skills] Failed to write:', dir, name, err);
       return false;
     }
   }
 
-  /** 给前端：name + description + allowedTools + body 直接拼 markdown 落盘 */
+  /** For the frontend: write name, description, allowedTools, and body directly as Markdown. */
   writeStructured(
     scope: 'user' | 'project',
     payload: { name: string; description: string; allowedTools?: string[]; body: string },
@@ -185,7 +185,7 @@ class SkillsManager {
       this.scheduleBroadcast();
       return true;
     } catch (err) {
-      console.error('[skills] 删除失败:', filePath, err);
+      console.error('[skills] Failed to delete:', filePath, err);
       return false;
     }
   }

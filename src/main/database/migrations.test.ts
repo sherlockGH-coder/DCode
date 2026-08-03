@@ -46,7 +46,7 @@ function insertPlanRun(
 }
 
 describe('applyConnectionPragmas', () => {
-  // 内存库不支持 WAL，必须落到真实文件才能验证 journal_mode
+  // In-memory databases do not support WAL, so use a real file to verify journal_mode.
   it('pairs WAL with synchronous=NORMAL on a file-backed database', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'deepseek-db-'));
     try {
@@ -72,7 +72,7 @@ describe('orphan purge migration', () => {
     insertPlanArtifact(database, 'artifact-live', 'live');
     insertPlanRun(database, 'run-live', 'live', 'artifact-live');
 
-    // 模拟历史遗留：外键没开时对话被删掉，plan 行留了下来
+    // Simulate legacy behavior: a conversation was deleted with foreign keys disabled, leaving plan rows behind.
     insertConversation(database, 'ghost');
     insertPlanArtifact(database, 'artifact-ghost', 'ghost');
     insertPlanRun(database, 'run-ghost', 'ghost', 'artifact-ghost');

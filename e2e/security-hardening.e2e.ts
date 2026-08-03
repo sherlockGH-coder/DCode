@@ -42,8 +42,8 @@ test('renderer is hardened: CSP applied, external navigation blocked, window.ope
 
     await expect(page.locator('body')).toBeVisible();
 
-    // preventDefault 会让 Playwright 的导航状态机一直等待，所以后续断言
-    // 全部走主进程侧的 webContents，不再经过 page。
+    // preventDefault keeps Playwright's navigation state machine waiting, so subsequent assertions
+    // use the main-process webContents instead of page.
     await page.evaluate(() => {
       window.location.href = 'https://example.com';
     }).catch(() => undefined);

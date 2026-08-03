@@ -9,7 +9,7 @@ import { ALLOWED_ELEMENTS, DISALLOWED_ELEMENTS } from './message-bubble/utils';
 
 interface MarkdownBlockProps {
   text: string;
-  /** 是否为正在增长的最后一块：需要假闭合未完成的 Markdown 结构 */
+  /** Whether this is the last growing block, which needs incomplete Markdown structures closed temporarily. */
   isTail: boolean;
   components: Record<string, unknown>;
 }

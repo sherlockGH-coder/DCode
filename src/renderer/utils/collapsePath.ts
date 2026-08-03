@@ -1,18 +1,18 @@
 let _cwd = '';
 let _home = '';
 
-/** 初始化路径基准（由 App 启动时调用） */
+/** Initialize the path base, called when App starts. */
 export function initPathContext(cwd: string, home: string): void {
   _cwd = cwd;
   _home = home;
 }
 
-/** 获取当前路径上下文 */
+/** Get the current path context. */
 export function getPathContext(): { cwd: string; home: string } {
   return { cwd: _cwd, home: _home };
 }
 
-/** 折叠路径 */
+/** Collapse a path. */
 export function collapsePath(absolutePath: string): string {
   if (!absolutePath) return absolutePath;
 

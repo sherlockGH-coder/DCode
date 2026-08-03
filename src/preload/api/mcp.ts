@@ -3,12 +3,12 @@ import type { McpScope, McpServerConfig, McpServerStatus } from '../../shared/ty
 import { subscribe } from '../bridge';
 
 export const mcpApi = {
-  /** 列出所有 MCP server 状态（含配置 / 状态 / 暴露的工具） */
+  /** List all MCP server states, including configuration, status, and exposed tools. */
   mcpListStatus: (): Promise<McpServerStatus[]> => {
     return ipcRenderer.invoke('mcp:listStatus');
   },
 
-  /** 添加 MCP server */
+  /** Add an MCP server. */
   mcpAdd: (
     scope: McpScope,
     name: string,
@@ -18,7 +18,7 @@ export const mcpApi = {
     return ipcRenderer.invoke('mcp:add', scope, name, config, projectPath);
   },
 
-  /** 更新 MCP server */
+  /** Update an MCP server. */
   mcpUpdate: (
     scope: McpScope,
     name: string,
@@ -28,7 +28,7 @@ export const mcpApi = {
     return ipcRenderer.invoke('mcp:update', scope, name, config, projectPath);
   },
 
-  /** 删除 MCP server */
+  /** Delete an MCP server. */
   mcpRemove: (
     scope: McpScope,
     name: string,
@@ -37,17 +37,17 @@ export const mcpApi = {
     return ipcRenderer.invoke('mcp:remove', scope, name, projectPath);
   },
 
-  /** 启用 / 禁用 MCP server */
+  /** Enable or disable an MCP server. */
   mcpToggle: (scope: McpScope, name: string, enabled: boolean): Promise<boolean> => {
     return ipcRenderer.invoke('mcp:toggle', scope, name, enabled);
   },
 
-  /** 重启 MCP server */
+  /** Restart an MCP server. */
   mcpRestart: (scope: McpScope, name: string): Promise<boolean> => {
     return ipcRenderer.invoke('mcp:restart', scope, name);
   },
 
-  /** 订阅 MCP 状态变更 */
+  /** Subscribe to MCP state changes. */
   onMcpChanged: (callback: () => void): (() => void) => {
     return subscribe('mcp:changed', callback);
   },

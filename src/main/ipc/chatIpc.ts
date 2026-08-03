@@ -124,7 +124,7 @@ export function registerChatIpc(): void {
               seqCounter++,
             );
           } catch (err) {
-            console.warn('[chat] 错误消息落库失败:', err);
+            console.warn('[chat] Failed to persist error message:', err);
           }
         }
 
@@ -185,7 +185,7 @@ export function registerChatIpc(): void {
                     msg.id,
                   );
                 } catch (err) {
-                  console.warn('[chat] assistant 消息落库失败:', err);
+                  console.warn('[chat] Failed to persist assistant message:', err);
                 }
               }
               safeSend(IPC_EVENTS.CHAT_ASSISTANT_MESSAGE, conversationId, payload);
@@ -209,7 +209,7 @@ export function registerChatIpc(): void {
                   msg.contentBlocks,
                 );
               } catch (err) {
-                console.warn('[chat] tool 消息落库失败:', err);
+                console.warn('[chat] Failed to persist tool message:', err);
               }
             },
             onDone: () => {
@@ -269,7 +269,7 @@ export function registerChatIpc(): void {
           );
           startedPlanExecution = false;
         }
-        console.error('[chat] Agent Loop 错误:', error instanceof Error ? error.message : error);
+        console.error('[chat] Agent Loop error:', error instanceof Error ? error.message : error);
         handleTerminalError(error instanceof Error ? error : String(error));
       } finally {
         if (activeChats.get(convKey) === controller) {

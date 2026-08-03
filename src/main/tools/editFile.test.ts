@@ -25,7 +25,7 @@ describe('editFileTool', () => {
         { projectPath: projectRoot, toolCallId: 'call_1' },
       );
 
-      expect(result.content).toContain('文件编辑成功');
+      expect(result.content).toContain('File edited successfully');
       expect(readFileSync(filePath, 'utf8')).toContain('hello DeepSeek');
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });
@@ -62,7 +62,7 @@ describe('editFileTool', () => {
         { projectPath: projectRoot, toolCallId: 'call_create' },
       );
 
-      expect(result.content).toContain('文件编辑成功');
+      expect(result.content).toContain('File edited successfully');
       expect(readFileSync(filePath, 'utf8')).toBe('created\n');
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });

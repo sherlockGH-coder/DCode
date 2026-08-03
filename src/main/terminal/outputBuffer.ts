@@ -1,12 +1,12 @@
 /**
- * 终端输出缓冲。
+ * Terminal output buffer.
  *
- * 此前实现是 `buffer += data` 再 `buffer.slice(-MAX)`：缓冲一旦填满，
- * 每来一个 chunk 都要复制整个 256KB 字符串，长时间跑高输出量的进程
- * （构建日志、`tail -f`）会退化成 O(n²)。
+ * The previous implementation used `buffer += data` followed by `buffer.slice(-MAX)`.
+ * Once full, every chunk copied the entire 256 KB string, degrading to O(n²) for
+ * long-running high-output processes such as build logs and `tail -f`.
  *
- * 这里改成分片队列 + running length，追加与淘汰都是摊还 O(1)，
- * 只有真正读取时才拼接。
+ * Use a chunk queue and running length instead. Appending and eviction are amortized O(1);
+ * concatenate only when the buffer is actually read.
  */
 export class TerminalOutputBuffer {
   private chunks: string[] = [];
@@ -20,12 +20,12 @@ export class TerminalOutputBuffer {
     this.chunks.push(data);
     this.length += data.length;
 
-    // 丢弃最旧的整片，直到回到上限之内
+    // Discard the oldest complete chunks until under the limit.
     while (this.length > this.maxLength && this.chunks.length > 1) {
       this.length -= this.chunks.shift()!.length;
     }
 
-    // 单片本身就超限时，只保留尾部
+    // If one chunk exceeds the limit by itself, keep only its tail.
     if (this.length > this.maxLength && this.chunks.length === 1) {
       const only = this.chunks[0];
       this.chunks[0] = only.slice(only.length - this.maxLength);
@@ -33,11 +33,11 @@ export class TerminalOutputBuffer {
     }
   }
 
-  /** 拼接出当前缓冲内容。仅在 attach 回放时调用。 */
+  /** Concatenate the current buffer contents; called only when replaying on attach. */
   read(): string {
     if (this.chunks.length === 0) return '';
     if (this.chunks.length > 1) {
-      // 顺手压实，后续重复读取就不用再拼
+      // Compact while reading so repeated reads do not concatenate again.
       this.chunks = [this.chunks.join('')];
     }
     return this.chunks[0];

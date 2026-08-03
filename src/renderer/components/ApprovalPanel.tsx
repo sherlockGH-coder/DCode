@@ -35,18 +35,18 @@ const ICON_MAP: Record<string, React.FC<{ size?: number; className?: string }>> 
 
 const getCategoryName = (kind: string): string => {
   const names: Record<string, string> = {
-    exec: '终端命令',
-    read: '读取文件',
-    write: '写入文件',
-    edit: '编辑文件',
-    grep: '内容搜索',
-    glob: '文件检索',
-    web_search: '网页搜索',
-    web_fetch: '网页抓取',
-    task: '任务管理',
-    tool: '外部工具',
+    exec: 'Terminal command',
+    read: 'Read file',
+    write: 'Write file',
+    edit: 'Edit file',
+    grep: 'Search content',
+    glob: 'Find files',
+    web_search: 'Web search',
+    web_fetch: 'Fetch webpage',
+    task: 'Task management',
+    tool: 'External tool',
   };
-  return names[kind] || '工具执行';
+  return names[kind] || 'Tool execution';
 };
 
 const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 0, onConfirm }) => {
@@ -140,19 +140,19 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
 
   const getOption2Title = () => {
     if (outOfScope && allowedDir) {
-      return '允许，本会话内此目录不再询问';
+      return 'Allow; do not ask again for this directory in this session';
     }
     if (item.kind === 'exec' && item.command) {
       const cmdName = item.command.trim().split(/\s+/)[0] || 'command';
-      return `允许，本会话内 "${cmdName}" 不再询问`;
+      return `Allow; do not ask again for "${cmdName}" in this session`;
     }
     if (item.kind === 'tool' && item.toolName) {
-      return `允许，本会话内 "${item.toolName}" 不再询问`;
+      return `Allow; do not ask again for "${item.toolName}" in this session`;
     }
     if (['read', 'write', 'edit'].includes(item.kind)) {
-      return '允许，本会话内文件操作不再询问';
+      return 'Allow; do not ask again for file operations in this session';
     }
-    return '允许，本会话内此工具不再询问';
+    return 'Allow; do not ask again for this tool in this session';
   };
 
   return (
@@ -161,7 +161,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
       data-testid="approval-panel"
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      aria-label="审批选项"
+      aria-label="Approval options"
       className="flex max-h-[min(60vh,600px)] flex-col overflow-hidden rounded-[10px] border border-hairline bg-bg-main outline-none transition-[border-color,box-shadow] focus-visible:border-accent/45 focus-visible:ring-[3px] focus-visible:ring-accent-bg animate-[menu-in_150ms_ease-out]"
     >
       <div className="flex shrink-0 items-center justify-between border-b border-hairline px-4 py-2.5 sm:px-5">
@@ -195,7 +195,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
           </code>
         ) : (
           <div className="text-[13px] leading-5 text-text-secondary">
-            确认执行此操作
+            Confirm this action
           </div>
         )}
         {item.approvalDescription && (
@@ -207,7 +207,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
 
       {outOfScope && (
         <div className="shrink-0 border-t border-hairline px-4 py-2.5 sm:px-5">
-          <div className="text-[12px] font-medium text-amber-600">路径在当前项目之外</div>
+          <div className="text-[12px] font-medium text-amber-600">Path is outside the current project</div>
           <div className="mt-0.5 break-all font-mono text-[11px] leading-5 text-text-tertiary">
             {outOfScope.absolutePath}
           </div>
@@ -248,7 +248,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
           <ActionButton
             action="allow"
             variant="primary"
-            title="允许"
+            title="Allow"
             icon={<CheckIcon />}
             selected={selectedAction === 'allow'}
             disabled={submitting}
@@ -268,7 +268,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
           <ActionButton
             action="deny"
             variant={denyExpanded ? 'dangerActive' : 'danger'}
-            title="拒绝"
+            title="Deny"
             icon={<XIcon />}
             selected={selectedAction === 'deny'}
             disabled={submitting}
@@ -279,7 +279,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
 
         {outOfScope && allowedDir && (
           <div className="mt-2 truncate font-mono text-[11px] text-text-tertiary" title={allowedDir}>
-            本会话允许的路径：{allowedDir}
+              Paths allowed for this session: {allowedDir}
           </div>
         )}
 
@@ -297,7 +297,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
                 }
               }}
               onFocus={() => selectAction('deny')}
-              placeholder="可选：告诉 AI 应当改做什么…"
+              placeholder="Optional: tell the AI what to do instead…"
               rows={3}
               className="max-h-[240px] min-h-[76px] w-full resize-y rounded-[8px] border border-hairline bg-bg-main px-3 py-2 text-[13px] leading-5 text-text-primary outline-none placeholder:text-text-tertiary focus:border-accent/45 focus:ring-[3px] focus:ring-accent-bg"
               disabled={submitting}
@@ -313,7 +313,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
                 }}
                 className="h-9 rounded-[8px] px-3 text-[13px] font-medium text-text-secondary transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50 border-0 bg-transparent cursor-pointer"
               >
-                取消
+                Cancel
               </button>
               <button
                 type="button"
@@ -321,7 +321,7 @@ const ApprovalPanel: React.FC<ApprovalPanelProps> = ({ item, total = 1, index = 
                 onClick={() => respond('deny')}
                 className="h-9 rounded-[8px] bg-diff-del px-3 text-[13px] font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 border-0 cursor-pointer"
               >
-                确认拒绝
+                Confirm denial
               </button>
             </div>
           </div>

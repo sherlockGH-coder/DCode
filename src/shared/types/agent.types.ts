@@ -51,23 +51,24 @@ export interface AgentLoopCallbacks {
   onDone: (finalContent: string) => void;
   onError: (error: Error) => void;
   /**
-   * 每完成一轮 assistant 消息时触发（含 tool_calls 中间轮、stop 终轮，以及 abort/error 时已积累的部分轮）。
-   * 调用方应据此持久化到 DB；这是唯一的"已落定"边界。
+   * Fired after each assistant message round completes, including tool-call intermediate rounds, the stop round,
+   * and partial rounds accumulated before abort or error.
+   * Callers should persist at this point; this is the only "settled" boundary.
    */
   onAssistantMessage?: (msg: import('./conversation.types').Message) => void;
-  /** 每条 tool 结果消息追加进历史时触发，便于持久化。 */
+  /** Fired when each tool result message is appended to history, for persistence. */
   onToolMessage?: (msg: import('./conversation.types').Message) => void;
-  /** 自动压缩回调：token 超阈值时调用，返回压缩后的消息数组；失败返回 null */
+  /** Automatic compaction callback, called when tokens exceed the threshold; returns compacted messages or null on failure. */
   onAutoCompact?: () => Promise<import('./conversation.types').Message[] | null>;
   /**
-   * 网络层重试退避时触发：让前端把"正在重试…"反馈给用户。
-   * - attempt 从 1 起步（已失败次数）；maxAttempts = MAX_RETRIES + 1
-   * - reason 是触发重试的简短原因（status / errno / message）
+   * Fired during network retry backoff so the frontend can show "Retrying...".
+   * - attempt starts at 1, representing the number of failures; maxAttempts = MAX_RETRIES + 1.
+   * - reason is a short retry reason, such as status, errno, or message.
    */
   onStreamRetry?: (info: { attempt: number; maxAttempts: number; delayMs: number; reason: string }) => void;
   /**
-   * 每轮结束后触发缓存命中指标，便于前端实时展示缓存命中率。
-   * hitTokens / missTokens 为当轮增量，cumulativeHit/Miss 为会话累计。
+   * Fired after each round with cache-hit metrics for live display.
+   * hitTokens and missTokens are per-round deltas; cumulativeHit and cumulativeMiss are session totals.
    */
   onCacheMetrics?: (metrics: { hitTokens: number; missTokens: number; cumulativeHit: number; cumulativeMiss: number }) => void;
 }
@@ -76,47 +77,47 @@ export interface AgentLoopConfig {
   apiKey: string;
   model?: string;
   baseUrl?: string;
-  /** 当前对话所属项目根；null = 未归类对话（文件访问需单独确认） */
+  /** Project root for the current conversation; null means unassigned and file access requires separate confirmation. */
   projectPath?: string | null;
-  /** 覆盖注入给模型的运行环境描述；用于工具实际连接远端/容器环境的运行器。 */
+  /** Override the runtime environment description injected into the model, used when tools connect to a remote or container environment. */
   environmentInfoOverride?: string;
-  /** 本回合用户附件清单 — read_file 命中其路径则跳过项目沙箱并按 mimeType 路由解析器 */
+  /** User attachments for this turn; read_file skips the project sandbox for matching paths and routes by mimeType. */
   attachmentWhitelist?: import('./attachment.types').Attachment[];
-  /** 当前启用的 skill 概要（仅 name + description），注入 system prompt 让 AI 决策 load_skill */
+  /** Summaries of enabled skills, name and description only, injected into the system prompt so AI can choose load_skill. */
   enabledSkills?: Array<{ name: string; description: string }>;
-  /** 注入到首条 system 消息的正文 — 由调用方（主进程）从 prompts.ts 计算后传入 */
+  /** Body injected into the first system message, computed by the main process from prompts.ts. */
   systemPrompt: string;
-  /** DEEPSEEK.md 层级来源（由调用方传入结构化 sources，避免 agentLoop 直接读文件） */
+  /** DEEPSEEK.md sources by level, passed in as structured sources so agentLoop does not read files directly. */
   deepseekMdSources?: Array<{ filePath: string; contents: string; scope: 'user' | 'project' | 'local' }>;
-  /** 跨对话记忆上下文（由调用方从 DB 加载后传入） */
+  /** Cross-conversation memory context loaded from the DB by the caller. */
   memoryContext?: string;
-  /** 已连接 MCP server 的使用说明（由调用方从 mcpManager 收集后传入） */
+  /** Usage instructions for connected MCP servers, collected from mcpManager by the caller. */
   mcpInstructions?: Array<{ serverName: string; instructions: string }>;
-  /** 中断信号 — 触发后 fetch 立即报错、循环跳出；不调 onError 而是走 onDone */
+  /** Abort signal; fetch fails immediately and the loop exits through onDone rather than onError. */
   signal?: AbortSignal;
-  /** 当前运行关联的对话 ID；用于上下文、审批和工具调用路由。 */
+  /** Conversation ID associated with the current run, used for context, approvals, and tool routing. */
   conversationId?: string | null;
-  /** 当前用户回合 ID；用于 renderer 重挂载后恢复挂起审批 UI。 */
+  /** Current user-turn ID, used to restore pending approval UI after renderer remount. */
   turnId?: string;
-  /** 当前回合的 attempt 序号；用于 renderer 重挂载后恢复挂起审批 UI。 */
+  /** Attempt number for the current turn, used to restore pending approval UI after renderer remount. */
   attemptNo?: number;
-  /** 当前运行的追踪 ID；用于关联控制台调试输出和审批请求。 */
+  /** Trace ID for the current run, used to associate console debug output with approval requests. */
   traceId?: string;
-  /** 发起本轮对话的窗口 webContents id；用于把审批请求路由回对应窗口 */
+  /** webContents ID of the window that started this turn, used to route approval requests back to it. */
   approvalWebContentsId?: number;
-  /** 思考深度：high = 高，max = 极限；不传 = 关闭思考模式 */
+  /** Reasoning effort: high is strong, max is maximum; omit to disable reasoning mode. */
   reasoningEffort?: 'high' | 'max';
-  /** 工具访问策略。子 Agent 使用 subagent_readonly。 */
+  /** Tool access policy; child agents use subagent_readonly. */
   toolAccessMode?: 'default' | 'subagent_readonly';
-  /** 当前 loop 是否为只读子 Agent。 */
+  /** Whether the current loop is a read-only child agent. */
   subAgent?: boolean;
-  /** 单次请求允许的最大模型轮数，防止重复工具调用形成无限循环。 */
+  /** Maximum model rounds allowed for one request, preventing infinite loops from repeated tool calls. */
   maxToolRounds?: number;
   /**
-   * 工具审批策略（定时任务用）：
-   * - 'auto-deny'：自动拒绝需要审批的工具调用（默认，安全）
-   * - 'auto-approve'：自动批准所有工具调用（危险，仅用于可信任务）
-   * - undefined：正常弹出审批窗口等待用户决策
+   * Tool approval policy, used by scheduled tasks:
+   * - 'auto-deny': automatically deny tool calls that require approval (safe default).
+   * - 'auto-approve': automatically approve all tool calls (dangerous; trusted tasks only).
+   * - undefined: show the normal approval prompt and wait for the user.
    */
   approvalPolicy?: 'auto-deny' | 'auto-approve';
   collaborationMode?: 'execute' | 'plan';

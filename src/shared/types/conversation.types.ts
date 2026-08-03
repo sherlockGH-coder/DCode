@@ -4,7 +4,7 @@ import type { AgentRunStatus } from './agent.types';
 
 export interface Message {
   id: string;
-  /** 渲染稳定键：流式创建时生成，持久化后 id 更换但 clientId 保留，避免 React 整树 remount。不入库。 */
+  /** Stable renderer key: generated during streaming creation; clientId remains when the persisted ID changes to avoid a full React-tree remount. Not stored in the DB. */
   clientId?: string;
   role: "user" | "assistant" | "system" | "tool";
   content: string;
@@ -28,11 +28,11 @@ export interface Message {
   completed_at?: number;
   created_at?: string;
 
-  /** 该消息所属轮次。user 消息：=自己的 id；assistant/tool 消息：=触发它的 user 消息 id */
+  /** Turn owning the message. For user messages, this is their own ID; for assistant/tool messages, it is the triggering user message ID. */
   turnId?: string;
-  /** 该消息所在的 attempt 序号；user 消息恒为 0；assistant/tool 从 1 开始 */
+  /** Attempt number for the message; user messages are always 0, while assistant/tool messages start at 1. */
   attemptNo?: number;
-  /** 同一 (turnId, attemptNo) 内的顺序号；从 0 起递增 */
+  /** Sequence number within the same (turnId, attemptNo), starting at 0. */
   seq?: number;
   contextEpoch?: number;
   origin?: 'chat' | 'plan_rejection' | 'plan_execution';
@@ -42,29 +42,29 @@ export interface Message {
 export interface Conversation {
   id: string;
   title: string;
-  /** 所属项目路径；null = legacy 未归类对话 */
+  /** Project path; null means a legacy unassigned conversation. */
   project_path: string | null;
   created_at: string;
   updated_at: string;
-  /** 每个 turn 当前激活的 attempt 序号；缺省时 UI fallback 到 max(attemptNo) */
+  /** Active attempt number for each turn; the UI falls back to max(attemptNo) when absent. */
   activeAttempts?: Record<string, number>;
-  /** 对话来源：manual=手动创建, cron=定时任务 */
+  /** Conversation source: manual or cron. */
   source?: string;
-  /** 来源关联的任务 ID（仅 cron 来源） */
+  /** Task ID associated with the source, only for cron sources. */
   source_job_id?: string | null;
-  /** 子 Agent 父会话 ID（source=agent 时使用） */
+  /** Parent conversation ID for a child agent, used when source=agent. */
   parent_conversation_id?: string | null;
-  /** 子 Agent 所属根会话 ID（source=agent 时使用） */
+  /** Root conversation ID for a child agent, used when source=agent. */
   root_conversation_id?: string | null;
-  /** 子 Agent 角色 */
+  /** Child-agent role. */
   agent_role?: string | null;
-  /** 子 Agent 状态 */
+  /** Child-agent status. */
   agent_status?: AgentRunStatus | null;
-  /** 子 Agent 任务名 */
+  /** Child-agent task name. */
   agent_task_name?: string | null;
-  /** 对话摘要（用于上下文压缩） */
+  /** Conversation summary used for context compaction. */
   summary?: string | null;
-  /** 压缩截止消息 ID */
+  /** Compaction boundary message ID. */
   compacted_to_message_id?: string | null;
   collaboration_mode?: import('./plan.types').ConversationMode;
   mode_revision?: number;

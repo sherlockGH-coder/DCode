@@ -1,17 +1,17 @@
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 
-/** 解析结果统一形态 */
+/** Unified parse-result shape. */
 interface ParsedDoc {
-  /** 提取到的纯文本 */
+  /** Extracted plain text. */
   text: string;
-  /** 解析器标记（pdf / docx / xlsx），用于日志/UI */
+  /** Parser label (pdf, docx, or xlsx), used by logs and UI. */
   parser: 'pdf' | 'docx' | 'xlsx';
-  /** 额外元信息（页数、表数等） */
+  /** Additional metadata, such as page and sheet counts. */
   meta?: Record<string, unknown>;
 }
 
-/** 按 ext + mime 判断是否为二进制文档（值得调解析器） */
+/** Determine whether an ext/mime pair is a binary document worth sending to a parser. */
 export function isParsableDocument(filePath: string, mimeType?: string): boolean {
   const ext = extname(filePath).toLowerCase();
   if (ext === '.pdf' || ext === '.docx' || ext === '.xlsx' || ext === '.xls') return true;
@@ -62,8 +62,8 @@ async function parseXlsx(filePath: string): Promise<ParsedDoc> {
 }
 
 /**
- * 主入口：按文件类型解析为纯文本。
- * 若类型不支持，抛错（调用方应先用 isParsableDocument 判断）。
+ * Main entry point: parse a file into plain text by type.
+ * Throw when the type is unsupported; callers should check isParsableDocument first.
  */
 export async function parseDocument(
   filePath: string,
@@ -73,5 +73,5 @@ export async function parseDocument(
   if (ext === '.pdf' || mimeType === 'application/pdf') return parsePdf(filePath);
   if (ext === '.docx' || mimeType?.includes('wordprocessingml')) return parseDocx(filePath);
   if (ext === '.xlsx' || ext === '.xls' || mimeType?.includes('spreadsheetml') || mimeType === 'application/vnd.ms-excel') return parseXlsx(filePath);
-  throw new Error(`不支持的文档类型：${ext || mimeType || 'unknown'}`);
+  throw new Error(`Unsupported document type: ${ext || mimeType || 'unknown'}`);
 }

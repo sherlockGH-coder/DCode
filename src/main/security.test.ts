@@ -10,7 +10,7 @@ afterEach(() => {
   else process.env.ELECTRON_RENDERER_URL = originalDevUrl;
 });
 
-/** 与 security.ts 内部一致：打包后允许的唯一页面。 */
+/** Matches security.ts: the only page allowed in packaged builds. */
 function packagedRendererUrl(): string {
   return pathToFileURL(join(__dirname, '../renderer/index.html')).toString();
 }

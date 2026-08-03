@@ -42,7 +42,7 @@ export function useChatInputAttachments({
       const picked = await window.deepseekApi.pickFiles();
       addAttachments(picked);
     } catch (err) {
-      console.error('选择文件失败:', err);
+      console.error('Failed to select files:', err);
     }
   }, [isLoading, addAttachments]);
 
@@ -84,7 +84,7 @@ export function useChatInputAttachments({
         const attachment = await window.deepseekApi.pasteClipboardImage();
         if (attachment) addAttachments([attachment]);
       } catch (err) {
-        console.error('粘贴图片失败:', err);
+        console.error('Failed to paste image:', err);
       }
       return;
     }

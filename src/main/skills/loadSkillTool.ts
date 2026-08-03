@@ -6,13 +6,13 @@ export const loadSkillTool: ToolExecutor = {
   definition: {
     name: 'load_skill',
     description:
-      '加载指定 skill 的完整指令正文。当 system prompt 中「Available Skills」列出的 skill 与当前用户请求匹配时调用。',
+      'Load the full instructions for a skill. Call this when a skill listed under "Available Skills" in the system prompt matches the current user request.',
     input_schema: {
       type: 'object',
       properties: {
         name: {
           type: 'string',
-          description: 'Skill 名称，必须与 system prompt 中列出的一致',
+          description: 'Skill name; it must match a name listed in the system prompt.',
         },
       },
       required: ['name'],
@@ -22,19 +22,19 @@ export const loadSkillTool: ToolExecutor = {
   async execute(args, ctx): Promise<ToolExecuteResult> {
     const name = String(args.name ?? '').trim();
     if (!name) {
-      return { content: 'load_skill 需要 name 参数', error: true };
+      return { content: 'load_skill requires a name parameter', error: true };
     }
 
     const skill = skillsManager.read(name, ctx.projectPath);
     if (!skill) {
-      return { content: `Skill "${name}" 不存在或已禁用`, error: true };
+      return { content: `Skill "${name}" does not exist or is disabled`, error: true };
     }
     if (!skill.enabled) {
-      return { content: `Skill "${name}" 已被禁用`, error: true };
+      return { content: `Skill "${name}" is disabled`, error: true };
     }
 
     const toolsHint = skill.allowedTools && skill.allowedTools.length > 0
-      ? `\n\n[执行约束] 调用本 skill 时只能使用以下工具：${skill.allowedTools.join(', ')}`
+      ? `\n\n[Execution constraint] When using this skill, only these tools may be used: ${skill.allowedTools.join(', ')}`
       : '';
 
     return {

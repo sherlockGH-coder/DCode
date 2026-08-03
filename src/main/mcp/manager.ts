@@ -192,9 +192,9 @@ class McpManager {
   }
 
   /**
-   * 收集所有已连接 server 的 instructions（服务器使用说明）。
-   * 仅返回 status === 'connected' 且声明了非空 instructions 的 server。
-   * 用于注入 userContext，让模型知道每个 MCP server「何时用、怎么用」。
+   * Collect instructions from all connected servers.
+   * Return only servers with status === 'connected' and non-empty instructions.
+   * Inject them into userContext so the model knows when and how to use each MCP server.
    */
   getActiveInstructions(): Array<{ name: string; scope: McpScope; instructions: string }> {
     const out: Array<{ name: string; scope: McpScope; instructions: string }> = [];
@@ -235,7 +235,7 @@ class McpManager {
       entry.registeredToolNames = newToolNames;
       debugLog('mcp', `connected: ${entry.scope}:${entry.name} (${newToolNames.length} tools)`);
     } catch (err) {
-      console.warn(`[mcp] 启动失败 ${entry.scope}:${entry.name}:`, err instanceof Error ? err.message : err);
+      console.warn(`[mcp] Failed to start ${entry.scope}:${entry.name}:`, err instanceof Error ? err.message : err);
     } finally {
       this.scheduleBroadcast();
     }

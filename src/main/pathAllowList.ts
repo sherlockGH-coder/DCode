@@ -11,7 +11,7 @@ function getOrCreate(convId: string): Set<string> {
   return set;
 }
 
-/** absPath 是否落在该对话已审批过的任一目录内 */
+/** Whether absPath is inside any directory already approved for the conversation. */
 export function isPathAllowedInSession(
   conversationId: string | null | undefined,
   absPath: string,
@@ -25,7 +25,7 @@ export function isPathAllowedInSession(
   return false;
 }
 
-/** 把绝对目录加入会话白名单 */
+/** Add an absolute directory to the session allowlist. */
 export function addAllowedDirToSession(
   conversationId: string | null | undefined,
   absDir: string,
@@ -34,7 +34,7 @@ export function addAllowedDirToSession(
   getOrCreate(conversationId).add(absDir);
 }
 
-/** 对话删除/中断时清空，避免长会话泄露内存 */
+/** Clear on conversation deletion or interruption to prevent memory leaks during long sessions. */
 export function clearSessionAllowList(conversationId: string): void {
   allowedDirs.delete(conversationId);
 }

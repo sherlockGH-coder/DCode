@@ -44,14 +44,14 @@ export function useSlashCommands({
     },
     {
       name: 'plan',
-      description: '进入计划模式并先制定可审批计划',
+      description: 'Enter plan mode and create an approval-ready plan first',
       icon: <span aria-hidden>◇</span>,
       color: '',
       kind: 'text',
     },
     {
       name: 'help',
-      description: '获取使用帮助与技巧',
+      description: 'Get help and usage tips',
       icon: (
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />

@@ -47,13 +47,13 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
             type="button"
             onClick={onClose}
             className="h-9 w-9 px-0"
-            aria-label="返回配置列表"
+            aria-label="Back to profile list"
           >
             <IconChevronLeft size={17} />
           </SecondaryButton>
           <div>
-            <h2 className="text-[21px] font-semibold text-text-primary">编辑 API 配置</h2>
-            <p className="mt-1 text-[12px] text-text-tertiary">端点、凭据与模型会一起保存到此配置。</p>
+            <h2 className="text-[21px] font-semibold text-text-primary">Edit API profile</h2>
+            <p className="mt-1 text-[12px] text-text-tertiary">The endpoint, credentials, and models are saved together in this profile.</p>
           </div>
         </div>
         <SavePill state={saveState} error={error} />
@@ -66,35 +66,35 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
               <div className="flex gap-3">
                 <IconInfo size={17} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-300" />
                 <div>
-                  <h3 className="text-[13px] font-semibold">旧版 OpenAI 配置需要迁移</h3>
+                  <h3 className="text-[13px] font-semibold">Legacy OpenAI profile requires migration</h3>
                   <p className="mt-1 text-[11.5px] leading-relaxed text-amber-900/75 dark:text-amber-100/70">
-                    当前应用仅发送 Anthropic Messages 请求。请先把 Base URL 和模型改为支持该协议的值，再确认转换；原配置不会被自动改写或误调用。
+                    This app sends only Anthropic Messages requests. Update the Base URL and model to values that support this protocol, then confirm the conversion; the original profile will not be rewritten or called accidentally.
                   </p>
                   <button
                     type="button"
                     onClick={() => updateEditing({ protocol: 'anthropic' })}
                     className="mt-3 inline-flex h-8 items-center rounded-[8px] bg-amber-600 px-3 text-[11.5px] font-semibold text-white transition-colors hover:bg-amber-700 dark:bg-amber-500 dark:text-black dark:hover:bg-amber-400"
                   >
-                    我已更新并确认 Anthropic 兼容
+                    I updated it and confirm Anthropic compatibility
                   </button>
                 </div>
               </div>
             </div>
           )}
           <SettingsGroup className="p-5">
-            <SectionTitle>基础信息</SectionTitle>
+            <SectionTitle>Basic information</SectionTitle>
             <div className="mt-4">
-              <Field label="名称">
+              <Field label="Name">
                 <input
                   className={INPUT_CLASS}
                   value={editing.name}
                   onChange={(event) => updateEditing({ name: event.target.value })}
-                  placeholder="例如 anyrouter"
+                  placeholder="For example, anyrouter"
                 />
               </Field>
             </div>
             <div className="mt-4">
-              <Field label="Base URL" hint="填写服务根地址，不需要完整 chat endpoint。">
+              <Field label="Base URL" hint="Enter the service root URL; the full chat endpoint is not required.">
                 <input
                   className={INPUT_CLASS}
                   value={editing.baseUrl}
@@ -106,9 +106,9 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
           </SettingsGroup>
 
           <SettingsGroup className="p-5">
-            <SectionTitle>模型</SectionTitle>
+            <SectionTitle>Models</SectionTitle>
             <div className="mt-4 space-y-4">
-              <Field label="自定义模型" hint="提供商不支持 /v1/models 时，在这里手动添加模型；留空则自动拉取。">
+              <Field label="Custom models" hint="Add models manually here when the provider does not support /v1/models; leave empty to load them automatically.">
                 <ModelListField
                   models={editing.models}
                   defaultModel={editing.defaultModel}
@@ -119,16 +119,16 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                       : editing.defaultModel,
                   })}
                   onSetDefault={(model) => updateEditing({ defaultModel: model })}
-                  placeholder="输入模型名后回车"
+                  placeholder="Enter a model name and press Enter"
                 />
               </Field>
               {editing.models.length === 0 && (
-                <Field label="默认模型" hint="自定义模型为空时，新建对话默认使用的模型；留空则使用 Anthropic 协议的内置默认值。">
+                <Field label="Default model" hint="The model used for new conversations when the custom model list is empty; leave empty to use the built-in Anthropic protocol default.">
                   <input
                     className={INPUT_CLASS}
                     value={editing.defaultModel}
                     onChange={(event) => updateEditing({ defaultModel: event.target.value })}
-                    placeholder="例如 claude-sonnet-4-6"
+                    placeholder="For example, claude-sonnet-4-6"
                   />
                 </Field>
               )}
@@ -137,11 +137,11 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
         </div>
 
         <SettingsGroup className="h-fit p-5">
-          <SectionTitle>凭据</SectionTitle>
+          <SectionTitle>Credentials</SectionTitle>
           <div className="mt-4">
             <Field
               label="API Key"
-              hint={editing.apiKeySet ? '留空则保留当前 Key。输入新值会替换；勾选清除会删除当前 Key。' : '可先留空，后续再编辑补充。'}
+              hint={editing.apiKeySet ? 'Leave empty to keep the current key. Enter a new value to replace it; select clear to delete the current key.' : 'You can leave this empty and add it later.'}
             >
               <MaskedSecretInput
                 className={INPUT_CLASS}
@@ -152,7 +152,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                   onKeyDraftChange(next);
                   onClearKeyChange(false);
                 }}
-                placeholder={editing.apiKeySet ? '输入新 Key 替换' : '请输入 API Key'}
+                placeholder={editing.apiKeySet ? 'Enter a new key to replace it' : 'Enter an API key'}
               />
               {editing.apiKeySet && (
                 <label className="mt-3 inline-flex items-center gap-2 text-[12px] font-medium text-text-secondary cursor-pointer select-none">
@@ -165,7 +165,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     }}
                     className="rounded"
                   />
-                  清除当前 API Key
+                  Clear current API key
                 </label>
               )}
             </Field>
@@ -180,7 +180,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
           disabled={saveState === 'saving'}
           className="h-9 px-5"
         >
-          保存
+          Save
         </PrimaryButton>
       </div>
     </div>

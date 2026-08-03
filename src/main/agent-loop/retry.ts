@@ -37,7 +37,7 @@ export function getRetryReason(error: any): string {
   if (code) return code;
 
   const message = typeof error?.message === 'string' ? error.message : String(error);
-  return message.slice(0, 80) || '网络错误';
+  return message.slice(0, 80) || 'Network error';
 }
 
 export function isRetryableStreamError(error: any, attempt: number): boolean {

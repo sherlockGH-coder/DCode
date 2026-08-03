@@ -134,7 +134,7 @@ describe('ChatPanel automatic scrolling', () => {
 
     const panel = container.querySelector('.chat-panel') as HTMLDivElement;
     expect(panel.getAttribute('role')).toBe('region');
-    expect(panel.getAttribute('aria-label')).toBe('对话内容');
+    expect(panel.getAttribute('aria-label')).toBe('Conversation content');
     expect(panel.getAttribute('tabindex')).toBe('0');
     expect(panel.classList.contains('custom-scrollbar')).toBe(true);
   });

@@ -10,26 +10,26 @@ type ExplorationGroupRenderUnit = {
   defaultCollapsed?: boolean;
 };
 
-/** 段内子单元必须是叶子单元，避免 collapsed/expanded 内再次嵌套折叠段。 */
+/** Child units inside a segment must be leaf units to avoid nesting folded segments inside collapsed or expanded segments. */
 export type SegmentChildRenderUnit = EntryRenderUnit | ExplorationGroupRenderUnit;
 
-/** 渲染单元 — 管线最终输出 */
+/** Render unit, the final pipeline output. */
 export type RenderUnit =
   | SegmentChildRenderUnit
   | { kind: 'collapsed-segment'; units: SegmentChildRenderUnit[]; summary: string; segmentIndex: number }
   | { kind: 'expanded-segment'; units: SegmentChildRenderUnit[]; segmentIndex: number };
 
-/** 段 — 按 assistant-message 切分的 ToolItem 序列 */
+/** Segment, a ToolItem sequence split by assistant messages. */
 export interface ToolSegment {
   index: number;
   items: ToolItem[];
-  /** 触发该段的 assistant 消息 ID（用于前端映射） */
+  /** Assistant message ID that triggered the segment, used for renderer mapping. */
   startMessageId: string;
-  /** 该段后面紧跟的 assistant 消息是否是最后一条（决定折叠策略） */
+  /** Whether the assistant message immediately after this segment is the last one, which determines the folding strategy. */
   isLastSegment: boolean;
 }
 
-/** 聚合摘要数据 */
+/** Aggregated summary data. */
 export interface SegmentSummary {
   readCount: number;
   writeCount: number;

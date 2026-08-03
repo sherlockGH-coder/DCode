@@ -112,7 +112,7 @@ test('Plan is shown before approval, tools are restricted, and fresh execution s
     await composer.fill('/plan build the feature');
     await composer.press('Enter');
     const indicator = page.getByTestId('plan-mode-indicator');
-    await expect(indicator).toHaveText(/计划/);
+    await expect(indicator).toHaveText(/Plan/);
     await expect(page.getByTestId('plan-approval-panel')).toBeVisible();
     expect(requests[0].tools.map((tool) => tool.name)).toContain('submit_plan');
     expect(requests[0].tools.map((tool) => tool.name)).not.toContain('edit_file');
@@ -144,13 +144,13 @@ test('Rejection replans with a new version and same-context approval executes on
     await composer.fill('/plan preserve the original context');
     await composer.press('Enter');
     await expect(page.getByTestId('plan-approval-panel')).toBeVisible();
-    await expect(page.getByText('实施计划 · 等待批准')).toBeVisible();
+    await expect(page.getByText('Implementation plan · Awaiting approval')).toBeVisible();
     await expect(page.getByTestId('plan-reject-toggle')).toBeEnabled();
     await page.getByTestId('plan-reject-toggle').click();
-    await page.getByPlaceholder('可选：告诉 AI 计划需要如何调整…').fill('Add a rollback step');
+    await page.getByPlaceholder('Optional: tell the AI how to adjust the plan…').fill('Add a rollback step');
     await page.getByTestId('plan-reject').click();
     await expect(page.getByTestId('plan-approval-panel')).toBeVisible();
-    await expect(page.getByText('实施计划 · 等待批准')).toBeVisible();
+    await expect(page.getByText('Implementation plan · Awaiting approval')).toBeVisible();
     await expect(page.getByTestId('plan-approval-panel').getByText('v2')).toHaveCount(0);
     expect(JSON.stringify(requests[1].messages)).toContain('Add a rollback step');
     expect(requests[1].tools.map((tool) => tool.name)).toContain('submit_plan');

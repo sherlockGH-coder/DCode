@@ -19,6 +19,11 @@ test('opens wider and renders compact welcome action icons and titles', async ()
     const cards = page.locator('.welcome-action-card');
     await expect(cards).toHaveCount(4);
 
+    const cardHeights = await cards.evaluateAll((elements) => (
+      elements.map((card) => Math.round(card.getBoundingClientRect().height))
+    ));
+    expect(new Set(cardHeights).size).toBe(1);
+
     const welcomeWidths = await page.locator('.welcome-layout').evaluate((layout) => {
       const content = layout.querySelector<HTMLElement>('.welcome-content');
       const hero = layout.querySelector<HTMLElement>('.welcome-hero');
@@ -65,7 +70,7 @@ test('opens wider and renders compact welcome action icons and titles', async ()
     await expect(page.locator('.welcome-review-check')).toHaveCSS('width', '13px');
     await expect(page.locator('.welcome-review-check')).toHaveCSS('height', '13px');
 
-    for (const label of ['附加选项', '语音输入']) {
+    for (const label of ['More options', 'Voice input']) {
       const button = page.getByRole('button', { name: label });
       await expect(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
       await button.hover();

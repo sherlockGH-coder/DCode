@@ -1,10 +1,10 @@
 import type Database from 'better-sqlite3';
 
 /**
- * 版本化迁移。
+ * Versioned migrations.
  *
- * `initializeSchema` 负责建表与补列（幂等），这里只放那些「一次性数据修复」。
- * 版本 1 是历史基线，由 `initializeSchema` 写入。
+ * `initializeSchema` creates tables and adds columns idempotently; this file contains one-time data repairs.
+ * Version 1 is the historical baseline written by `initializeSchema`.
  */
 
 interface Migration {
@@ -14,11 +14,11 @@ interface Migration {
 }
 
 /**
- * 清理孤儿行。
+ * Clean up orphan rows.
  *
- * `plan_artifacts` / `plan_execution_runs` 声明了 `ON DELETE CASCADE`，但连接从未
- * 打开 `PRAGMA foreign_keys`，级联一直没生效，而 `deleteConversation` 也只手动删了
- * messages。结果是每删一个对话就在这两张表里永久留下孤儿行。
+ * `plan_artifacts` and `plan_execution_runs` declare `ON DELETE CASCADE`, but the connection never
+ * enabled `PRAGMA foreign_keys`. Cascading never ran, while `deleteConversation` only deleted
+ * messages, leaving permanent orphan rows in these tables after every conversation deletion.
  */
 function purgeOrphanedRows(database: Database.Database): void {
   database.exec(`

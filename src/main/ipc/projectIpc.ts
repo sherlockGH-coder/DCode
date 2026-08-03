@@ -56,10 +56,10 @@ export function registerProjectIpc(): void {
     const ok = projectManager.setActiveProject(folderPath);
     if (ok) {
       mcpManager.refreshForProject(folderPath ?? null).catch((err) => {
-        console.warn('[mcp] refreshForProject 失败:', err);
+        console.warn('[mcp] refreshForProject failed:', err);
       });
       taskManager.refreshForProject(folderPath ?? null).catch((err) => {
-        console.warn('[tasks] refreshForProject 失败:', err);
+        console.warn('[tasks] refreshForProject failed:', err);
       });
       broadcastProjectChanged();
     }
@@ -74,7 +74,7 @@ export function registerProjectIpc(): void {
 
   ipcMain.handle('git:checkoutBranch', async (_event, folderPath: string, branch: string) => {
     const projectPath = resolveGitProjectPath(folderPath);
-    if (!projectPath) return { success: false, error: '项目路径未注册。' };
+    if (!projectPath) return { success: false, error: 'The project path is not registered.' };
     return checkoutGitBranch(projectPath, branch);
   });
 
@@ -112,13 +112,13 @@ export function registerProjectIpc(): void {
 
   ipcMain.handle('git:commit', async (_event, folderPath: string, message: string, includeUnstaged: boolean) => {
     const projectPath = resolveGitProjectPath(folderPath);
-    if (!projectPath) return { success: false, error: '项目路径未注册。' };
+    if (!projectPath) return { success: false, error: 'The project path is not registered.' };
     return commitGitChanges(projectPath, message, includeUnstaged);
   });
 
   ipcMain.handle('git:push', async (_event, folderPath: string) => {
     const projectPath = resolveGitProjectPath(folderPath);
-    if (!projectPath) return { success: false, error: '项目路径未注册。' };
+    if (!projectPath) return { success: false, error: 'The project path is not registered.' };
     return pushGitChanges(projectPath);
   });
 
@@ -136,10 +136,10 @@ export async function handleOpenFolder(folderPath: string): Promise<void> {
   if (result) {
     projectManager.setActiveProject(folderPath);
     mcpManager.refreshForProject(folderPath).catch((err) => {
-      console.warn('[mcp] refreshForProject 失败:', err);
+      console.warn('[mcp] refreshForProject failed:', err);
     });
     taskManager.refreshForProject(folderPath).catch((err) => {
-      console.warn('[tasks] refreshForProject 失败:', err);
+      console.warn('[tasks] refreshForProject failed:', err);
     });
     broadcastProjectChanged();
   }

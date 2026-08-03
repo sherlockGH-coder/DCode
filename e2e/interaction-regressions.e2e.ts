@@ -21,16 +21,69 @@ async function sendMessage(page: Page, message: string): Promise<void> {
   await composer.press('Enter');
 }
 
+test('sidebar section action placement and resize guide are measurable in the rendered app', async () => {
+  const fixture = await launchFixture(() => textResponse('unused'));
+  try {
+    const { page } = fixture;
+    const projectHeading = page.getByRole('heading', { name: 'Projects' });
+    const conversationHeading = page.getByRole('heading', { name: 'Conversations' });
+    await expect(projectHeading).toBeVisible();
+    await expect(conversationHeading).toBeVisible();
+
+    const metrics = await page.evaluate(() => {
+      const sidebar = document.querySelector('.sidebar-surface');
+      const projectAction = document.querySelector('button[title="Add project"]');
+      const conversationAction = document.querySelector('button[title="New conversation"]');
+      const resizeHandle = document.querySelector('button.sidebar-resize-handle');
+      const indicator = resizeHandle?.querySelector('.sidebar-resize-indicator');
+      if (!sidebar || !projectAction || !conversationAction || !resizeHandle || !indicator) return null;
+
+      const bounds = (element: Element) => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, right: rect.right, width: rect.width };
+      };
+      return {
+        sidebar: bounds(sidebar),
+        projectAction: bounds(projectAction),
+        conversationAction: bounds(conversationAction),
+        resizeHandle: bounds(resizeHandle),
+        indicator: {
+          width: getComputedStyle(indicator).width,
+          backgroundColor: getComputedStyle(indicator).backgroundColor,
+        },
+      };
+    });
+    expect(metrics).not.toBeNull();
+    if (!metrics) throw new Error('Sidebar layout metrics were not available');
+    expect(metrics.projectAction.right).toBeGreaterThanOrEqual(metrics.resizeHandle.left - 16);
+    expect(metrics.conversationAction.right).toBeGreaterThanOrEqual(metrics.resizeHandle.left - 16);
+    expect(metrics.projectAction.right).toBe(metrics.conversationAction.right);
+
+    await page.locator('button.sidebar-resize-handle').hover();
+    const sidebarIndicator = page.locator('button.sidebar-resize-handle .sidebar-resize-indicator');
+    const hoveredIndicator = await sidebarIndicator.evaluate((element) => ({
+      width: getComputedStyle(element).width,
+      backgroundColor: getComputedStyle(element).backgroundColor,
+    }));
+    await expect(sidebarIndicator).not.toHaveClass(/group-hover:/);
+    await expect(sidebarIndicator).toHaveClass(/group-active:/);
+    expect(hoveredIndicator.width).toBe('1px');
+    expect(hoveredIndicator.backgroundColor).toMatch(/rgba\(0, 0, 0, 0\)|oklab\(0 0 0 \/ 0\)/);
+  } finally {
+    await closeFixture(fixture);
+  }
+});
+
 test('Plan mode is selected from the plus menu and closes from its microphone-adjacent badge', async () => {
   const fixture = await launchFixture(() => textResponse('unused'));
   try {
     const { page } = fixture;
-    await page.getByRole('button', { name: '附加选项' }).click();
-    await page.getByRole('menuitem', { name: '计划' }).click();
+    await page.getByRole('button', { name: 'More options' }).click();
+    await page.getByRole('menuitem', { name: 'Plan' }).click();
 
     const badge = page.getByTestId('plan-mode-indicator');
-    await expect(badge).toHaveText(/计划/);
-    const microphone = page.getByRole('button', { name: '语音输入' });
+    await expect(badge).toHaveText(/Plan/);
+    const microphone = page.getByRole('button', { name: 'Voice input' });
     const toolbarOrder = await microphone.evaluate((mic, badgeTestId) => {
       const badgeElement = document.querySelector(`[data-testid="${badgeTestId}"]`);
       if (!badgeElement) return null;
@@ -40,14 +93,14 @@ test('Plan mode is selected from the plus menu and closes from its microphone-ad
     await captureVisualQa(page, 'plan-mode-indicator');
 
     await badge.hover();
-    await page.getByRole('button', { name: '关闭计划模式' }).click();
+    await page.getByRole('button', { name: 'Close plan mode' }).click();
     await expect(badge).toHaveCount(0);
 
-    await page.getByRole('button', { name: '附加选项' }).click();
-    await page.getByRole('menuitem', { name: '计划' }).click();
+    await page.getByRole('button', { name: 'More options' }).click();
+    await page.getByRole('menuitem', { name: 'Plan' }).click();
     await expect(page.getByTestId('plan-mode-indicator')).toBeVisible();
-    await page.getByRole('button', { name: '附加选项' }).click();
-    await page.getByRole('menuitem', { name: '计划' }).click();
+    await page.getByRole('button', { name: 'More options' }).click();
+    await page.getByRole('menuitem', { name: 'Plan' }).click();
     await expect(page.getByTestId('plan-mode-indicator')).toHaveCount(0);
   } finally {
     await closeFixture(fixture);
@@ -74,20 +127,20 @@ test('completed ask_user_question rows expand to show questions, options, answer
   try {
     const { page } = fixture;
     await sendMessage(page, 'Ask me before implementing');
-    await expect(page.getByText('需要你的选择')).toBeVisible();
+    await expect(page.getByText('Your choice is needed')).toBeVisible();
     await page.getByRole('button', { name: /Robust/ }).click();
-    await page.getByRole('button', { name: '提交' }).click();
+    await page.getByRole('button', { name: 'Submit' }).click();
     await expect(page.getByText('Question handled')).toBeVisible();
 
     await page.getByTestId('processed-summary-toggle').click();
-    const row = page.getByTestId('tool-item-row').filter({ hasText: '已提问' });
+    const row = page.getByTestId('tool-item-row').filter({ hasText: 'Asked' });
     await row.click();
     const detail = page.getByTestId('ask-user-question-detail');
     await expect(detail).toContainText(question);
     await expect(detail).toContainText('Robust');
     await expect(detail).toContainText('Minimal');
-    await expect(detail).toContainText('用户选择');
-    await expect(detail).toContainText('已完成');
+    await expect(detail).toContainText('User selection');
+    await expect(detail).toContainText('Completed');
     await captureVisualQa(page, 'ask-user-question-detail');
   } finally {
     await closeFixture(fixture);
@@ -99,7 +152,7 @@ test('approval options default to the first item, wrap with arrow keys, and exec
     requestIndex === 1
       ? toolResponse('approval-1', 'bash_exec', {
           command: 'printf keyboard-approval',
-          description: '验证键盘审批',
+          description: 'Validate keyboard approval',
         })
       : textResponse('Keyboard approval handled')
   ));
@@ -131,7 +184,7 @@ test('Tab opens rejection feedback, Enter inserts a newline, and Mod+Enter submi
     requestIndex === 1
       ? toolResponse('approval-reject-1', 'bash_exec', {
           command: 'printf should-not-run',
-          description: '验证拒绝理由输入',
+          description: 'Validate rejection feedback input',
         })
       : textResponse('Rejection handled')
   ));
@@ -143,7 +196,7 @@ test('Tab opens rejection feedback, Enter inserts a newline, and Mod+Enter submi
     await panel.press('ArrowDown');
     await panel.press('Tab');
 
-    const feedback = page.getByPlaceholder('可选：告诉 AI 应当改做什么…');
+    const feedback = page.getByPlaceholder('Optional: tell the AI what to do instead…');
     await expect(feedback).toBeFocused();
     await feedback.fill('Keep the first line');
     await feedback.press('Enter');
@@ -224,7 +277,7 @@ test('streaming does not pull the viewport back down after the user scrolls up',
     expect(viewportAnchorAfterUserInput).toMatch(/^Initial stream line/);
 
     await expect(page.getByText('STREAM_FINISHED_MARKER')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByRole('button', { name: '发送' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Send' })).toBeVisible();
     const finalDistanceToBottom = await panel.evaluate((element) => (
       element.scrollHeight - element.scrollTop - element.clientHeight
     ));

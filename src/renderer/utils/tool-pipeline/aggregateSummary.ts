@@ -72,50 +72,50 @@ function formatSummary(summary: SegmentSummary): string {
   const fileOps = summary.writeCount + summary.editCount + summary.readCount;
   if (fileOps > 0) {
     const fileParts: string[] = [];
-    if (summary.writeCount > 0) fileParts.push(`${count(summary.writeCount, '个')}已创建`);
-    if (summary.editCount > 0) fileParts.push(`${count(summary.editCount, '个')}已编辑`);
-    if (summary.readCount > 0) fileParts.push(`${count(summary.readCount, '个')}已读取`);
+    if (summary.writeCount > 0) fileParts.push(`${count(summary.writeCount, 'files')} created`);
+    if (summary.editCount > 0) fileParts.push(`${count(summary.editCount, 'files')} edited`);
+    if (summary.readCount > 0) fileParts.push(`${count(summary.readCount, 'files')} read`);
 
     if (summary.writeCount === fileOps) {
-      parts.push(`已创建 ${count(fileOps, '个文件')}`);
+      parts.push(`${count(fileOps, 'files')} created`);
     } else if (summary.editCount === fileOps) {
-      parts.push(`已编辑 ${count(fileOps, '个文件')}`);
+      parts.push(`${count(fileOps, 'files')} edited`);
     } else if (summary.readCount === fileOps) {
-      parts.push(`已读取 ${count(fileOps, '个文件')}`);
+      parts.push(`${count(fileOps, 'files')} read`);
     } else {
-      parts.push(`已处理 ${count(fileOps, '个文件')}（${fileParts.join('， ')}）`);
+      parts.push(`${count(fileOps, 'files')} processed (${fileParts.join(', ')})`);
     }
   }
 
   if (summary.execCount > 0) {
-    parts.push(`已运行 ${count(summary.execCount, '个命令')}`);
+    parts.push(`${count(summary.execCount, 'commands')} run`);
   }
 
   const searches = summary.grepCount + summary.globCount;
   if (searches > 0) {
-    parts.push(`已检索 ${count(searches, '次')}`);
+    parts.push(`${count(searches, 'searches')} performed`);
   }
 
   const web = summary.webSearchCount + summary.webFetchCount;
   if (web > 0) {
     const webParts: string[] = [];
-    if (summary.webSearchCount > 0) webParts.push(`${count(summary.webSearchCount, '次')}搜索`);
-    if (summary.webFetchCount > 0) webParts.push(`${count(summary.webFetchCount, '个')}页面`);
-    parts.push(`网页操作 ${count(web, '次')}（${webParts.join('， ')}）`);
+    if (summary.webSearchCount > 0) webParts.push(`${count(summary.webSearchCount, 'searches')} searched`);
+    if (summary.webFetchCount > 0) webParts.push(`${count(summary.webFetchCount, 'pages')} fetched`);
+    parts.push(`Web operations: ${count(web, 'operations')} (${webParts.join(', ')})`);
   }
 
   if (summary.otherCount > 0) {
-    parts.push(`已调用 ${count(summary.otherCount, '个工具')}`);
+    parts.push(`${count(summary.otherCount, 'tools')} called`);
   }
 
-  const base = parts.join('， ') || '已就绪';
+  const base = parts.join(', ') || 'Ready';
   const status: string[] = [];
-  if (summary.hasRunning) status.push('运行中');
+  if (summary.hasRunning) status.push('running');
 
-  return status.length ? `${base}（${status.join('， ')}）` : base;
+  return status.length ? `${base} (${status.join(', ')})` : base;
 }
 
-/** 从 ToolItem 列表生成聚合摘要 */
+/** Generate an aggregate summary from a list of ToolItems. */
 export function aggregateSummary(items: ToolItem[]): string {
   return formatSummary(computeSummary(items));
 }

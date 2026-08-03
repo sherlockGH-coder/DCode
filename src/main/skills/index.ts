@@ -55,7 +55,7 @@ export function registerSkillsIpc(): void {
         await shell.openPath(dir);
         return true;
       } catch (err) {
-        console.warn('[skills] openPath 失败:', dir, err);
+        console.warn('[skills] openPath failed:', dir, err);
         return false;
       }
     },

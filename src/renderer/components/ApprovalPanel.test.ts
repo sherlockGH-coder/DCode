@@ -157,7 +157,7 @@ describe('ApprovalPanel', () => {
     });
     act(() => pressKey(panel, 'Tab'));
 
-    const feedback = container.querySelector('textarea[placeholder="可选：告诉 AI 应当改做什么…"]') as HTMLTextAreaElement;
+    const feedback = container.querySelector('textarea[placeholder="Optional: tell the AI what to do instead…"]') as HTMLTextAreaElement;
     expect(feedback).not.toBeNull();
     expect(onConfirm).not.toHaveBeenCalled();
     expect(isDenyFeedbackSubmitShortcut({ key: 'Enter', metaKey: false, ctrlKey: false })).toBe(false);

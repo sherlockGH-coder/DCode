@@ -39,6 +39,24 @@ type TurnGroup =
   | { kind: 'legacy'; message: Message }
   | { kind: 'turn'; turnId: string; messages: Message[] };
 
+const CONTEXT_SUMMARY_MARKER = '[Context summary]';
+const LEGACY_CONTEXT_SUMMARY_MARKER = '[\u4e0a\u4e0b\u6587\u6458\u8981]';
+
+function isContextSummaryContent(content?: string): boolean {
+  return !!content
+    && (content.startsWith(CONTEXT_SUMMARY_MARKER) || content.startsWith(LEGACY_CONTEXT_SUMMARY_MARKER));
+}
+
+function stripContextSummaryMarker(content: string): string {
+  if (content.startsWith(CONTEXT_SUMMARY_MARKER)) {
+    return content.slice(CONTEXT_SUMMARY_MARKER.length).replace(/^\n?/, '');
+  }
+  if (content.startsWith(LEGACY_CONTEXT_SUMMARY_MARKER)) {
+    return content.slice(LEGACY_CONTEXT_SUMMARY_MARKER.length).replace(/^\n?/, '');
+  }
+  return content;
+}
+
 function isExplorationTool(item: ToolItem): boolean {
   return item.kind === 'read'
     || item.kind === 'grep'
@@ -127,7 +145,7 @@ export function useChatPresentation({
     const latestAssistantMessageId = (() => {
       for (let index = visibleMessages.length - 1; index >= 0; index -= 1) {
         const message = visibleMessages[index];
-        if (message.role === 'assistant' && !message.content?.startsWith('[上下文摘要]')) return message.id;
+        if (message.role === 'assistant' && !isContextSummaryContent(message.content)) return message.id;
       }
       return undefined;
     })();
@@ -157,7 +175,7 @@ export function useChatPresentation({
     const groupByTurnId = new Map<string, Extract<TurnGroup, { kind: 'turn' }>>();
     for (const message of presentationMessages) {
       if (message.role === 'system') continue;
-      if (message.role === 'assistant' && message.content?.startsWith('[上下文摘要]')) {
+      if (message.role === 'assistant' && isContextSummaryContent(message.content)) {
         groups.push({ kind: 'legacy', message });
         continue;
       }
@@ -269,8 +287,8 @@ export function useChatPresentation({
     for (const group of groups) {
       if (group.kind === 'legacy') {
         const { message } = group;
-        if (message.role === 'assistant' && message.content?.startsWith('[上下文摘要]')) {
-          const legacySummary = message.content.replace(/^\[上下文摘要\]\n?/, '');
+        if (message.role === 'assistant' && isContextSummaryContent(message.content)) {
+          const legacySummary = stripContextSummaryMarker(message.content);
           pushItem(<CompressionSeparator key={`comp-sep-legacy-${message.id}`} summary={legacySummary} />);
           continue;
         }
@@ -335,7 +353,7 @@ export function useChatPresentation({
             isConvLoading={isLoading}
             changeItems={turnChangeItems}
             onUndoChanges={cascadeUndoEntries.length > 0 ? () => onUndoCascade(turnId, cascadeUndoEntries) : undefined}
-            undoConfirmationMessage="撤销从这条消息开始到之后所有回复产生的文件改动，并删除这些消息？如果任一文件之后又被修改，撤销会失败。"
+            undoConfirmationMessage="Undo all file changes made by replies from this message onward and delete those messages? Undo fails if any file was modified afterward."
             reasoningEffort={reasoningEffort}
             onReasoningEffortChange={onReasoningEffortChange}
           />,

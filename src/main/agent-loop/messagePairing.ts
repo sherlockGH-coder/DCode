@@ -2,12 +2,11 @@ import { randomUUID } from 'node:crypto';
 import type { Message } from '../../shared/types';
 
 /**
- * 修复消息历史中 orphan tool_use/tool_result 对
+ * Repair orphan tool_use/tool_result pairs in message history.
  *
- * OpenAI/Anthropic 工具协议要求 assistant.tool_calls 后面紧跟对应的
- * tool_result 窗口。应用崩溃或断电可能留下"assistant 已落库、tool 结果
- * 未落库 / 乱序落库"的半事务历史；这里在请求边界规范化历史，避免坏历史
- * 永久卡住继续对话。
+ * The OpenAI and Anthropic tool protocols require the matching tool_result window to immediately follow assistant.tool_calls.
+ * A crash or power loss can leave a half-committed history where the assistant is stored but tool results are missing or out of order.
+ * Normalize history at the request boundary so malformed history cannot permanently block the conversation.
  */
 export function ensureToolResultPairing(messages: Message[]): Message[] {
   const result: Message[] = [];
@@ -46,7 +45,7 @@ export function ensureToolResultPairing(messages: Message[]): Message[] {
       result.push({
         id: randomUUID(),
         role: 'tool',
-        content: '[Interrupted tool_result] 工具执行结果丢失，通常是应用在工具运行中被关闭或系统断电导致。请根据当前上下文决定是否重新调用该工具。',
+        content: '[Interrupted tool_result] The tool result is missing, usually because the app closed or the system lost power while the tool was running. Decide whether to call the tool again based on the current context.',
         tool_call_id: tc.id,
         name: tc.function.name,
         error: true,

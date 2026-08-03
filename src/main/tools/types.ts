@@ -39,29 +39,29 @@ const SUB_AGENT_DENY_TOOLS = new Set([
 
 export interface ToolExecutionContext {
   projectPath: string | null;
-  /** 当前 toolCall 的 id（工具用于审批请求等需要回写状态的场景） */
+  /** Current toolCall ID, used when a tool must write state back, such as approval requests. */
   toolCallId: string;
-  /** 本回合用户附件 — key 是绝对路径，value 携带 mimeType / kind 等元数据 */
+  /** Attachments for this turn; keys are absolute paths and values carry mimeType, kind, and other metadata. */
   attachmentWhitelist?: Map<string, Attachment>;
-  /** 当前运行的追踪 ID；用于关联控制台调试输出和审批请求。 */
+  /** Current trace ID, used to associate console debug output with approval requests. */
   traceId?: string;
   conversationId?: string | null;
   turnId?: string;
   attemptNo?: number;
-  /** 发起对话的窗口 webContents id；审批请求应优先回到这个窗口 */
+  /** webContents ID of the window that started the conversation; approval requests should return to this window first. */
   approvalWebContentsId?: number;
   /**
-   * 工具审批策略（定时任务用）：
-   * - 'auto-deny'：自动拒绝需要审批的工具调用（默认，安全）
-   * - 'auto-approve'：自动批准所有工具调用（危险，仅用于可信任务）
-   * - undefined：正常弹出审批窗口等待用户决策
+   * Tool approval policy, used by scheduled tasks:
+   * - 'auto-deny': automatically deny tool calls that require approval (safe default).
+   * - 'auto-approve': automatically approve all tool calls (dangerous; trusted tasks only).
+   * - undefined: show the normal approval prompt and wait for the user.
    */
   approvalPolicy?: 'auto-deny' | 'auto-approve';
-  /** 子 Agent 使用更窄的只读工具策略，禁止问用户和再派生 Agent。 */
+  /** Child agents use a narrower read-only tool policy and cannot ask the user or spawn more agents. */
   subAgent?: boolean;
-  /** 当前 loop 的运行配置快照，协作工具用来派生只读子 Agent。 */
+  /** Snapshot of the current loop configuration, used by collaboration tools to spawn read-only child agents. */
   agentRuntime?: AgentLoopConfig & { toolRegistry: ToolRegistry };
-  /** 用户中止或调度器取消当前工具批次时触发。工具应尽快停止可取消的工作。 */
+  /** Fired when the user aborts or the scheduler cancels the current tool batch. Tools should stop cancellable work promptly. */
   signal?: AbortSignal;
   collaborationMode?: 'execute' | 'plan';
   modeRevision?: number;
@@ -71,7 +71,7 @@ export interface ToolExecuteResult {
   content: string;
   contentBlocks?: ToolResultContentBlock[];
   metadata?: ToolResultMetadata;
-  /** 是否作为错误展示（如用户拒绝审批）；默认 false */
+  /** Whether to display this as an error, such as when the user denies approval; false by default. */
   error?: boolean;
   terminal?: boolean;
 }
@@ -79,9 +79,9 @@ export interface ToolExecuteResult {
 export interface ToolExecutor {
 
   definition: ToolDefinition;
-  /** 是否可与其他安全工具并行执行（默认 false） */
+  /** Whether it can run in parallel with other safe tools; false by default. */
   isConcurrencySafe?: boolean;
-  /** 是否为只读工具（子 Agent 只读策略依赖；默认 false） */
+  /** Whether this is a read-only tool, required by the child-agent read-only policy; false by default. */
   isReadonly?: boolean;
 
   execute(args: Record<string, unknown>, ctx: ToolExecutionContext): Promise<ToolExecuteResult>;
@@ -91,21 +91,21 @@ export class ToolRegistry {
   private tools: Map<string, ToolExecutor> = new Map();
 
   /**
-   * 注册工具
+   * Register a tool.
    */
   register(executor: ToolExecutor): void {
     this.tools.set(executor.definition.name, executor);
   }
 
   /**
-   * 注销工具（MCP server 断开 / 删除时用）
+   * Unregister a tool, used when an MCP server disconnects or is removed.
    */
   unregister(name: string): boolean {
     return this.tools.delete(name);
   }
 
   /**
-   * 获取所有工具定义（发送给 API）
+   * Get all tool definitions to send to the API.
    */
   getDefinitions(): ToolDefinition[] {
     return Array.from(this.tools.values()).map(t => t.definition);
@@ -123,7 +123,7 @@ export class ToolRegistry {
   }
 
   /**
-   * 获取只读工具定义（仅返回 isReadonly 为 true 的工具）
+   * Get read-only tool definitions, returning only tools with isReadonly true.
    */
   getReadonlyDefinitions(): ToolDefinition[] {
     return Array.from(this.tools.values())
@@ -132,7 +132,7 @@ export class ToolRegistry {
   }
 
   /**
-   * 获取子 Agent 工具定义：只读工具，但禁止向用户提问和创建更多 Agent。
+   * Get child-agent tool definitions: read-only tools that cannot ask the user or create more agents.
    */
   getSubAgentReadonlyDefinitions(): ToolDefinition[] {
     return Array.from(this.tools.values())
@@ -141,23 +141,23 @@ export class ToolRegistry {
   }
 
   /**
-   * 查询工具是否为只读工具
+   * Check whether a tool is read-only.
    */
   isReadonlyTool(name: string): boolean {
     return this.tools.get(name)?.isReadonly ?? false;
   }
 
   /**
-   * 查询工具是否并发安全
+   * Check whether a tool is concurrency-safe.
    */
   isConcurrencySafe(name: string): boolean {
     return this.tools.get(name)?.isConcurrencySafe ?? false;
   }
 
   /**
-   * 执行工具调用
+   * Execute a tool call.
    *
-   * @param ctx — 不含 toolCallId 的基础上下文，本方法会从 toolCall 注入
+   * @param ctx - Base context without toolCallId; this method injects it from toolCall.
    */
   async execute(toolCall: ToolCall, ctx: Omit<ToolExecutionContext, 'toolCallId'>): Promise<ToolResult> {
     const executor = this.tools.get(toolCall.function.name);
@@ -201,17 +201,17 @@ export class ToolRegistry {
         if (approvalKind) {
 
           if (outOfScope && isPathAllowedInSession(ctx.conversationId, outOfScope.absolutePath)) {
-            // 本会话已经放行过该路径，直接执行
+            // This path was already allowed in the current session; execute directly.
           } else if (ctx.approvalPolicy === 'auto-deny') {
 
             return {
               tool_call_id: toolCall.id,
               name,
-              content: `[Auto-denied] 定时任务配置为自动拒绝需要审批的工具调用。如需执行此操作，请修改任务的审批策略。`,
+              content: `[Auto-denied] The scheduled-task policy automatically denies tool calls that require approval. Change the task approval policy to perform this operation.`,
               error: true,
             };
           } else if (ctx.approvalPolicy === 'auto-approve') {
-            // 策略是自动批准，无需询问
+            // The policy automatically approves; no prompt is needed.
           } else {
 
             const diffPreview = await approvalDiffPreview(name, args, ctx);
@@ -233,7 +233,7 @@ export class ToolRegistry {
               return {
                 tool_call_id: toolCall.id,
                 name,
-                content: `[Denied by user] ${decision.reason || '用户拒绝执行'}`,
+                content: `[Denied by user] ${decision.reason || 'The user denied execution'}`,
                 error: true,
               };
             }
@@ -245,7 +245,7 @@ export class ToolRegistry {
         return {
           tool_call_id: toolCall.id,
           name,
-          content: '[Aborted] 用户中止了执行',
+          content: '[Aborted] The user stopped execution',
           error: true,
         };
       }
@@ -265,7 +265,7 @@ export class ToolRegistry {
         return {
           tool_call_id: toolCall.id,
           name: toolCall.function.name,
-          content: '[Aborted] 用户中止了执行',
+          content: '[Aborted] The user stopped execution',
           error: true,
         };
       }
@@ -401,12 +401,12 @@ function approvalDisplayText(name: string, args: Record<string, unknown>): strin
 function approvalDescriptionText(name: string, args: Record<string, unknown>): string | undefined {
   if (approvalKindFor(name) === 'external_tool') {
     const preview = JSON.stringify(args).slice(0, 240);
-    return preview ? `参数: ${preview}` : undefined;
+    return preview ? `Arguments: ${preview}` : undefined;
   }
   return undefined;
 }
 
-/** 为审批面板生成 edit/write 工具的 diff 预览（异步，需要读文件定位行号） */
+/** Generate a diff preview for edit/write tools in the approval panel; asynchronous because it reads files to locate line numbers. */
 async function approvalDiffPreview(
   name: string,
   args: Record<string, unknown>,

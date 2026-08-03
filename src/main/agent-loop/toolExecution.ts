@@ -7,13 +7,13 @@ interface ToolExecutionPair {
 }
 
 /**
- * 按模型给出的顺序执行同一轮工具调用。
+ * Execute one round of tool calls in the order provided by the model.
  *
- * 设计：
- *   - 连续的并发安全工具组成批次并行执行
- *   - 写入、终端和其他未声明安全的工具作为顺序屏障单独执行
- *   - 返回结果始终与 toolCalls 入参一一对应
- *   - 中止信号同时传入底层工具，避免只停止 UI 等待而让副作用继续发生
+ * Design:
+ *   - Consecutive concurrency-safe tools run in parallel as a batch.
+ *   - Writes, terminal commands, and tools without a safety declaration run individually as sequential barriers.
+ *   - Results always correspond one-to-one with the toolCalls input.
+ *   - Abort signals reach the underlying tools so side effects do not continue after only the UI wait stops.
  */
 export async function executeToolCallsParallel(
   toolCalls: ToolCall[],
@@ -27,7 +27,7 @@ export async function executeToolCallsParallel(
 
   const executeOne = async (toolCall: ToolCall): Promise<ToolExecutionPair> => {
     const toolStart = Date.now();
-    if (log) log(`  → 执行工具: ${toolCall.function.name} (id=${toolCall.id.slice(0, 8)})`);
+    if (log) log(`  → Executing tool: ${toolCall.function.name} (id=${toolCall.id.slice(0, 8)})`);
 
     callbacks.onToolCallStart(toolCall);
 
@@ -35,15 +35,15 @@ export async function executeToolCallsParallel(
       ? {
           tool_call_id: toolCall.id,
           name: toolCall.function.name,
-          content: '[Aborted] 用户中止了执行',
+          content: '[Aborted] The user stopped execution',
           error: true,
         }
       : await toolRegistry.execute(toolCall, { ...toolCtx, signal });
 
     callbacks.onToolCallEnd(result);
     const aborted = signal?.aborted === true;
-    const status = aborted ? '⏹ 中止' : result.error ? '✗ 失败' : '✓ 成功';
-    if (log) log(`  ← 工具完成 ${result.name} | ${status} | 耗时=${Date.now() - toolStart}ms`);
+    const status = aborted ? '⏹ Aborted' : result.error ? '✗ Failed' : '✓ Succeeded';
+    if (log) log(`  ← Tool completed ${result.name} | ${status} | duration=${Date.now() - toolStart}ms`);
 
     return { toolCall, result };
   };

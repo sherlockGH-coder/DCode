@@ -13,9 +13,9 @@ interface UseMcpResult {
 }
 
 /**
- * 监听所有 MCP server 状态 + 提供管理操作。
- * projectPath 仅用于 add/update/remove 时透传给主进程，
- * server 列表本身由主进程依据当前 active project 动态维护。
+ * Listen to all MCP server states and provide management operations.
+ * projectPath is forwarded to the main process only for add/update/remove.
+ * The server list itself is maintained dynamically by the main process for the active project.
  */
 export function useMcp(projectPath: string | null): UseMcpResult {
   const [servers, setServers] = useState<McpServerStatus[]>([]);

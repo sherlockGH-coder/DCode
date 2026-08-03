@@ -53,7 +53,7 @@ describe('ExplorationActivityGroup', () => {
     const summary = container.querySelector('[data-testid="exploration-activity-summary"]') as HTMLButtonElement;
     expect(summary.getAttribute('aria-expanded')).toBe('false');
     expect(summary.getAttribute('data-tool-icon')).toBe('book');
-    expect(summary.textContent).toContain('思考了 2分49秒，读取 1 个文件，搜索 1 次');
+    expect(summary.textContent).toContain('Thought for 2m 49s, Read 1 files, Searched 1 times');
     expect(container.querySelector('[data-testid="exploration-activity-details"]')).toBeNull();
 
     act(() => summary.dispatchEvent(new window.Event('click', { bubbles: true })));
@@ -63,11 +63,11 @@ describe('ExplorationActivityGroup', () => {
     expect(details.className).not.toContain('pl-[25px]');
     expect(details.querySelector('[data-testid="reasoning-activity-toggle"]')?.className).not.toContain('px-2');
     expect(details.querySelector('[data-testid="tool-item-row"]')?.className).not.toContain('px-2');
-    expect(container.textContent).toContain('已深度思考，思考了 2分49秒');
-    expect(container.textContent).toContain('已读取');
+    expect(container.textContent).toContain('Thought deeply · thought for 2m 49s');
+    expect(container.textContent).toContain('Read');
     expect(container.textContent).toContain('App.tsx');
     expect(container.textContent).toContain('22 lines');
-    expect(container.textContent).toContain('src 中的 MessageBubble');
+    expect(container.textContent).toContain('SearchedMessageBubble');
   });
 
   it('renders reasoning directly without a redundant summary and expands its content', () => {
@@ -77,7 +77,7 @@ describe('ExplorationActivityGroup', () => {
 
     expect(container.querySelector('[data-testid="exploration-activity-summary"]')).toBeNull();
     const reasoningToggle = container.querySelector('[data-testid="reasoning-activity-toggle"]') as HTMLButtonElement;
-    expect(reasoningToggle.textContent).toContain('已深度思考，思考了 12秒');
+    expect(reasoningToggle.textContent).toContain('Thought deeply · thought for 12s');
     expect(reasoningToggle.getAttribute('aria-expanded')).toBe('false');
     expect(container.textContent).not.toContain('reasoning');
 
@@ -104,7 +104,7 @@ describe('ExplorationActivityGroup', () => {
 
   it('collapses a reasoning row as soon as its own stream completes while the turn continues', () => {
     const streamingActivity: Extract<ExplorationActivity, { kind: 'reasoning' }> = {
-      kind: 'reasoning', id: 'thought-streaming', content: '正在思考', isStreaming: true,
+      kind: 'reasoning', id: 'thought-streaming', content: 'Thinking', isStreaming: true,
     };
 
     act(() => root?.render(React.createElement(ExplorationActivityGroup, {
@@ -113,8 +113,8 @@ describe('ExplorationActivityGroup', () => {
     })));
 
     expect(container.querySelector('[data-testid="reasoning-activity-toggle"]')).toBeNull();
-    expect(container.querySelector('[data-testid="reasoning-activity-streaming-label"]')?.textContent).toContain('正在深度思考');
-    expect(container.querySelector('[data-testid="reasoning-activity-content"]')?.textContent).toBe('正在思考');
+    expect(container.querySelector('[data-testid="reasoning-activity-streaming-label"]')?.textContent).toContain('Thinking deeply');
+    expect(container.querySelector('[data-testid="reasoning-activity-content"]')?.textContent).toBe('Thinking');
 
     act(() => root?.render(React.createElement(ExplorationActivityGroup, {
       activities: [{ ...streamingActivity, isStreaming: false }],
@@ -124,7 +124,7 @@ describe('ExplorationActivityGroup', () => {
     const reasoningToggle = container.querySelector('[data-testid="reasoning-activity-toggle"]') as HTMLButtonElement;
     expect(reasoningToggle.getAttribute('aria-expanded')).toBe('false');
     expect(container.querySelector('[data-testid="reasoning-activity-streaming-label"]')).toBeNull();
-    expect(container.textContent).not.toContain('正在思考');
+    expect(container.textContent).not.toContain('Thinking');
   });
 
   it('hides the summary row while the group is still active and shows it once terminated', () => {
@@ -146,7 +146,7 @@ describe('ExplorationActivityGroup', () => {
 
     const summary = container.querySelector('[data-testid="exploration-activity-summary"]') as HTMLButtonElement;
     expect(summary.getAttribute('aria-expanded')).toBe('false');
-    expect(summary.textContent).toContain('读取 1 个文件');
+    expect(summary.textContent).toContain('Read 1 files');
     expect(container.querySelector('[data-testid="exploration-activity-details"]')).toBeNull();
   });
 });

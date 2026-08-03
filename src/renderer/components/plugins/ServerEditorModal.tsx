@@ -84,11 +84,11 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
         setHeaders(mapToRows(config.headers));
       }
 
-      setJsonStatus('已填充字段');
+      setJsonStatus('Fields populated');
       setError(null);
     } catch (err) {
       setJsonStatus(null);
-      setError(err instanceof Error ? err.message : 'JSON 解析失败');
+      setError(err instanceof Error ? err.message : 'Failed to parse JSON');
     }
   };
 
@@ -104,13 +104,13 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setError('名称不能为空');
+      setError('Name is required');
       return;
     }
     let config: McpServerConfig;
     if (transport === 'stdio') {
       if (!command.trim()) {
-        setError('command 不能为空');
+        setError('Command is required');
         return;
       }
       const argsArr = argsRaw.match(/\S+/g) ?? [];
@@ -123,7 +123,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
       };
     } else if (transport === 'http' || transport === 'sse') {
       if (!url.trim()) {
-        setError('URL 不能为空');
+        setError('URL is required');
         return;
       }
       config = {
@@ -132,7 +132,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
         headers: rowsToMap(headers),
       };
     } else {
-      setError('协议不支持');
+      setError('Unsupported transport');
       return;
     }
 
@@ -141,12 +141,12 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
     const ok = await onSave(name.trim(), config);
     setSaving(false);
     if (ok) onClose();
-    else setError('保存失败');
+    else setError('Failed to save');
   };
 
   const scopeLabel: Record<McpScope, string> = {
-    user: '全局',
-    project: '项目',
+    user: 'Global',
+    project: 'Project',
   };
 
   return (
@@ -157,13 +157,13 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
       >
         <header className="flex shrink-0 items-center justify-between border-b border-black/[0.06] px-6 py-4 dark:border-white/[0.07]">
           <h2 className="text-[17px] font-semibold text-text-primary">
-            {isEditing ? '编辑' : '添加'} {scopeLabel[scope]} MCP 服务器
+            {isEditing ? 'Edit' : 'Add'} {scopeLabel[scope]} MCP server
           </h2>
           <button
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-black/[0.04] text-text-tertiary transition-colors hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1]"
             onClick={onClose}
-            aria-label="关闭"
+            aria-label="Close"
           >
             <IconX size={14} />
           </button>
@@ -171,7 +171,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
 
         <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
           <div>
-            <label className={LABEL_CLS}>JSON 配置</label>
+            <label className={LABEL_CLS}>JSON configuration</label>
             <textarea
               rows={5}
               value={jsonRaw}
@@ -187,7 +187,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
           </div>
 
           <div>
-            <label className={LABEL_CLS}>名称</label>
+            <label className={LABEL_CLS}>Name</label>
             <input
               type="text"
               value={name}
@@ -196,11 +196,11 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
               placeholder="filesystem, memory, sqlite"
               className={settingsInputClass}
             />
-            {isEditing && <p className="mt-1 text-[11px] text-text-tertiary italic">名称不可修改</p>}
+            {isEditing && <p className="mt-1 text-[11px] text-text-tertiary italic">Name cannot be changed</p>}
           </div>
 
           <div>
-            <label className={LABEL_CLS}>协议</label>
+            <label className={LABEL_CLS}>Transport</label>
             <div className="flex gap-1 rounded-[8px] bg-[#F1F1F3] p-1 dark:bg-white/[0.07]">
               {(['stdio', 'http', 'sse'] as McpTransport[]).map((t) => (
                 <button
@@ -220,7 +220,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
           {transport === 'stdio' ? (
             <div className="flex flex-col gap-4">
               <div>
-                <label className={LABEL_CLS}>命令</label>
+                <label className={LABEL_CLS}>Command</label>
                 <input
                   type="text"
                   value={command}
@@ -230,7 +230,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
                 />
               </div>
               <div>
-                <label className={LABEL_CLS}>参数</label>
+                <label className={LABEL_CLS}>Arguments</label>
                 <textarea
                   rows={2}
                   value={argsRaw}
@@ -240,7 +240,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
                 />
               </div>
               <div>
-                <label className={LABEL_CLS}>工作目录</label>
+                <label className={LABEL_CLS}>Working directory</label>
                 <input
                   type="text"
                   value={cwd}
@@ -249,7 +249,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
                   className={settingsMonoInputClass}
                 />
               </div>
-              <KeyValueEditor label="环境变量" rows={env} onChange={setEnv} />
+              <KeyValueEditor label="Environment variables" rows={env} onChange={setEnv} />
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -263,7 +263,7 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
                   className={settingsMonoInputClass}
                 />
               </div>
-              <KeyValueEditor label="请求头" rows={headers} onChange={setHeaders} />
+              <KeyValueEditor label="Request headers" rows={headers} onChange={setHeaders} />
             </div>
           )}
 
@@ -280,14 +280,14 @@ const ServerEditorModal: React.FC<Props> = ({ scope, initial, onClose, onSave })
             onClick={onClose}
             disabled={saving}
           >
-            取消
+            Cancel
           </SecondaryButton>
           <PrimaryButton
             type="button"
             onClick={handleSave}
             disabled={saving}
           >
-            {saving ? '保存...' : '保存'}
+            {saving ? 'Saving...' : 'Save'}
           </PrimaryButton>
         </footer>
       </div>
@@ -331,7 +331,7 @@ const KeyValueEditor: React.FC<{
               type="button"
               className="flex h-8 w-8 items-center justify-center rounded-[7px] bg-transparent text-text-tertiary transition-colors hover:bg-red-50 hover:text-red-500"
               onClick={() => removeRow(i)}
-              title="移除"
+              title="Remove"
             >
               <IconX size={14} />
             </button>
@@ -342,7 +342,7 @@ const KeyValueEditor: React.FC<{
           className="w-full rounded-[7px] border border-black/[0.08] bg-white py-1.5 text-[12px] font-semibold text-text-tertiary transition-colors hover:bg-[#F7F7F8] hover:text-text-secondary dark:border-white/[0.08] dark:bg-white/[0.04] dark:hover:bg-white/[0.07]"
           onClick={addRow}
         >
-          + 添加
+          + Add
         </button>
       </div>
     </div>

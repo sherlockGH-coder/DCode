@@ -5,17 +5,16 @@ import type { PendingApprovalRequest } from '../shared/types';
 export type ApprovalRequest = PendingApprovalRequest;
 
 /**
- * 用户决策。新增的 scope 字段用于「本会话允许」时告诉主进程要把
- * 什么加入会话级 allow list。
+ * User decisions. The scope field tells the main process what to add to the session allowlist when the user chooses "Allow for this session".
  */
 interface ApprovalDecision {
   allowed: boolean;
   reason?: string;
-  /** 用户勾选「本会话允许」时为 true（项目外路径场景） */
+  /** True when the user selects "Allow for this session", used for paths outside the project. */
   rememberForSession?: boolean;
-  /** 「本会话允许」的语义对象：当前仅支持 outOfScopeDir */
+  /** Semantic object for "Allow for this session"; currently only outOfScopeDir is supported. */
   scope?: { kind: 'outOfScopeDir'; dir: string };
-  /** AskUserQuestion 专用：用户作答映射（question → answer） */
+  /** Answer mapping for AskUserQuestion, from question to answer. */
   answers?: Record<string, string>;
 }
 
@@ -27,7 +26,7 @@ type Pending = {
 class ApprovalService {
   private pending = new Map<string, Pending>();
 
-  /** 工具调用 — 等待用户决策，返回是否放行 */
+  /** Tool call waiting for the user's decision; returns whether it is allowed. */
   request(req: ApprovalRequest): Promise<ApprovalDecision> {
     return new Promise<ApprovalDecision>((resolve) => {
       this.pending.set(req.toolCallId, { resolve, req });
@@ -51,7 +50,7 @@ class ApprovalService {
     });
   }
 
-  /** 用户决策回调（IPC 入口） */
+  /** User decision callback, exposed through IPC. */
   resolve(toolCallId: string, decision: ApprovalDecision): boolean {
     const entry = this.pending.get(toolCallId);
     if (!entry) return false;
@@ -69,7 +68,7 @@ class ApprovalService {
     return true;
   }
 
-  /** 渲染进程热加载 / 重挂载后，用于恢复仍在等待的审批 UI。 */
+  /** Restore approval UI that is still waiting after renderer hot reload or remount. */
   listPending(conversationId?: string | null): ApprovalRequest[] {
     return [...this.pending.values()]
       .map((entry) => entry.req)
@@ -79,7 +78,7 @@ class ApprovalService {
       });
   }
 
-  /** 兜底：会话取消时把所有挂起的请求拒掉 */
+  /** Fallback: reject all pending requests when the session is cancelled. */
   rejectAll(reason = 'Cancelled'): void {
     for (const [, entry] of this.pending) {
       entry.resolve({ allowed: false, reason });
@@ -87,7 +86,7 @@ class ApprovalService {
     this.pending.clear();
   }
 
-  /** 会话取消时只拒掉该会话挂起的审批，避免影响其他窗口正在运行的任务。 */
+  /** When a session is cancelled, reject only its pending approvals so tasks in other windows are not affected. */
   rejectForConversation(conversationId: string, reason = 'Cancelled'): void {
     for (const [toolCallId, entry] of this.pending) {
       if (entry.req.conversationId !== conversationId) continue;

@@ -63,11 +63,11 @@ function extractServer(raw: JsonObject): { name?: string; config: JsonObject } {
     );
 
     if (entries.length === 0) {
-      throw new Error('mcpServers 中没有可用的 server 配置');
+      throw new Error('No usable server configuration found in mcpServers');
     }
 
     if (entries.length > 1) {
-      throw new Error('一次只能导入一个 MCP server JSON');
+      throw new Error('Only one MCP server JSON object can be imported at a time');
     }
 
     const [name, config] = entries[0];
@@ -87,7 +87,7 @@ function normalizeConfig(raw: JsonObject): McpServerConfig {
   if (transport === 'stdio' || (!transport && typeof raw.command === 'string')) {
     const command = nonEmptyString(raw.command);
     if (!command) {
-      throw new Error('stdio 配置缺少 command');
+      throw new Error('The stdio configuration is missing command');
     }
 
     return {
@@ -102,7 +102,7 @@ function normalizeConfig(raw: JsonObject): McpServerConfig {
   if (transport === 'http' || transport === 'sse' || (!transport && typeof raw.url === 'string')) {
     const url = nonEmptyString(raw.url);
     if (!url) {
-      throw new Error('远程 MCP 配置缺少 URL');
+      throw new Error('The remote MCP configuration is missing URL');
     }
 
     return {
@@ -112,23 +112,23 @@ function normalizeConfig(raw: JsonObject): McpServerConfig {
     };
   }
 
-  throw new Error('JSON 中没有可识别的 MCP 配置字段');
+  throw new Error('No recognizable MCP configuration fields found in JSON');
 }
 
 export function parseMcpServerJson(raw: string): ParsedMcpJsonConfig {
   if (!raw.trim()) {
-    throw new Error('JSON 不能为空');
+    throw new Error('JSON cannot be empty');
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error('JSON 格式不正确');
+    throw new Error('Invalid JSON format');
   }
 
   if (!isJsonObject(parsed)) {
-    throw new Error('JSON 顶层必须是对象');
+    throw new Error('The top-level JSON value must be an object');
   }
 
   const server = extractServer(parsed);

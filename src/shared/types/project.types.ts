@@ -1,7 +1,7 @@
-/** 项目环境类型；当前仅实现 local，预留 worktree/remote/cloud 占位 */
+/** Project environment type; only local is implemented, with worktree/remote/cloud reserved as placeholders. */
 export type ProjectEnvironment = 'local';
 
-/** 项目条目 */
+/** Project entry. */
 export interface Project {
   path: string;
   name: string;
@@ -9,19 +9,19 @@ export interface Project {
   addedAt: number;
 }
 
-/** 新建本地项目输入 */
+/** New local-project input. */
 export interface ProjectCreateInput {
   parentPath: string;
   name: string;
 }
 
-/** 项目整体状态 */
+/** Overall project state. */
 export interface ProjectState {
   projects: Project[];
   activeProject: string | null;
 }
 
-/** Git 运行环境与提交面板状态。 */
+/** Git runtime environment and commit-panel state. */
 export interface GitCommitStatus {
   hasGit: boolean;
   branch: string;

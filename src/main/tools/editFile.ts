@@ -51,7 +51,7 @@ export const editFileTool: ToolExecutor = {
     const oldString = args.old_string as string;
     const newString = args.new_string as string;
     const replaceAll = (args.replace_all as boolean) ?? false;
-    debugLog('tool', '编辑文件:', rawPath);
+    debugLog('tool', 'Editing file:', rawPath);
 
     const { absolutePath: filePath } = resolveInside(rawPath, ctx.projectPath);
 
@@ -87,13 +87,13 @@ export const editFileTool: ToolExecutor = {
         newContent = newString;
       } else if (replaceAll) {
         if (!content.includes(oldString)) {
-          throw new Error(`在文件中未找到匹配的文本:\n${oldString}`);
+          throw new Error(`Could not find the matching text in the file:\n${oldString}`);
         }
         newContent = content.split(oldString).join(newString);
       } else {
 
         if (!content.includes(oldString)) {
-          throw new Error(`在文件中未找到匹配的文本:\n${oldString}`);
+          throw new Error(`Could not find the matching text in the file:\n${oldString}`);
         }
 
         const firstIdx = content.indexOf(oldString);
@@ -101,7 +101,7 @@ export const editFileTool: ToolExecutor = {
         const secondIdx = content.indexOf(oldString, firstIdx + oldString.length);
         if (secondIdx !== -1) {
           throw new Error(
-            `找到多处匹配（至少 2 处），请提供更多的上下文使 old_string 唯一，或设置 replace_all: true`
+            `Found multiple matches (at least 2). Provide more context to make old_string unique, or set replace_all: true`
           );
         }
         newContent = content.replace(oldString, newString);
@@ -120,12 +120,12 @@ export const editFileTool: ToolExecutor = {
       const diff = buildLineDiff(content, newContent, 1, 1);
 
       return {
-        content: `文件编辑成功: ${filePath}`,
+        content: `File edited successfully: ${filePath}`,
         metadata: { kind: 'edit', path: filePath, linesAdded, linesDeleted, diff },
       };
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);
-      throw new Error(`编辑文件失败: ${error}`);
+      throw new Error(`Failed to edit file: ${error}`);
     }
   },
 };

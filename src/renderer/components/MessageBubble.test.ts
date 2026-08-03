@@ -60,7 +60,7 @@ describe('MessageBubble', () => {
   const message: Message = {
     id: 'user_1',
     role: 'user',
-    content: '你是谁?',
+    content: 'Who are you?',
     created_at: '2026-06-14 14:00:00',
     turnId: 'user_1',
     attemptNo: 0,
@@ -116,9 +116,9 @@ describe('MessageBubble', () => {
       bubble?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    expect(container.querySelector('textarea[placeholder="编辑消息..."]')).toBeNull();
-    expect(container.querySelector('button[title="编辑消息"]')).toBeNull();
-    expect(container.querySelector('button[title="复制内容"]')).toBeNull();
+    expect(container.querySelector('textarea[placeholder="Edit message..."]')).toBeNull();
+    expect(container.querySelector('button[title="Edit message"]')).toBeNull();
+    expect(container.querySelector('button[title="Copy content"]')).toBeNull();
   });
 
   it('enters edit mode by clicking the latest editable user bubble', () => {
@@ -135,19 +135,19 @@ describe('MessageBubble', () => {
 
     const bubble = container.querySelector('[data-testid="user-message-bubble"]');
     expect(bubble).not.toBeNull();
-    expect(container.querySelector('button[title="编辑消息"]')).toBeNull();
-    expect(container.querySelector('button[title="复制内容"]')).toBeNull();
+    expect(container.querySelector('button[title="Edit message"]')).toBeNull();
+    expect(container.querySelector('button[title="Copy content"]')).toBeNull();
 
     act(() => {
       bubble?.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
 
-    const textarea = container.querySelector<HTMLTextAreaElement>('textarea[placeholder="编辑消息..."]');
+    const textarea = container.querySelector<HTMLTextAreaElement>('textarea[placeholder="Edit message..."]');
     expect(textarea).not.toBeNull();
-    expect(textarea?.value).toBe('你是谁?');
+    expect(textarea?.value).toBe('Who are you?');
 
     const composer = container.querySelector('[data-testid="chat-input-composer"]');
-    const sendButton = container.querySelector('button[aria-label="发送"]');
+    const sendButton = container.querySelector('button[aria-label="Send"]');
     expect(composer).not.toBeNull();
     expect(composer?.textContent).toContain('deepseek-v4-flash');
     expect(sendButton).not.toBeNull();
@@ -181,13 +181,13 @@ describe('MessageBubble', () => {
     act(() => {
       composer?.dispatchEvent(new window.Event('mousedown', { bubbles: true }));
     });
-    expect(container.querySelector('textarea[placeholder="编辑消息..."]')).not.toBeNull();
+    expect(container.querySelector('textarea[placeholder="Edit message..."]')).not.toBeNull();
 
     act(() => {
       window.document.body.dispatchEvent(new window.Event('mousedown', { bubbles: true }));
     });
 
-    expect(container.querySelector('textarea[placeholder="编辑消息..."]')).toBeNull();
+    expect(container.querySelector('textarea[placeholder="Edit message..."]')).toBeNull();
     expect(container.querySelector('[data-testid="user-message-bubble"]')).not.toBeNull();
   });
 
@@ -195,8 +195,8 @@ describe('MessageBubble', () => {
     const assistantMessage: Message = {
       id: 'assistant_1',
       role: 'assistant',
-      content: '最终答案',
-      reasoning_content: '这里是思考过程',
+      content: 'Final answer',
+      reasoning_content: 'This is the reasoning process',
       duration: 1200,
     };
 
@@ -207,16 +207,16 @@ describe('MessageBubble', () => {
       }));
     });
 
-    expect(container.textContent).toContain('最终答案');
-    expect(container.textContent).toContain('已深度思考');
-    expect(container.textContent).not.toContain('这里是思考过程');
+    expect(container.textContent).toContain('Final answer');
+    expect(container.textContent).toContain('Thought deeply');
+    expect(container.textContent).not.toContain('This is the reasoning process');
   });
 
   it('insets assistant messages without changing user-message alignment', () => {
     const assistantMessage: Message = {
       id: 'assistant_inset',
       role: 'assistant',
-      content: '左右对称缩进',
+      content: 'Symmetric left and right inset',
     };
 
     act(() => {
@@ -235,12 +235,12 @@ describe('MessageBubble', () => {
       id: 'assistant_list',
       role: 'assistant',
       content: [
-        '根据变更分析：',
+        'Analysis of the changes:',
         '',
-        '- App.tsx：移除推理区',
-        '- App.test.ts：补充测试',
+        '- App.tsx: remove the reasoning area',
+        '- App.test.ts: add tests',
         '',
-        '执行提交：',
+        'Commit the changes:',
         '',
         '1. git add',
         '2. git commit',
@@ -266,7 +266,7 @@ describe('MessageBubble', () => {
     const assistantMessage: Message = {
       id: 'assistant_file_ref',
       role: 'assistant',
-      content: '查看 /Users/conan/project/src/example.ts:2',
+      content: 'View /Users/conan/project/src/example.ts:2',
     };
 
     await act(async () => {

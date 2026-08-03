@@ -2,7 +2,7 @@ import type { RenderUnit, ToolSegment } from './types';
 import { groupExploration } from './groupExploration';
 import { aggregateSummary } from './aggregateSummary';
 
-/** 判断段是否全部完成（没有 running/pending 状态） */
+/** Whether every item in a segment is complete, with no running or pending state. */
 function isSegmentComplete(segment: ToolSegment): boolean {
   return segment.items.every((item) => item.status === 'done' || item.status === 'error');
 }
@@ -14,7 +14,7 @@ export function foldSegments(segments: ToolSegment[], isGenerating?: boolean): R
 
     const allGrouped = groupExploration(segment.items, segment.index);
 
-    // 计划留档卡片始终独立展示，不参与折叠
+    // Plan archive cards always render independently and are not folded.
     const planUnits = allGrouped.filter((unit) => unit.kind === 'entry' && unit.item.kind === 'plan_artifact');
     const grouped = planUnits.length ? allGrouped.filter((unit) => !planUnits.includes(unit)) : allGrouped;
     const foldableItems = planUnits.length

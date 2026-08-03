@@ -14,7 +14,7 @@ function parseToolDiff(diff: string): ParsedDiff {
   const lines = diff.split('\n');
   const hunkStart = lines.findIndex((line) => line.startsWith(DIFF_HEADER_PREFIX));
   if (hunkStart < 0) {
-    throw new Error('缺少 unified diff hunk 头。');
+    throw new Error('Missing unified diff hunk header.');
   }
 
   const before: string[] = [];
@@ -44,7 +44,7 @@ function assertInsideRegisteredProject(filePath: string): string {
   const roots = projectManager.getState().projects.map((project) => project.path);
   const projectRoot = roots.find((root) => resolveInside(filePath, root).isInside);
   if (!projectRoot) {
-    throw new Error(`文件不在已注册项目内: ${filePath}`);
+    throw new Error(`File is not inside a registered project: ${filePath}`);
   }
   return projectRoot;
 }
@@ -59,12 +59,12 @@ async function fileExists(filePath: string): Promise<boolean> {
 }
 
 async function undoOneChange(entry: ChangeUndoEntry): Promise<string> {
-  if (!entry.path.trim()) throw new Error('缺少文件路径。');
-  if (!entry.diff.trim()) throw new Error(`缺少 diff: ${entry.path}`);
+  if (!entry.path.trim()) throw new Error('File path is required.');
+  if (!entry.diff.trim()) throw new Error(`Diff is required: ${entry.path}`);
 
   const projectRoot = assertInsideRegisteredProject(entry.path);
   const { absolutePath, isInside } = resolveInside(entry.path, projectRoot);
-  if (!isInside) throw new Error(`路径越界: ${entry.path}`);
+  if (!isInside) throw new Error(`Path is outside the allowed project: ${entry.path}`);
 
   const parsed = parseToolDiff(entry.diff);
 
@@ -74,7 +74,7 @@ async function undoOneChange(entry: ChangeUndoEntry): Promise<string> {
 
     const current = await readFile(absolutePath, 'utf-8');
     if (current !== parsed.after) {
-      throw new Error(`文件已被继续修改，不能安全删除: ${absolutePath}`);
+      throw new Error(`The file was modified afterward and cannot be safely deleted: ${absolutePath}`);
     }
     await rm(absolutePath);
     return absolutePath;
@@ -82,7 +82,7 @@ async function undoOneChange(entry: ChangeUndoEntry): Promise<string> {
 
   const current = await readFile(absolutePath, 'utf-8');
   if (current !== parsed.after) {
-    throw new Error(`文件已被继续修改，不能安全恢复: ${absolutePath}`);
+    throw new Error(`The file was modified afterward and cannot be safely restored: ${absolutePath}`);
   }
 
   await writeFile(absolutePath, parsed.before, 'utf-8');
@@ -91,7 +91,7 @@ async function undoOneChange(entry: ChangeUndoEntry): Promise<string> {
 
 export async function undoChanges(entries: ChangeUndoEntry[]): Promise<ChangeUndoResult> {
   if (!Array.isArray(entries) || entries.length === 0) {
-    return { success: false, reverted: [], error: '没有可撤销的文件改动。' };
+    return { success: false, reverted: [], error: 'There are no file changes to undo.' };
   }
 
   const reverted: string[] = [];

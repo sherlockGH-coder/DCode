@@ -35,35 +35,35 @@ import { areMessageBubblePropsEqual } from './message-bubble/areMessageBubblePro
 export interface MessageBubbleProps {
   message: Message;
   renderUnit?: RenderUnit;
-  /** 当前回复版本（1-based，用于显示） */
+  /** Current reply version, 1-based for display. */
   responseCurrent?: number;
-  /** 总回复版本数 */
+  /** Total number of reply versions. */
   responseTotal?: number;
-  /** 切换到上一个回复版本 */
+  /** Switch to the previous reply version. */
   onResponsePrev?: () => void;
-  /** 切换到下一个回复版本 */
+  /** Switch to the next reply version. */
   onResponseNext?: () => void;
-  /** 是否渲染底部操作行（复制 + 用时）— 多轮工具回合下仅最后一条 assistant 才显示 */
+  /** Whether to render the footer actions (copy and duration); only the last assistant message shows it after tool rounds. */
   showFooter?: boolean;
-  /** 是否默认显示底部操作行；历史消息仍使用 hover 显示。 */
+  /** Whether to show footer actions by default; historical messages still show them on hover. */
   showFooterByDefault?: boolean;
   isGenerating?: boolean;
-  /** 隐藏思维链折叠区（用于把 reasoning 抽出到 ProcessedSummary 里渲染） */
+  /** Hide the reasoning collapsible section when reasoning is rendered in ProcessedSummary. */
   hideReasoning?: boolean;
-  /** 跟随当前 assistant 的尾随产物；操作栏应在它们之后。 */
+  /** Artifacts attached to the current assistant message; the action bar should follow them. */
   trailingUnits?: RenderUnit[];
-  /** 当前最终回复关联的一轮工具改动，用于底部汇总与撤销。 */
+  /** Tool changes associated with the current final reply, used for the footer summary and undo. */
   changeItems?: ToolItem[];
-  /** 覆盖默认撤销行为，用于级联撤销消息时间线。返回 false 表示撤销失败。 */
+  /** Override the default undo behavior for cascading message-timeline undo; return false on failure. */
   onUndoChanges?: () => Promise<boolean>;
   undoConfirmationMessage?: string;
-  /** 编辑重试：提交编辑后的内容 */
+  /** Edit and retry: submit edited content. */
   onEditSubmit?: (editedContent: string, attachments?: Attachment[]) => void;
-  /** 编辑重试：是否显示编辑入口（仅最后一条用户消息为 true） */
+  /** Edit and retry: whether to show the edit entry, true only for the last user message. */
   isEditAvailable?: boolean;
-  /** 编辑重试：对话是否正在加载（编辑中时隐藏入口） */
+  /** Edit and retry: whether the conversation is loading; hide the entry while editing. */
   isConvLoading?: boolean;
-  /** 编辑态复用主输入框 composer 的模型状态 */
+  /** Reuse the main composer model state while editing. */
   reasoningEffort?: string;
   onReasoningEffortChange?: (effort: string | undefined) => void;
 }
@@ -206,7 +206,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
   }, []);
   const handleUndoChanges = useCallback(async () => {
     if (undoStatus === 'undoing' || undoStatus === 'undone') return;
-    const confirmed = window.confirm(undoConfirmationMessage ?? '撤销这条回复产生的文件改动？如果文件之后又被修改，撤销会失败。');
+    const confirmed = window.confirm(undoConfirmationMessage ?? 'Undo the file changes made by this reply? Undo will fail if the file was modified afterward.');
     if (!confirmed) return;
     setUndoStatus('undoing');
     const success = onUndoChanges
@@ -287,7 +287,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
                 inline
                 initialValue={message.content}
                 initialAttachments={message.attachments}
-                placeholder="编辑消息..."
+                placeholder="Edit message..."
                 autoFocus
                 onSend={handleInlineEditSend}
                 onAbort={() => setIsEditing(false)}
@@ -310,7 +310,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
                 onClick={canEditUserMessage ? handleStartEdit : undefined}
                 role={canEditUserMessage ? 'button' : undefined}
                 tabIndex={canEditUserMessage ? 0 : undefined}
-                aria-label={canEditUserMessage ? '编辑消息' : undefined}
+                aria-label={canEditUserMessage ? 'Edit message' : undefined}
                 onKeyDown={canEditUserMessage ? (e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -340,7 +340,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
                         void handleUndoChanges();
                       }}
                       disabled={undoStatus === 'undoing' || undoStatus === 'undone'}
-                      title={undoStatus === 'undone' ? '已撤销' : '撤销这条回复产生的文件改动'}
+                      title={undoStatus === 'undone' ? 'Undone' : 'Undo file changes made by this reply'}
                       className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex shrink-0 items-center justify-center w-6 h-6 rounded-full text-text-tertiary hover:bg-bg-hover hover:text-text-primary border-none bg-transparent cursor-pointer disabled:opacity-40 disabled:cursor-default"
                     >
                       {undoStatus === 'undone' ? <IconCheck size={14} className="text-text-secondary" /> : <IconUndo size={14} />}

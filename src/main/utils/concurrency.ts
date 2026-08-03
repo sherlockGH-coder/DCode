@@ -1,19 +1,18 @@
 /**
- * 有界并发工具。
+ * Bounded-concurrency utility.
  *
- * 文件系统密集的工具（grep / glob）此前逐个 `await`，串行读取整棵树。
- * 用固定大小的 worker 池能把墙钟时间压到接近 I/O 上限，同时避免一次性
- * 打开成千上万个文件描述符。
+ * File-system-heavy tools such as grep and glob previously awaited each file sequentially.
+ * A fixed-size worker pool approaches the I/O wall-clock limit while avoiding thousands of file descriptors at once.
  */
 
-/** 默认并发度：足够跑满 SSD，又远低于常见的文件描述符上限。 */
+/** Default concurrency: enough to saturate an SSD and well below common file-descriptor limits. */
 export const DEFAULT_IO_CONCURRENCY = 24;
 
 /**
- * 以最多 `limit` 个并发对 `items` 执行 `worker`，结果按输入顺序返回。
+ * Run `worker` on `items` with at most `limit` concurrent tasks and return results in input order.
  *
- * `worker` 抛出的异常会中断整体（与 `Promise.all` 一致），调用方若要忽略
- * 单项失败，应在 `worker` 内部自行 catch。
+ * An exception from `worker` aborts the whole operation, matching `Promise.all`; callers that want to ignore
+ * individual failures should catch inside `worker`.
  */
 export async function mapWithConcurrency<T, R>(
   items: readonly T[],

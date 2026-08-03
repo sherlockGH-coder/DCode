@@ -48,7 +48,7 @@ export function parseFrontmatter(raw: string): RawSkill {
   return { frontmatter: fm, body };
 }
 
-/** 反向：把 frontmatter + body 拼回完整 markdown 文本（编辑器保存用） */
+/** Reverse operation: combine frontmatter and body into complete Markdown for editor saves. */
 export function stringifyFrontmatter(fm: Record<string, unknown>, body: string): string {
   const lines: string[] = ['---'];
   for (const [key, value] of Object.entries(fm)) {

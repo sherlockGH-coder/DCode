@@ -10,7 +10,7 @@ const SPEECH_DEFAULT_DURATION_SECONDS = 60;
 export const SPEECH_DEFAULT_MODEL = 'whisper-1';
 export const DEFAULT_PROFILE_ID = 'default';
 
-const UNTITLED_PROFILE_NAME = '未命名配置';
+const UNTITLED_PROFILE_NAME = 'Untitled profile';
 
 export interface PersistedApiProfile {
   id: string;
@@ -19,9 +19,9 @@ export interface PersistedApiProfile {
   baseUrl: string;
   models: string[];
   defaultModel: string;
-  /** safeStorage 加密后的 base64；缺失/空 = 未设置 */
+  /** Base64 encrypted by safeStorage; missing or empty means not configured. */
   apiKeyEncrypted?: string;
-  /** 加密不可用时的明文兜底 */
+  /** Plaintext fallback when encryption is unavailable. */
   apiKeyPlain?: string;
 }
 
@@ -32,9 +32,9 @@ export interface PersistedShape {
     baseUrl: string;
     models: string[];
     defaultModel: string;
-    /** safeStorage 加密后的 base64；缺失/空 = 未设置 */
+    /** Base64 encrypted by safeStorage; missing or empty means not configured. */
     apiKeyEncrypted?: string;
-    /** 加密不可用时的明文兜底 */
+    /** Plaintext fallback when encryption is unavailable. */
     apiKeyPlain?: string;
   };
   apiProfiles: PersistedApiProfile[];
@@ -79,7 +79,7 @@ export interface PersistedShape {
 export function defaultApiProfile(): PersistedApiProfile {
   return {
     id: DEFAULT_PROFILE_ID,
-    name: '默认配置',
+    name: 'Default profile',
     protocol: 'anthropic',
     baseUrl: env.ANTHROPIC_BASE_URL,
     models: [],
@@ -292,7 +292,7 @@ export function mergePersistedShape(base: PersistedShape, patch: Partial<Persist
     ? patch.apiProfiles ?? []
     : [{
       id: DEFAULT_PROFILE_ID,
-      name: '默认配置',
+      name: 'Default profile',
       protocol: legacyApi.protocol,
       baseUrl: legacyApi.baseUrl,
       models: legacyApi.models,

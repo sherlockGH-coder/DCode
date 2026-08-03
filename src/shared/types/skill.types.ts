@@ -1,21 +1,21 @@
 import type { Scope } from './common.types';
 
-/** 作用域：内置 / 用户全局 / 项目内（同名优先级 project > user > builtin） */
+/** Scope: built-in, global user, or project; duplicate names use project > user > built-in priority. */
 export type SkillScope = Scope;
 
-/** Skill 摘要（不含正文，前端列表 / system prompt 注入用） */
+/** Skill summary without the body, used by the frontend list and system-prompt injection. */
 export interface SkillSummary {
   name: string;
   description: string;
   scope: SkillScope;
   filePath: string;
-  /** frontmatter 的 allowed-tools（可选）— load_skill 返回时附加文字提示 */
+  /** Optional frontmatter allowed-tools, appended as a note when load_skill returns the skill. */
   allowedTools?: string[];
-  /** 由 settings.permissions.skills.disabled 反推 */
+  /** Derived from settings.permissions.skills.disabled. */
   enabled: boolean;
 }
 
-/** Skill 完整数据（含 markdown 正文，load_skill 工具或编辑器读取） */
+/** Complete skill data including Markdown body, read by load_skill or the editor. */
 export interface Skill extends SkillSummary {
   body: string;
 }

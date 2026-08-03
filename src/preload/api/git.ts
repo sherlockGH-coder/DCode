@@ -10,12 +10,12 @@ export const gitApi = {
     return ipcRenderer.invoke('git:checkoutBranch', folderPath, branch);
   },
 
-  /** 获取 git 仓库中已变更的文件列表（新增/复制/修改/重命名）；非 git 项目返回 { files:[], hasGit:false } */
+  /** Get changed files in a git repository (added, copied, modified, or renamed); non-git projects return { files:[], hasGit:false }. */
   gitGetChangedFiles: (folderPath: string): Promise<{ files: string[]; hasGit: boolean }> => {
     return ipcRenderer.invoke('git:getChangedFiles', folderPath);
   },
 
-  /** 获取单个文件的 git unified-diff；失败返回空字符串 */
+  /** Get a file's git unified diff; return an empty string on failure. */
   gitGetFileDiff: (folderPath: string, file: string): Promise<string> => {
     return ipcRenderer.invoke('git:getFileDiff', folderPath, file);
   },
@@ -32,7 +32,7 @@ export const gitApi = {
     return ipcRenderer.invoke('git:push', folderPath);
   },
 
-  /** 撤销一轮 assistant 产生的文件改动 */
+  /** Undo file changes produced by one assistant turn. */
   undoChanges: (entries: ChangeUndoEntry[]): Promise<ChangeUndoResult> => {
     return ipcRenderer.invoke('changes:undo', entries);
   },

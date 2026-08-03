@@ -21,9 +21,9 @@ describe('aggregateSummary', () => {
 
     const summary = aggregateSummary(items);
 
-    expect(summary).toContain('已运行 1 个命令');
-    expect(summary).not.toContain('错误');
-    expect(summary).not.toContain('失败');
+    expect(summary).toContain('1 commands run');
+    expect(summary).not.toContain('Error');
+    expect(summary).not.toContain('Failed');
   });
 
   it('formats file change summaries like codex file activity rows', () => {
@@ -41,7 +41,7 @@ describe('aggregateSummary', () => {
       },
     ];
 
-    expect(aggregateSummary(items)).toBe('已编辑 1 个文件');
+    expect(aggregateSummary(items)).toBe('1 files edited');
   });
 
   it('shows tool count for MCP and other uncategorized tools', () => {
@@ -68,7 +68,7 @@ describe('aggregateSummary', () => {
       },
     ];
 
-    expect(aggregateSummary(items)).toBe('已调用 2 个工具');
+    expect(aggregateSummary(items)).toBe('2 tools called');
   });
 
   it('mixes regular tools with MCP tool calls', () => {
@@ -95,10 +95,10 @@ describe('aggregateSummary', () => {
       },
     ];
 
-    expect(aggregateSummary(items)).toBe('已读取 1 个文件， 已调用 1 个工具');
+    expect(aggregateSummary(items)).toBe('1 files read, 1 tools called');
   });
 
-  it('returns 已就绪 for empty items', () => {
-    expect(aggregateSummary([])).toBe('已就绪');
+  it('returns Ready for empty items', () => {
+    expect(aggregateSummary([])).toBe('Ready');
   });
 });

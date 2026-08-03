@@ -29,8 +29,8 @@ describe('globToRegex', () => {
     expect(re.test('src/a.js')).toBe(false);
   });
 
-  // 回归：花括号分支里的 `*` 曾被当作字面量转义，生成 `(?:*\.ts|*\.js)`，
-  // 直接抛 "Nothing to repeat"。
+  // Regression: `*` in brace alternatives used to be escaped as a literal,
+  // producing `(?:*\.ts|*\.js)` and throwing "Nothing to repeat".
   it('expands braces whose alternatives contain wildcards', () => {
     expect(() => globToRegex('{*.ts,*.js}')).not.toThrow();
     const re = globToRegex('{*.ts,*.js}');

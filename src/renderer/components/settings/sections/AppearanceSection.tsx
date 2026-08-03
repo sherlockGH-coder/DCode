@@ -3,9 +3,9 @@ import { getThemePreference, setThemePreference, type ThemePreference } from '..
 import { SettingsPageHeader, SectionTitle } from '../SettingsPrimitives';
 
 const OPTIONS: Array<{ value: ThemePreference; label: string; description: string }> = [
-  { value: 'system', label: '跟随系统', description: '自动匹配系统的外观设置' },
-  { value: 'light', label: '浅色', description: '始终使用清晰明亮的浅色界面' },
-  { value: 'dark', label: '深色', description: '始终使用适合低光环境的深色界面' },
+  { value: 'system', label: 'System', description: 'Match the system appearance' },
+  { value: 'light', label: 'Light', description: 'Always use a bright light interface' },
+  { value: 'dark', label: 'Dark', description: 'Always use a dark interface for low-light environments' },
 ];
 
 const ThemePreview: React.FC<{ theme: ThemePreference }> = ({ theme }) => {
@@ -33,9 +33,9 @@ const AppearanceSection: React.FC = () => {
 
   return (
     <>
-      <SettingsPageHeader title="外观" />
-      <SectionTitle>主题</SectionTitle>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="应用主题">
+      <SettingsPageHeader title="Appearance" />
+      <SectionTitle>Theme</SectionTitle>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3" role="radiogroup" aria-label="App theme">
         {OPTIONS.map((option) => {
           const selected = preference === option.value;
           return (

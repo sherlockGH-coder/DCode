@@ -1,7 +1,7 @@
 {
   "name": "deepseek-app",
   "version": "0.13.0",
-  "description": "DeepSeek 桌面聊天应用 — 基于 Electron + React",
+  "description": "DeepSeek desktop chat application built with Electron and React",
   "productName": "DeepSeek",
   "main": "./out/main/index.js",
   "scripts": {
@@ -58,7 +58,7 @@
       "icon": "resources/icon.icns",
       "artifactName": "${productName}-${version}-${arch}.dmg",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "DeepSeek 需要使用麦克风将语音转写为输入文本。"
+        "NSMicrophoneUsageDescription": "DeepSeek uses the microphone to transcribe speech into input text."
       }
     },
     "win": {

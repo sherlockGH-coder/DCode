@@ -8,9 +8,9 @@ export type { RenderUnit, SegmentChildRenderUnit } from './types';
 
 export interface PipelineResult {
   units: RenderUnit[];
-  /** message.id → renderUnit index 的映射（用于前端精确放置） */
+  /** message.id -> renderUnit index mapping for precise placement in the renderer. */
   segmentMessageMap: Map<string, number>;
-  /** message.id → tail renderUnit indexes；保留结构以兼容调用方。 */
+  /** message.id -> tail renderUnit indexes; structure retained for caller compatibility. */
   tailUnitsByMessageId: Map<string, number[]>;
 }
 
@@ -18,7 +18,7 @@ function shouldRenderToolItem(item: { kind: string }): boolean {
   return item.kind !== 'vision' && item.kind !== 'task' && item.kind !== 'plan_update';
 }
 
-/** 完整管线: messages[] → PipelineResult */
+/** Complete pipeline: messages[] -> PipelineResult. */
 export function pipeline(messages: Message[], isGenerating?: boolean): PipelineResult {
 
   const items = extractToolItems(messages).filter(shouldRenderToolItem);

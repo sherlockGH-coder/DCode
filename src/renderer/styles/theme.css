@@ -191,15 +191,16 @@
 }
 
 .sidebar-frame {
-  /* 开合动画期间内容保持目标宽度：外壳只负责裁剪，呈现“整体滑出”而非逐帧压缩重排。
-     右锚定用绝对定位实现——flex 的 auto margin 在负剩余空间下会归零，锚不住。 */
+  /* During the open/close animation, keep the content at its target width.
+     The shell only clips it, creating a whole-panel slide instead of frame-by-frame reflow.
+     Use absolute positioning for the right anchor because flex auto margins collapse under negative free space. */
   position: absolute;
   inset: 0 0 0 auto;
   width: var(--panel-size, 100%);
 }
 
 .right-panel-card-frame {
-  /* 同理：默认左锚定即可，折叠时整体向右滑出 */
+  /* Likewise, use the default left anchor so the whole panel slides right when collapsed. */
   width: var(--panel-size, 100%);
 }
 
@@ -382,11 +383,13 @@
   display: grid;
   width: 676.8px;
   grid-template-columns: repeat(4, 160.2px);
+  align-items: stretch;
   gap: 12px;
   margin: clamp(22px, 3vh, 30px) auto 0;
 }
 
 .welcome-action-wrap {
+  display: flex;
   min-width: 0;
   --welcome-action: #3979b9;
   --welcome-action-soft: #eff5fa;
@@ -415,6 +418,7 @@
   position: relative;
   display: flex;
   width: 100%;
+  flex: 1 1 auto;
   min-width: 160.2px;
   min-height: 118px;
   flex-direction: column;
@@ -1321,35 +1325,35 @@
   background: rgba(247, 248, 251, 0.94);
 }
 
-.welcome-input-footer button[aria-label="附加选项"],
-.welcome-input-footer button[aria-label="语音输入"] {
+.welcome-input-footer button[aria-label="More options"],
+.welcome-input-footer button[aria-label="Voice input"] {
   width: 34px;
   height: 34px;
   border-radius: 10px;
   background: transparent;
 }
 
-.welcome-input-footer button[aria-label="附加选项"]:hover,
-.welcome-input-footer button[aria-label="附加选项"]:focus-visible,
-.welcome-input-footer button[aria-label="语音输入"]:hover,
-.welcome-input-footer button[aria-label="语音输入"]:focus-visible {
+.welcome-input-footer button[aria-label="More options"]:hover,
+.welcome-input-footer button[aria-label="More options"]:focus-visible,
+.welcome-input-footer button[aria-label="Voice input"]:hover,
+.welcome-input-footer button[aria-label="Voice input"]:focus-visible {
   background-color: rgba(117, 124, 143, 0.07) !important;
 }
 
-.welcome-input-footer button[aria-label="语音输入"] {
+.welcome-input-footer button[aria-label="Voice input"] {
   border-radius: 10px;
 }
 
-.welcome-input-footer > button[aria-label="发送"],
-.welcome-input-footer > button[aria-label="停止回复"] {
+.welcome-input-footer > button[aria-label="Send"],
+.welcome-input-footer > button[aria-label="Stop response"] {
   width: 30px;
   height: 30px;
   margin-left: 0;
   background: #a7b1ff;
 }
 
-.welcome-input-footer > button[aria-label="发送"]:hover,
-.welcome-input-footer > button[aria-label="停止回复"]:hover {
+.welcome-input-footer > button[aria-label="Send"]:hover,
+.welcome-input-footer > button[aria-label="Stop response"]:hover {
   background: #8794f6;
 }
 

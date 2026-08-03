@@ -77,12 +77,12 @@ const ModelSelector: React.FC<{
         className="inline-flex h-7 items-center justify-center gap-1 rounded-[7px] border-none bg-transparent px-2 text-[13px] font-normal text-text-secondary transition-colors duration-150 hover:bg-bg-hover hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-55"
         onClick={() => onOpenChange(!isOpen)}
         disabled={isLoading || models.length === 0}
-        aria-label="选择模型"
+        aria-label="Select model"
         aria-expanded={isOpen}
       >
         <ReasoningIcon effort={reasoningEffort === 'max' ? 'max' : reasoningEffort === 'high' ? 'high' : undefined} />
         <span className="max-w-[90px] truncate leading-normal select-none xs:max-w-[140px] sm:max-w-[180px]">
-          {selectedModel || '加载中...'}
+          {selectedModel || 'Loading...'}
         </span>
         <svg width="8" height="5" viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 text-text-tertiary transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}>
           <path d="M1 1L5 5L9 1" />
@@ -98,7 +98,7 @@ const ModelSelector: React.FC<{
           <div className="w-[200px] overflow-hidden rounded-[12px] border border-hairline bg-bg-main p-1.5 shadow-floating animate-[menu-in_150ms_ease-out]">
             <button
               type="button"
-              aria-label="选择具体模型"
+              aria-label="Select a specific model"
               aria-expanded={submenu === 'model'}
               className={`flex h-9 w-full items-center gap-2.5 rounded-[8px] border-none px-2.5 text-left text-[13px] transition-colors ${submenu === 'model' ? 'bg-bg-hover' : 'bg-transparent hover:bg-bg-hover'}`}
               onMouseEnter={() => setSubmenu('model')}
@@ -110,7 +110,7 @@ const ModelSelector: React.FC<{
             </button>
             <button
               type="button"
-              aria-label="选择推理强度"
+              aria-label="Select reasoning effort"
               aria-expanded={submenu === 'effort'}
               className={`flex h-9 w-full items-center gap-2.5 rounded-[8px] border-none px-2.5 text-left text-[13px] transition-colors ${submenu === 'effort' ? 'bg-bg-hover' : 'bg-transparent hover:bg-bg-hover'}`}
               onMouseEnter={() => setSubmenu('effort')}

@@ -93,7 +93,7 @@ describe('grep/glob .gitignore awareness', () => {
 });
 
 describe('grep/glob brace expansion', () => {
-  // 回归：`{*.ts,*.js}` 曾生成非法正则，两个工具都直接抛错
+  // Regression: `{*.ts,*.js}` used to generate an invalid regex and make both tools throw.
   it('accepts brace alternatives that begin with a wildcard', async () => {
     await withProject(async (root) => {
       await writeFile(join(root, 'a.ts'), 'NEEDLE\n', 'utf-8');
@@ -130,20 +130,20 @@ describe('grep scanning limits', () => {
   it('skips oversized files and reports the count instead of silently dropping them', async () => {
     await withProject(async (root) => {
       await writeFile(join(root, 'small.ts'), 'NEEDLE\n', 'utf-8');
-      // 21MB > 20MB 上限
+      // 21 MB exceeds the 20 MB limit.
       await writeFile(join(root, 'huge.ts'), `${'x'.repeat(21 * 1024 * 1024)}\nNEEDLE\n`, 'utf-8');
 
       const result = await runGrep({ pattern: 'NEEDLE' }, root);
       expect(result.content).toContain('small.ts');
       expect(result.content).not.toContain('huge.ts');
-      expect(result.content).toContain('未搜索');
+      expect(result.content).toContain('were not searched');
     });
   });
 
   it('skips binary files detected by content, not just extension', async () => {
     await withProject(async (root) => {
       await writeFile(join(root, 'text.ts'), 'NEEDLE\n', 'utf-8');
-      // 无常见二进制扩展名，但内容含 NUL
+      // No common binary extension, but the content contains a NUL byte.
       await writeFile(join(root, 'blob.dat'), Buffer.from([0x4e, 0x00, 0x45, 0x45, 0x44]));
 
       const result = await runGrep({ pattern: 'NEED' }, root);

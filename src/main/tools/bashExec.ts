@@ -51,7 +51,7 @@ function formatCommandOutput(stdout: string, stderr: string): string {
   const output = [];
   if (stdout) output.push(stdout);
   if (stderr) output.push(`[stderr]\n${stderr}`);
-  return output.join('\n') || '命令执行成功（无输出）';
+  return output.join('\n') || 'Command completed successfully (no output)';
 }
 
 function exitCodeFromError(error: ExecException): number {
@@ -143,7 +143,7 @@ export const bashExecTool: ToolExecutor = {
         description: {
           type: 'string',
           description:
-            '用一句话描述这个命令做了什么。供审批时展示给用户，帮助用户快速判断是否放行。示例："列出当前目录文件"、"安装 npm 依赖"、"运行单元测试"。不要写"复杂"或"有风险"这类词——只描述行为本身',
+            'Describe what this command does in one sentence for the approval prompt, so the user can quickly decide whether to allow it. Examples: "List files in the current directory", "Install npm dependencies", or "Run unit tests". Do not use words such as "complex" or "risky"; describe only the action itself.',
         },
         timeout: {
           type: 'number',
@@ -176,7 +176,7 @@ export const bashExecTool: ToolExecutor = {
 
     if (ctx.signal?.aborted) {
       return {
-        content: '[Aborted] 用户中止了执行',
+        content: '[Aborted] The user stopped execution',
         error: true,
         metadata: {
           kind: 'exec',
@@ -193,9 +193,9 @@ export const bashExecTool: ToolExecutor = {
     const policy = settingsManager.getBashPolicy();
 
     if (ctx.approvalPolicy === 'auto-approve' && isDangerousCommand(command)) {
-      debugLog('tool', '危险命令被拦截 | 字符数:', command.length);
+      debugLog('tool', 'Dangerous command blocked | characters:', command.length);
       return {
-        content: `[Blocked] 定时任务拦截了危险命令: ${command}\n如需执行此类操作，请手动在对话中运行。`,
+        content: `[Blocked] The scheduled-task policy blocked a dangerous command: ${command}\nRun this kind of command manually in the conversation if needed.`,
         error: true,
         metadata: {
           kind: 'exec',
@@ -212,10 +212,10 @@ export const bashExecTool: ToolExecutor = {
 
     if (ctx.approvalPolicy === 'auto-deny') {
       allowed = false;
-      reason = '定时任务配置为自动拒绝终端命令。';
+      reason = 'The scheduled-task policy is configured to automatically deny terminal commands.';
     } else if (ctx.approvalPolicy === 'auto-approve' || policy === 'full_access') {
       allowed = true;
-      debugLog('tool', '跳过 bash 审批 | 字符数:', command.length);
+      debugLog('tool', 'Skipped bash approval | characters:', command.length);
     } else {
       const decision = await approvalService.request({
         toolCallId: ctx.toolCallId,
@@ -234,10 +234,10 @@ export const bashExecTool: ToolExecutor = {
     }
 
     if (!allowed) {
-      const msg = reason || '用户拒绝执行';
-      debugLog('tool', '命令被拒绝 | 字符数:', command.length, '|', msg);
+      const msg = reason || 'The user denied execution';
+      debugLog('tool', 'Command denied | characters:', command.length, '|', msg);
       return {
-        content: `[Denied by user] ${msg}\n命令: ${command}`,
+        content: `[Denied by user] ${msg}\nCommand: ${command}`,
         error: true,
         metadata: {
           kind: 'exec',
@@ -254,9 +254,9 @@ export const bashExecTool: ToolExecutor = {
     }
 
     if (cwd) {
-      debugLog('tool', '执行命令 | cwd:', cwd, '| 字符数:', command.length);
+      debugLog('tool', 'Executing command | cwd:', cwd, '| characters:', command.length);
     } else {
-      debugLog('tool', '执行命令（无项目，使用进程默认 cwd）| 字符数:', command.length);
+      debugLog('tool', 'Executing command (no project; using the process default cwd) | characters:', command.length);
     }
 
     return new Promise((resolve) => {
@@ -279,7 +279,7 @@ export const bashExecTool: ToolExecutor = {
         const stderrText = String(stderr ?? '');
 
         if (aborted) {
-          const content = '[Aborted] 用户中止了执行';
+          const content = '[Aborted] The user stopped execution';
           resolve({
             content,
             error: true,
@@ -295,7 +295,7 @@ export const bashExecTool: ToolExecutor = {
         }
 
         if (error) {
-          const content = `命令执行失败: ${error.message}\n${formatCommandOutput(stdoutText, stderrText)}`;
+          const content = `Command failed: ${error.message}\n${formatCommandOutput(stdoutText, stderrText)}`;
           resolve({
             content,
             error: true,

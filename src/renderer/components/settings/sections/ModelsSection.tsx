@@ -76,7 +76,7 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
       window.dispatchEvent(new Event('models:refresh'));
       showSaved();
     } catch (err) {
-      setError((err as Error).message || '切换失败');
+      setError((err as Error).message || 'Failed to switch profiles');
       setSaveState('idle');
     }
   };
@@ -84,7 +84,7 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
   const handleDelete = async (id: string) => {
     if (settings.apiProfiles.length <= 1) return;
     const target = settings.apiProfiles.find((profile) => profile.id === id);
-    if (!target || !window.confirm(`删除配置"${target.name}"？`)) return;
+    if (!target || !window.confirm(`Delete profile "${target.name}"?`)) return;
     setSaveState('saving');
     setError(null);
     try {
@@ -95,7 +95,7 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
       await saveProfiles(nextProfiles, nextActiveId);
       showSaved();
     } catch (err) {
-      setError((err as Error).message || '删除失败');
+      setError((err as Error).message || 'Failed to delete profile');
       setSaveState('idle');
     }
   };
@@ -105,7 +105,7 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
     setEditing({
       ...draft,
       id: crypto.randomUUID?.() ?? `profile-${Date.now()}`,
-      name: `${draft.name} 副本`,
+      name: `${draft.name} copy`,
       apiKeySet: false,
     });
     setKeyDraft('');
@@ -117,11 +117,11 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
   const handleSaveEditing = async () => {
     if (!editing) return;
     if (!editing.name.trim()) {
-      setError('请填写配置名称');
+      setError('Enter a profile name');
       return;
     }
     if (!editing.baseUrl.trim()) {
-      setError('请填写 Base URL');
+      setError('Enter a Base URL');
       return;
     }
 
@@ -143,7 +143,7 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
       setKeyDraft('');
       setClearKey(false);
     } catch (err) {
-      setError((err as Error).message || '保存失败');
+      setError((err as Error).message || 'Failed to save');
       setSaveState('idle');
     }
   };
@@ -168,7 +168,7 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
   return (
     <div className="pb-10">
       <SettingsPageHeader
-        title="配置"
+        title="Configuration"
         action={
           <div className="flex items-center gap-2">
             <SavePill state={saveState} error={error} />
@@ -177,7 +177,7 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
               onClick={() => openEditor()}
             >
               <IconPlus size={14} className="text-white" />
-              添加配置
+              Add profile
             </PrimaryButton>
           </div>
         }
@@ -188,7 +188,7 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
       ) : (
         <div className="space-y-9">
           <section>
-            <SectionTitle>当前配置</SectionTitle>
+            <SectionTitle>Current profile</SectionTitle>
             <ProfileSummaryPanel
               profile={activeProfile}
               profileCount={settings.apiProfiles.length}
@@ -198,9 +198,9 @@ const ModelsSection: React.FC<Props> = ({ settings, patch, setApiProfileApiKey }
 
           <section>
             <SectionTitle
-              aside={<span className="text-[12px] font-semibold text-[#8E8E93] dark:text-white/42">{settings.apiProfiles.length} 项</span>}
+              aside={<span className="text-[12px] font-semibold text-[#8E8E93] dark:text-white/42">{settings.apiProfiles.length} profiles</span>}
             >
-              API 配置
+              API profiles
             </SectionTitle>
             <SettingsGroup>
               {settings.apiProfiles.map((profile) => (
@@ -228,15 +228,15 @@ const EmptyState: React.FC<{ onCreate: () => void }> = ({ onCreate }) => (
     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[8px] bg-[#F1F1F3] text-[#6B7280] dark:bg-white/[0.08] dark:text-white/55">
       <IconKey size={24} className="text-current" />
     </div>
-    <p className="text-[14px] font-semibold text-[#1D2127] dark:text-white">尚未添加任何配置</p>
-    <p className="mt-1 text-[12.5px] text-[#8E8E93] dark:text-white/42">创建第一个 Anthropic-compatible 配置后即可开始对话。</p>
+    <p className="text-[14px] font-semibold text-[#1D2127] dark:text-white">No profiles added yet</p>
+    <p className="mt-1 text-[12.5px] text-[#8E8E93] dark:text-white/42">Create your first Anthropic-compatible profile to start a conversation.</p>
     <PrimaryButton
       type="button"
       onClick={onCreate}
       className="mt-5"
     >
       <IconPlus size={14} className="text-white" />
-      添加配置
+      Add profile
     </PrimaryButton>
   </SettingsGroup>
 );

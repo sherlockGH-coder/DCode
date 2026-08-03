@@ -51,7 +51,7 @@ describe('ModelSelector', () => {
   it('keeps the trigger compact with a blue icon and no effort text', () => {
     renderSelector({ isOpen: false, reasoningEffort: 'max' });
 
-    const trigger = container.querySelector('[aria-label="选择模型"]');
+    const trigger = container.querySelector('[aria-label="Select model"]');
     const icon = trigger?.querySelector('[data-testid="model-selector-icon"]');
     expect(icon?.classList.contains('text-accent')).toBe(true);
     expect(trigger?.textContent).toContain('model-a');
@@ -70,7 +70,7 @@ describe('ModelSelector', () => {
 
   it('opens the model submenu on hover and marks the selected model', () => {
     const props = renderSelector();
-    const modelRow = container.querySelector('[aria-label="选择具体模型"]');
+    const modelRow = container.querySelector('[aria-label="Select a specific model"]');
 
     act(() => modelRow?.dispatchEvent(new window.Event('mouseover', { bubbles: true })));
 
@@ -88,7 +88,7 @@ describe('ModelSelector', () => {
 
   it('offers only Off, High, and Max and maps Off to undefined', () => {
     const props = renderSelector({ reasoningEffort: 'high' });
-    const effortRow = container.querySelector('[aria-label="选择推理强度"]');
+    const effortRow = container.querySelector('[aria-label="Select reasoning effort"]');
 
     act(() => effortRow?.dispatchEvent(new window.Event('mouseover', { bubbles: true })));
 

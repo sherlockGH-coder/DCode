@@ -7,11 +7,11 @@ export interface ActiveRequest {
   setMessages: (updater: (prev: Message[]) => Message[]) => void;
   turnId: string;
   attemptNo: number;
-  /** 旧字段：当前 assistant 锚点。保留用于热更新恢复兼容。 */
+  /** Legacy field: current assistant anchor, retained for hot-reload recovery compatibility. */
   placeholderId: string;
-  /** 当前 assistant 消息锚点，用于合并 chunk、tool_calls 和最终 assistant metadata。 */
+  /** Current assistant message anchor, used to merge chunks, tool_calls, and final assistant metadata. */
   assistantAnchorId?: string;
-  /** 新消息插入游标，用于把 tool result 和下一轮 assistant 插到正确位置。 */
+  /** New-message insertion cursor, used to place tool results and the next assistant message correctly. */
   insertAfterId?: string;
 }
 

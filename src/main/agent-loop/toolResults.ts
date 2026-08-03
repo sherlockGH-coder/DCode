@@ -14,10 +14,10 @@ export function truncateToolResult(content: string, toolName: string): string {
     const filepath = join(dir, filename);
     writeFileSync(filepath, content, 'utf-8');
     const preview = content.slice(0, TOOL_RESULT_PREVIEW_SIZE);
-    return `${preview}\n\n... [结果已截断: ${content.length} 字符 → ${TOOL_RESULT_PREVIEW_SIZE} 字符预览] 完整内容已保存至: ${filepath}`;
+    return `${preview}\n\n... [Result truncated: ${content.length} characters -> ${TOOL_RESULT_PREVIEW_SIZE} character preview] Full content saved to: ${filepath}`;
   } catch {
 
     const preview = content.slice(0, TOOL_RESULT_PREVIEW_SIZE);
-    return `${preview}\n\n... [结果已截断: ${content.length} 字符]`;
+    return `${preview}\n\n... [Result truncated: ${content.length} characters]`;
   }
 }
