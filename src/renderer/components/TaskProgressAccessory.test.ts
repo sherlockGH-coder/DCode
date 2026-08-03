@@ -104,12 +104,13 @@ describe('TaskProgressAccessory', () => {
     expect(text.indexOf('步骤 1')).toBeLessThan(text.lastIndexOf('步骤 3'));
 
     const panel = container.querySelector('[data-testid="task-progress-panel"]');
-    expect(panel?.className).toContain('w-[min(340px,80vw)]');
+    expect(panel?.className).toContain('w-[min(320px,calc(100vw-32px))]');
+    expect(panel?.className).toContain('rounded-[12px]');
 
     const completedIcon = container.querySelector('[data-todo-status="completed"]');
     expect(completedIcon?.className).toContain('rounded-full');
     expect(completedIcon?.className).toContain('border');
-    expect(completedIcon?.className).toContain('text-text-primary');
+    expect(completedIcon?.className).toContain('text-text-tertiary');
     expect(completedIcon?.querySelector('svg')?.getAttribute('class')).toBe('shrink-0 text-current');
 
     const inProgressIcon = container.querySelector('[data-todo-status="in_progress"]');
@@ -119,8 +120,8 @@ describe('TaskProgressAccessory', () => {
       expect(icon?.className).toContain('w-4');
       expect(icon?.className).toContain('rounded-full');
     }
-    expect(inProgressIcon?.querySelector('svg')?.getAttribute('width')).toBe('16');
-    expect(inProgressIcon?.querySelector('svg')?.getAttribute('height')).toBe('16');
+    expect(inProgressIcon?.querySelector('svg')).toBeNull();
+    expect(inProgressIcon?.className).toContain('border-text-secondary');
   });
 
   it('shows progress and lists todos when no todo is in progress', () => {

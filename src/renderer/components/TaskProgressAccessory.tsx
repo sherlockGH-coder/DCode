@@ -30,31 +30,25 @@ const Spinner: React.FC = () => (
   </svg>
 );
 
-const CompletedIcon: React.FC = () => (
+const CompletedIcon: React.FC<{ muted?: boolean }> = ({ muted = false }) => (
   <span
     data-todo-status="completed"
-    className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-border-strong text-text-primary"
+    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+      muted
+        ? 'border-border-strong text-text-tertiary'
+        : 'border-text-primary text-text-primary'
+    }`}
   >
     <IconCheck size={10} className="shrink-0 text-current" />
   </span>
 );
 
 const TodoStatusIcon: React.FC<{ status: string }> = ({ status }) => {
-  if (status === 'completed') return <CompletedIcon />;
-  if (status === 'in_progress') {
-    return (
-      <span
-        data-todo-status="in_progress"
-        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-text-secondary"
-      >
-        <Spinner />
-      </span>
-    );
-  }
+  if (status === 'completed') return <CompletedIcon muted />;
   return (
     <span
-      data-todo-status="pending"
-      className="h-4 w-4 shrink-0 rounded-full border border-border-strong"
+      data-todo-status={status === 'in_progress' ? 'in_progress' : 'pending'}
+      className="h-4 w-4 shrink-0 rounded-full border border-text-secondary"
     />
   );
 };
@@ -126,26 +120,28 @@ const TaskProgressAccessory: React.FC<TaskProgressAccessoryProps> = ({
     >
       <div
         data-testid="task-progress-panel"
-        className={`pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 w-[min(340px,80vw)] -translate-x-1/2 rounded-[14px] border border-hairline bg-bg-main shadow-floating transition-[opacity,transform] duration-200 ease-[var(--ease-standard)] ${
+        className={`pointer-events-none absolute bottom-full left-1/2 z-40 mb-0.5 w-[min(320px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-[12px] border border-hairline bg-bg-main shadow-[0_10px_30px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)] transition-[opacity,transform] duration-200 ease-[var(--ease-standard)] dark:shadow-floating ${
           expanded ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
         }`}
         aria-hidden={!expanded}
         inert={!expanded ? true : undefined}
         style={{ pointerEvents: expanded ? 'auto' : 'none' }}
       >
-        <div className="max-h-[min(320px,50vh)] overflow-y-auto px-3.5 py-2 custom-scrollbar">
+        <div className="max-h-[min(320px,50vh)] overflow-y-auto px-3 py-2 custom-scrollbar">
           {todos.map((item) => (
-            <div key={item.id} className="grid grid-cols-[16px_minmax(0,1fr)] items-start gap-2.5 py-1.5">
+            <div
+              key={item.id}
+              data-testid="task-progress-item"
+              className="grid grid-cols-[16px_minmax(0,1fr)] items-start gap-2 py-0.5"
+            >
               <span className="flex h-[18px] w-4 items-center justify-center text-text-secondary">
                 <TodoStatusIcon status={item.status} />
               </span>
               <span
-                className={`min-w-0 break-words text-[12px] leading-relaxed ${
+                className={`min-w-0 break-words text-pretty text-[13px] leading-[18px] ${
                   item.status === 'completed'
                     ? 'text-text-tertiary'
-                    : item.status === 'in_progress'
-                      ? 'text-text-primary'
-                      : 'text-text-secondary'
+                    : 'text-text-secondary'
                 }`}
               >
                 {item.title}

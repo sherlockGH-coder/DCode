@@ -27,9 +27,9 @@ const ReasoningPanel: React.FC<{
       {isGenerating && !thinkingEnd && !completedAt && duration === undefined ? (
         <div className="flex items-center gap-1.5">
           <div className="flex items-center justify-center w-4 h-4 shrink-0">
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent animate-thinking-pulse"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-text-primary animate-thinking-pulse"></span>
           </div>
-          <span className="text-[13.5px] font-normal text-accent">
+          <span className="text-[13.5px] font-normal text-text-primary">
             正在深度思考
           </span>
         </div>

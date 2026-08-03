@@ -71,7 +71,7 @@ const ReasoningActivityRow: React.FC<{
       <div className="w-full" data-testid="reasoning-activity-row">
         <div
           data-testid="reasoning-activity-streaming-label"
-          className="flex min-h-6 w-fit max-w-full items-center gap-[9px] py-1 text-accent"
+          className="flex min-h-6 w-fit max-w-full items-center gap-[9px] py-1 text-text-primary"
         >
           <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center opacity-75">
             <IconDeepThinking size={15} className="text-current" />
