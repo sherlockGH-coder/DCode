@@ -8,7 +8,7 @@ export function registerSpeechIpc(): void {
     IPC_EVENTS.SPEECH_TRANSCRIBE,
     async (_event, audioBuffer: ArrayBuffer | Uint8Array, mimeType: string): Promise<SpeechTranscriptionResult> => {
       if (typeof mimeType !== 'string') {
-        throw new Error('录音格式参数无效');
+        throw new Error('Invalid recording format parameter');
       }
       return transcribeSpeech(audioBuffer, mimeType);
     },

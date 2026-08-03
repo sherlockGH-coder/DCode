@@ -72,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={onOpenSearch}
           >
             <IconSearch size={13} className="text-text-secondary shrink-0" />
-            <span className="flex-1 select-none text-text-tertiary whitespace-nowrap truncate min-w-0">搜索</span>
+            <span className="flex-1 select-none text-text-tertiary whitespace-nowrap truncate min-w-0">Search</span>
             <kbd className="text-[10px] text-text-tertiary font-mono px-1 py-0.5 rounded border border-hairline shrink-0 hidden xs:inline-block">
               {isMacOS ? '⌘K' : 'Ctrl+K'}
             </kbd>
@@ -81,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <button
             type="button"
             className="w-8 h-8 flex items-center justify-center rounded-[7px] hover:bg-bg-hover text-text-secondary transition-colors duration-150 shrink-0 cursor-pointer [-webkit-app-region:no-drag]"
-            title="收起侧栏"
+            title="Collapse sidebar"
             onClick={onCollapseSidebar}
           >
             <IconPanels size={18} />
@@ -95,7 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={onNewConversation}
           >
             <IconChatPlus size={16} className="text-text-primary shrink-0" />
-            <span>开启新对话</span>
+            <span>New conversation</span>
           </button>
         </div>
 
@@ -127,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={onOpenSettings}
           >
             <IconGear size={15} className={activeView === 'settings' ? 'text-accent' : 'text-text-secondary'} />
-            <span>系统设置</span>
+            <span>Settings</span>
           </button>
         </div>
       </div>

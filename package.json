@@ -1,7 +1,7 @@
 {
   "name": "deepseek-app",
   "version": "0.0.1",
-  "description": "DeepSeek 桌面聊天应用 — 基于 Electron + React",
+  "description": "DeepSeek desktop chat application built with Electron and React",
   "productName": "DeepSeek",
   "main": "./out/main/index.js",
   "scripts": {
@@ -21,7 +21,6 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "pnpm build && playwright test",
     "benchmark:terminal": "pnpm build && PYTHONPATH=$PWD harbor run -d terminal-bench@2.0 -a benchmark.harbor_dcode_agent:DCodeAgent -o benchmark/jobs",
     "benchmark:terminal:smoke": "pnpm build && PYTHONPATH=$PWD harbor run -d terminal-bench@2.0 -a benchmark.harbor_dcode_agent:DCodeAgent -l 1 -n 1 -y -o benchmark/jobs"
   },
@@ -58,7 +57,7 @@
       "icon": "resources/icon.icns",
       "artifactName": "${productName}-${version}-${arch}.dmg",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "DeepSeek 需要使用麦克风将语音转写为输入文本。"
+        "NSMicrophoneUsageDescription": "DeepSeek uses the microphone to transcribe speech into input text."
       }
     },
     "win": {
@@ -113,7 +112,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@playwright/test": "^1.61.1",
     "@tailwindcss/vite": "^4.2.4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/react": "^19.0.0",
@@ -127,6 +125,7 @@
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.7.0",
+    "playwright-core": "^1.62.0",
     "tailwindcss": "^4.2.4",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.65.0",

@@ -2,18 +2,18 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 interface FilePathTooltipProps {
-  /** 触发 tooltip 的 DOM 元素 ref */
+  /** Ref for the DOM element that triggers the tooltip. */
   triggerRef: React.RefObject<HTMLElement | null>;
-  /** tooltip 显示的完整路径 */
+  /** Full path shown in the tooltip. */
   text: string;
 }
 
 /**
- * 文件路径悬停 tooltip，通过 createPortal 渲染到 document.body，
- * 避免被祖先元素的 overflow:hidden 裁剪（如侧边栏遮挡）。
+ * File-path hover tooltip rendered into document.body with createPortal,
+ * so ancestor overflow:hidden containers cannot clip it.
  *
- * 用法：在需要 tooltip 的元素上挂 ref，并将该 ref 和路径文本传入此组件。
- * 组件自动监听 trigger 的 mouseenter/mouseleave/focus/blur 来控制显隐。
+ * Attach the ref to the target element and pass the ref and path text to this component.
+ * The component listens for mouseenter, mouseleave, focus, and blur on the target.
  */
 const FilePathTooltip: React.FC<FilePathTooltipProps> = ({ triggerRef, text }) => {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);

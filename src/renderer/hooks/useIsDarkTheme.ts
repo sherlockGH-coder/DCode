@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 /**
- * 跟踪根元素 `.dark` class 的实时状态，供 JS 侧主题化组件
- * （如 react-syntax-highlighter 的 oneLight/oneDark 切换）使用。
+ * Track the live state of the root `.dark` class for themed JavaScript components,
+ * such as switching react-syntax-highlighter between oneLight and oneDark.
  */
 export function useIsDarkTheme(): boolean {
   const [isDark, setIsDark] = useState(

@@ -75,8 +75,8 @@ export const CollapsibleSection: React.FC<{
           }
         }}
         className="flex h-9 shrink-0 items-center justify-between px-3.5 cursor-pointer hover:bg-bg-hover select-none transition-colors duration-150 group"
-        aria-label={collapsed ? `展开 ${title}` : `折叠 ${title}`}
-        title={collapsed ? `展开 ${title}` : `折叠 ${title}`}
+        aria-label={collapsed ? `Expand ${title}` : `Collapse ${title}`}
+        title={collapsed ? `Expand ${title}` : `Collapse ${title}`}
         aria-expanded={!collapsed}
       >
         <div className="flex min-w-0 items-center gap-1.5">
@@ -143,7 +143,7 @@ export const TimelineTaskRow: React.FC<{
       type="button"
       onClick={onClick}
       disabled={isCompleted}
-      aria-label={isCompleted ? `任务已完成：${task.title}` : `标记任务为完成：${task.title}`}
+      aria-label={isCompleted ? `Task completed: ${task.title}` : `Mark task complete: ${task.title}`}
       className={`grid w-full grid-cols-[18px_minmax(0,1fr)] gap-2 rounded-[7px] border-none bg-transparent px-2.5 py-1.5 text-left transition-colors ${
         isCompleted ? 'cursor-default' : 'cursor-pointer hover:bg-bg-hover'
       }`}
@@ -168,9 +168,9 @@ export const TimelineTaskRow: React.FC<{
 type PlanUpdateToolItem = Extract<ToolItem, { kind: 'plan_update' }>;
 
 const PLAN_STATUS_LABELS: Record<PlanUpdateItem['status'], string> = {
-  pending: '待处理',
-  in_progress: '进行中',
-  completed: '已完成',
+  pending: 'Pending',
+  in_progress: 'In progress',
+  completed: 'Completed',
 };
 
 const PlanTimelineRow: React.FC<{
@@ -182,7 +182,7 @@ const PlanTimelineRow: React.FC<{
   return (
     <div
       className="grid w-full grid-cols-1 rounded-[7px] px-2.5 py-1.5 text-left"
-      title={`${PLAN_STATUS_LABELS[item.status]}：${item.step}`}
+      title={`${PLAN_STATUS_LABELS[item.status]}: ${item.step}`}
     >
       <span className="min-w-0 pb-1">
         <span
@@ -208,7 +208,7 @@ export const PlanTimeline: React.FC<{ planUpdate: PlanUpdateToolItem }> = ({ pla
       </div>
     )}
     {planUpdate.plan.length === 0 ? (
-      <div className="px-3 pb-2 text-[12px] text-text-tertiary">暂无计划步骤</div>
+      <div className="px-3 pb-2 text-[12px] text-text-tertiary">No plan steps</div>
     ) : (
       <div className="flex flex-col">
         {planUpdate.plan.map((item, index) => (

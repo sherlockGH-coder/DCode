@@ -70,7 +70,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   inline = false,
   initialValue = '',
   initialAttachments,
-  placeholder = '描述任务、问题或想要修改的内容…',
+  placeholder = 'Describe a task, ask a question, or describe what to change…',
   autoFocus = false,
   onCancel,
   onAfterSend,
@@ -217,7 +217,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           setGitInfo(info);
         }
       } catch (err) {
-        console.warn('[ChatInput] 获取 Git 分支信息失败:', err);
+        console.warn('[ChatInput] Failed to load Git branch information:', err);
         if (isMounted) {
           setGitInfo(null);
         }
@@ -243,10 +243,10 @@ const ChatInput: React.FC<ChatInputProps> = ({
         setGitInfo(info);
         setIsBranchMenuOpen(false);
       } else {
-        alert(`切换分支失败: ${res.error}`);
+        alert(`Failed to switch branches: ${res.error}`);
       }
     } catch (err: any) {
-      alert(`切换分支失败: ${err.message || err}`);
+      alert(`Failed to switch branches: ${err.message || err}`);
     }
   };
 
@@ -400,7 +400,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 selectedSlashCommand
                   ? ''
                   : isLoading
-                  ? 'DeepSeek 正在回复…'
+                  ? 'DeepSeek is responding…'
                   : placeholder
               }
               value={inputValue}

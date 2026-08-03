@@ -10,22 +10,22 @@ export interface Task {
   status: TaskStatus;
   scope: TaskScope;
   projectPath: string | null;
-  /** 被哪些任务阻塞（这些任务未完成前本任务不可开始） */
+  /** Tasks blocking this task; it cannot start until they are complete. */
   blockedBy: string[];
-  /** 阻塞了哪些任务（本任务完成后这些任务才能开始） */
+  /** Tasks blocked by this task; they can start after this task completes. */
   blocks: string[];
-  /** 是否为后台任务 */
+  /** Whether this is a background task. */
   isBackground: boolean;
-  /** 关联的对话 ID（后台任务执行时的 conversation） */
+  /** Associated conversation ID used when the background task runs. */
   conversationId: string | null;
-  /** 后台任务输出文件路径 */
+  /** Background-task output file path. */
   outputFilePath: string | null;
   createdAt: string;
   updatedAt: string;
   completedAt: string | null;
 }
 
-/** 创建任务的输入参数 */
+/** Create-task input. */
 export interface TaskInput {
   title: string;
   description?: string;
@@ -35,14 +35,14 @@ export interface TaskInput {
   isBackground?: boolean;
 }
 
-/** 批量创建任务的输入参数 */
+/** Batch create-task input. */
 export interface TaskBatchInput {
   tasks: TaskInput[];
-  /** 是否替换现有任务（默认为 false，即追加模式） */
+  /** Whether to replace existing tasks; false by default, meaning append mode. */
   replace?: boolean;
 }
 
-/** 更新任务的输入参数 */
+/** Update-task input. */
 export interface TaskUpdateInput {
   title?: string;
   description?: string;

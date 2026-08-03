@@ -1,17 +1,17 @@
-/** 作用域：内置 / 用户全局 / 项目内 */
+/** Scope: built-in, global user, or project. */
 export type Scope = 'builtin' | 'user' | 'project';
 
-/** 基础作用域：用户全局 / 项目内（不含 builtin） */
+/** Editable scope: global user or project, excluding built-in. */
 export type BasicScope = 'user' | 'project';
 
-/** 基础状态：待处理 / 进行中 / 已完成 */
+/** Basic status: pending, in progress, or completed. */
 export type BaseStatus = 'pending' | 'in_progress' | 'completed';
 
-/** API Key 设置状态的通用接口 */
+/** Common API-key configuration state. */
 export interface WithApiKey {
-  /** 是否已设置 API Key（明文不会传到渲染端） */
+  /** Whether an API key is configured; plaintext is never sent to the renderer. */
   apiKeySet: boolean;
 }
 
-/** 通用的错误分类 */
+/** Common error categories. */
 export type ErrorKind = 'rate_limit' | 'network' | 'auth' | 'timeout' | 'unknown';

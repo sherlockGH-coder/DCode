@@ -12,8 +12,8 @@ interface Props {
 }
 
 const TITLE: Record<'user' | 'project', string> = {
-  user: '全局技能',
-  project: '项目技能',
+  user: 'Global skill',
+  project: 'Project skill',
 };
 
 const LABEL_CLS = 'mb-2 block text-[11px] font-semibold text-text-tertiary';
@@ -42,11 +42,11 @@ const SkillEditorModal: React.FC<Props> = ({ scope, initial, loadFull, onClose, 
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setError('请输入技能名称');
+      setError('Enter a skill name');
       return;
     }
     if (!description.trim()) {
-      setError('请输入技能描述');
+      setError('Enter a skill description');
       return;
     }
     setSaving(true);
@@ -65,7 +65,7 @@ const SkillEditorModal: React.FC<Props> = ({ scope, initial, loadFull, onClose, 
     if (ok) {
       onClose();
     } else {
-      setError('保存失败');
+      setError('Save failed');
     }
   };
 
@@ -77,13 +77,13 @@ const SkillEditorModal: React.FC<Props> = ({ scope, initial, loadFull, onClose, 
       >
         <header className="flex shrink-0 items-center justify-between border-b border-black/[0.06] px-6 py-4 dark:border-white/[0.07]">
           <h2 className="text-[17px] font-semibold text-text-primary">
-            {isEditing ? '编辑' : '新建'}{TITLE[scope]}
+            {isEditing ? 'Edit ' : 'New '}{TITLE[scope]}
           </h2>
           <button
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-[7px] bg-black/[0.04] text-text-tertiary transition-colors hover:bg-black/[0.08] dark:bg-white/[0.06] dark:hover:bg-white/[0.1]"
             onClick={onClose}
-            aria-label="关闭"
+            aria-label="Close"
           >
             <IconX size={14} />
           </button>
@@ -91,14 +91,14 @@ const SkillEditorModal: React.FC<Props> = ({ scope, initial, loadFull, onClose, 
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-[#8A9099] dark:text-white/35">
-            <p className="text-[13px] font-medium">加载技能...</p>
+            <p className="text-[13px] font-medium">Loading skill...</p>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={LABEL_CLS}>
-                  名称 <span className="text-red-400">*</span>
+                  Name <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
@@ -108,12 +108,12 @@ const SkillEditorModal: React.FC<Props> = ({ scope, initial, loadFull, onClose, 
                   placeholder="git-commit"
                   className={settingsMonoInputClass}
                 />
-                {isEditing && <p className="mt-1 text-[10px] text-text-tertiary italic">名称不可修改</p>}
+                {isEditing && <p className="mt-1 text-[10px] text-text-tertiary italic">Name cannot be changed</p>}
               </div>
 
               <div>
                 <label className={LABEL_CLS}>
-                  允许工具
+                Allowed tools
                 </label>
                 <input
                   type="text"
@@ -127,25 +127,25 @@ const SkillEditorModal: React.FC<Props> = ({ scope, initial, loadFull, onClose, 
 
             <div>
               <label className={LABEL_CLS}>
-                描述 <span className="text-red-400">*</span>
+                Description <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="当用户要求生成 commit message 时使用"
+              placeholder="Use when the user asks for a commit message"
                 className={settingsInputClass}
               />
             </div>
 
             <div className="flex flex-col gap-2 min-h-[200px]">
               <label className={LABEL_CLS}>
-                指令正文 <span className="text-red-400">*</span>
+                Instructions <span className="text-red-400">*</span>
               </label>
               <textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="# 技能指令"
+                placeholder="# Skill instructions"
                 className={TEXTAREA_CLS}
                 style={{ tabSize: 2 }}
               />
@@ -165,14 +165,14 @@ const SkillEditorModal: React.FC<Props> = ({ scope, initial, loadFull, onClose, 
             onClick={onClose}
             disabled={saving}
           >
-            取消
+            Cancel
           </SecondaryButton>
           <PrimaryButton
             type="button"
             onClick={handleSave}
             disabled={saving || loading}
           >
-            {saving ? '保存...' : '保存'}
+            {saving ? 'Saving...' : 'Save'}
           </PrimaryButton>
         </footer>
       </div>

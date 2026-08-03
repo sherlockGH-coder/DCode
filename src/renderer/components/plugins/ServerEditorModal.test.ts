@@ -46,8 +46,8 @@ describe('ServerEditorModal JSON config', () => {
       }));
     });
 
-    expect(container.textContent).not.toContain('解析并填充');
-    expect(container.textContent).toContain('JSON 配置');
+    expect(container.textContent).not.toContain('Parse and fill');
+    expect(container.textContent).toContain('JSON configuration');
   });
 
   it('does not intercept native paste in the JSON textarea', () => {

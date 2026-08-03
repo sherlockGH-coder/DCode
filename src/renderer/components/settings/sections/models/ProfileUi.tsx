@@ -13,7 +13,7 @@ export const KeyBadge: React.FC<{ active: boolean }> = ({ active }) => (
     }`}
   >
     <IconKey size={9} className="shrink-0" />
-    {active ? 'Key' : '无 Key'}
+    {active ? 'Key' : 'No key'}
   </span>
 );
 
@@ -26,7 +26,7 @@ export const ProtocolBadge: React.FC<{ protocol: ApiProfile['protocol'] }> = ({ 
     }`}
   >
     {protocol === 'legacy-openai' && <IconInfo size={9} className="shrink-0" />}
-    {protocol === 'legacy-openai' ? '需迁移' : 'Anthropic'}
+    {protocol === 'legacy-openai' ? 'Migration required' : 'Anthropic'}
   </span>
 );
 

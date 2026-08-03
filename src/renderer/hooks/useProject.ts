@@ -15,7 +15,7 @@ export function useProject() {
       const state: ProjectState = await window.deepseekApi.projectGetState();
       applyState(state);
     } catch (err) {
-      console.error('[useProject] 加载状态失败:', err);
+      console.error('[useProject] Failed to load state:', err);
     }
   }, [applyState]);
 
@@ -25,7 +25,7 @@ export function useProject() {
       if (result) await loadState();
       return result;
     } catch (err) {
-      console.error('[useProject] 添加项目失败:', err);
+      console.error('[useProject] Failed to add project:', err);
       return null;
     }
   }, [loadState]);
@@ -34,7 +34,7 @@ export function useProject() {
     try {
       return await window.deepseekApi.projectPickParentDirectory();
     } catch (err) {
-      console.error('[useProject] 选择项目位置失败:', err);
+      console.error('[useProject] Failed to select project location:', err);
       return null;
     }
   }, []);
@@ -45,7 +45,7 @@ export function useProject() {
       await loadState();
       return result;
     } catch (err) {
-      console.error('[useProject] 创建项目失败:', err);
+      console.error('[useProject] Failed to create project:', err);
       throw err;
     }
   }, [loadState]);
@@ -56,7 +56,7 @@ export function useProject() {
       if (ok) await loadState();
       return ok;
     } catch (err) {
-      console.error('[useProject] 移除项目失败:', err);
+      console.error('[useProject] Failed to remove project:', err);
       return false;
     }
   }, [loadState]);
@@ -67,7 +67,7 @@ export function useProject() {
       if (ok) await loadState();
       return ok;
     } catch (err) {
-      console.error('[useProject] 设置激活项目失败:', err);
+      console.error('[useProject] Failed to set active project:', err);
       return false;
     }
   }, [loadState]);

@@ -20,8 +20,8 @@ interface GroupSpec {
 }
 
 const GROUPS: GroupSpec[] = [
-  { scope: 'builtin', title: '内置', writable: false },
-  { scope: 'user', title: '全局', writable: true },
+  { scope: 'builtin', title: 'Built-in', writable: false },
+  { scope: 'user', title: 'Global', writable: true },
 ];
 
 const SkillsPage: React.FC<Props> = ({ activeProject }) => {
@@ -52,21 +52,21 @@ const SkillsPage: React.FC<Props> = ({ activeProject }) => {
     <div className="mx-auto w-full max-w-[1040px] px-6 py-9 sm:px-10">
       {/* Header */}
       <div className="relative mb-10 flex min-h-[44px] items-center gap-3">
-        <h2 className="text-[24px] font-semibold text-[#1D2127] dark:text-white">技能</h2>
+        <h2 className="text-[24px] font-semibold text-[#1D2127] dark:text-white">Skills</h2>
         <div className="ml-auto">
           <SecondaryButton
             type="button"
             onClick={() => openDir('user')}
           >
             <IconFolder size={14} className="text-current" />
-            <span>管理文件</span>
+            <span>Manage files</span>
           </SecondaryButton>
         </div>
       </div>
 
       {isLoading ? (
         <div className="flex min-h-[220px] items-center justify-center rounded-[8px] border border-black/[0.08] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.025)] dark:border-white/[0.08] dark:bg-[#1E1E20]">
-          <p className="text-[13px] font-medium text-[#8E8E93] dark:text-white/42">加载技能...</p>
+          <p className="text-[13px] font-medium text-[#8E8E93] dark:text-white/42">Loading skills...</p>
         </div>
       ) : (
         GROUPS.map((g) => {
@@ -79,7 +79,7 @@ const SkillsPage: React.FC<Props> = ({ activeProject }) => {
                 <div className="flex items-center gap-2.5">
                   <h3 className="text-[15px] font-semibold text-[#1D2127] dark:text-white">{g.title}</h3>
                   <span className="inline-flex h-5 items-center rounded-[8px] bg-black/[0.045] px-2 text-[12px] font-semibold text-[#8E8E93] dark:bg-white/[0.06] dark:text-white/45">
-                    {items.length} 项
+                    {items.length} items
                   </span>
                 </div>
                 {g.writable && (
@@ -88,7 +88,7 @@ const SkillsPage: React.FC<Props> = ({ activeProject }) => {
                     onClick={() => setEditor({ scope: g.scope as 'user' | 'project', initial: null })}
                   >
                     <IconPlus size={13} className="text-current" />
-                    <span>新建</span>
+                    <span>New</span>
                   </PrimaryButton>
                 )}
               </div>
@@ -96,7 +96,7 @@ const SkillsPage: React.FC<Props> = ({ activeProject }) => {
               {items.length === 0 ? (
                 <div className="flex min-h-[150px] flex-col items-center justify-center rounded-[8px] border border-black/[0.08] bg-white px-6 text-center shadow-[0_1px_2px_rgba(15,23,42,0.025)] dark:border-white/[0.08] dark:bg-[#1E1E20]">
                   <p className="text-[13px] font-medium text-[#8E8E93] dark:text-white/42">
-                    {g.scope === 'builtin' ? '暂无内置技能' : '暂无自定义技能'}
+                    {g.scope === 'builtin' ? 'No built-in skills' : 'No custom skills'}
                   </p>
                   {g.writable && (
                     <button
@@ -104,7 +104,7 @@ const SkillsPage: React.FC<Props> = ({ activeProject }) => {
                       className="mt-2 text-[12.5px] font-semibold text-[#147CE5] transition-colors hover:text-[#0A66C2]"
                       onClick={() => setEditor({ scope: g.scope as 'user' | 'project', initial: null })}
                     >
-                      创建第一个
+                      Create the first one
                     </button>
                   )}
                 </div>
@@ -142,23 +142,23 @@ const SkillsPage: React.FC<Props> = ({ activeProject }) => {
             className="w-[400px] max-w-[90vw] rounded-[10px] border border-black/[0.08] bg-white px-6 py-5 shadow-2xl dark:border-white/[0.08] dark:bg-[#1E1E20]"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="mb-2 text-[17px] font-semibold text-text-primary">确认删除</h3>
+            <h3 className="mb-2 text-[17px] font-semibold text-text-primary">Confirm deletion</h3>
             <p className="mb-6 text-[13px] leading-relaxed text-text-secondary">
-              永久删除 <span className="font-semibold text-text-primary">{confirmDelete.name}</span>？
+              Permanently delete <span className="font-semibold text-text-primary">{confirmDelete.name}</span>?
             </p>
             <div className="flex justify-end gap-3">
               <SecondaryButton
                 type="button"
                 onClick={() => setConfirmDelete(null)}
               >
-                取消
+                Cancel
               </SecondaryButton>
               <button
                 type="button"
                 className="inline-flex h-8 items-center justify-center rounded-[7px] bg-red-600 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-red-700"
                 onClick={handleDelete}
               >
-                删除
+                Delete
               </button>
             </div>
           </div>

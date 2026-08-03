@@ -28,7 +28,7 @@ describe('ProcessedSummary', () => {
   });
 
   it('stays expanded while processing and collapses when the whole turn completes', () => {
-    const child = React.createElement('div', null, '中间过程');
+    const child = React.createElement('div', null, 'Intermediate process');
 
     act(() => root?.render(React.createElement(ProcessedSummary, {
       isProcessing: true,
@@ -39,7 +39,7 @@ describe('ProcessedSummary', () => {
 
     const toggle = container.querySelector('[data-testid="processed-summary-toggle"]') as HTMLButtonElement;
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(container.textContent).toContain('中间过程');
+    expect(container.textContent).toContain('Intermediate process');
 
     act(() => root?.render(React.createElement(ProcessedSummary, {
       isProcessing: false,
@@ -49,6 +49,6 @@ describe('ProcessedSummary', () => {
     })));
 
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(container.textContent).not.toContain('中间过程');
+    expect(container.textContent).not.toContain('Intermediate process');
   });
 });

@@ -9,7 +9,7 @@ describe('tool result content blocks', () => {
       {
         id: 'tail_context_reminder',
         role: 'user',
-        content: '<system-reminder>\n# 当前日期\n今天的日期: 2026/06/19\n</system-reminder>',
+        content: '<system-reminder>\n# Current date\nToday\'s date: 2026/06/19\n</system-reminder>',
       },
     ];
 
@@ -21,7 +21,7 @@ describe('tool result content blocks', () => {
       content: [
         {
           type: 'text',
-          text: '<system-reminder>\n# 当前日期\n今天的日期: 2026/06/19\n</system-reminder>',
+          text: '<system-reminder>\n# Current date\nToday\'s date: 2026/06/19\n</system-reminder>',
           cache_control: { type: 'ephemeral' },
         },
       ],

@@ -1,8 +1,8 @@
 /**
  * Glob → RegExp translation shared by the `glob` and `grep` tools.
  *
- * 支持 `**`、`*`、`?` 以及 `{a,b}` 花括号展开（可嵌套）。
- * 匹配区分大小写，与 ripgrep / git 的 pathspec 语义一致。
+ * Supports `**`, `*`, `?`, and brace expansion such as `{a,b}`, including nesting.
+ * Matching is case-sensitive and follows ripgrep and git pathspec semantics.
  */
 
 function escapeRegexChar(ch: string): string {
@@ -54,10 +54,10 @@ function splitTopLevel(body: string): string[] {
 }
 
 /**
- * 把 glob 翻译成正则片段（不含锚点）。
+ * Translate a glob into a regex fragment without anchors.
  *
- * 花括号的每个分支都会递归走同一套翻译，因此 `{*.ts,*.js}` 里的 `*`
- * 会被正确翻译成 `[^/]*`，而不是当作字面量留下一个悬空量词。
+ * Each brace branch uses the same recursive translation, so the `*` in `{*.ts,*.js}`
+ * correctly becomes `[^/]*` instead of remaining as a literal dangling quantifier.
  */
 function translate(pattern: string): string {
   let out = '';
@@ -67,7 +67,7 @@ function translate(pattern: string): string {
     if (ch === '*' && pattern[i + 1] === '*') {
       out += '.*';
       i += 2;
-      // `**/` 允许匹配零层目录
+      // `**/` can match zero directory levels.
       if (pattern[i] === '/') i++;
     } else if (ch === '*') {
       out += '[^/]*';
@@ -98,9 +98,9 @@ export function globToRegex(pattern: string): RegExp {
 }
 
 /**
- * 预编译一个 glob 匹配器，供逐文件过滤复用——避免在 per-file 谓词里重复编译正则。
+ * Precompile a glob matcher for reuse during per-file filtering instead of rebuilding the regex in the predicate.
  *
- * 不含 `/` 的模式同时按 basename 匹配，这样 `*.ts` 能命中 `src/a.ts`。
+ * Patterns without `/` also match basenames, so `*.ts` matches `src/a.ts`.
  */
 export function createGlobMatcher(pattern: string): (relPath: string) => boolean {
   const regex = globToRegex(pattern);

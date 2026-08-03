@@ -18,7 +18,7 @@ if (previewTheme === 'dark' || previewTheme === 'light') {
 }
 
 /**
- * 平台适配：为 macOS 添加特定样式类
+ * Platform adaptation: add platform-specific classes for macOS.
  */
 if (window.electronEnv?.platform === "darwin") {
   document.documentElement.classList.add("platform-darwin");
@@ -27,7 +27,7 @@ if (window.electronEnv?.platform === "darwin") {
 const rootElement = document.getElementById("root");
 
 if (!rootElement) {
-  throw new Error('Error: HTML中缺少 id="root" 元素，React无法挂载');
+  throw new Error('Error: the HTML is missing the id="root" element, so React cannot mount');
 }
 
 const root = createRoot(rootElement);

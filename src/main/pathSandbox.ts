@@ -3,15 +3,15 @@ import { isAbsolute, resolve, relative, sep, basename, dirname, join } from 'nod
 import { homedir } from 'node:os';
 
 interface ResolvedPath {
-  /** 规范化后的绝对路径（已尽可能 realpath） */
+  /** Normalized absolute path, realpath-resolved where possible. */
   absolutePath: string;
-  /** 是否在 projectRoot 内（projectRoot 为 null 时统一为 false，但不代表被拒） */
+  /** Whether it is inside projectRoot; false when projectRoot is null, which does not mean it was denied. */
   isInside: boolean;
-  /** 是否经过 symlink 解析（调试用，用于将来排查“为何 isInside 不符直觉”） */
+  /** Whether symlinks were resolved, for debugging cases where isInside is unexpected. */
   symlinkResolved: boolean;
 }
 
-/** 展开 ~ / ~/foo 为用户主目录 */
+/** Expand ~ and ~/foo to the user's home directory. */
 function expandTilde(input: string): string {
   if (input === '~') return homedir();
   if (input.startsWith('~/') || input.startsWith('~\\')) {
@@ -20,7 +20,7 @@ function expandTilde(input: string): string {
   return input;
 }
 
-/** realpath 包装：路径不存在时回退到最深已存在祖先，再拼回缺失片段 */
+/** realpath wrapper: when a path does not exist, resolve the deepest existing ancestor and append missing segments. */
 function safeRealpath(absPath: string): { path: string; resolved: boolean } {
   try {
     return { path: realpathSync.native(absPath), resolved: true };
@@ -46,10 +46,10 @@ function safeRealpath(absPath: string): { path: string; resolved: boolean } {
 }
 
 /**
- * 把 input 规范化为绝对路径，并判断它是否在 projectRoot 内。
+ * Normalize input to an absolute path and determine whether it is inside projectRoot.
  *
- * @param input 原始输入路径（可能是相对/绝对/含 ~）
- * @param projectRoot 项目根（绝对路径），null 表示无项目（旧对话）
+ * @param input Original input path, which may be relative, absolute, or contain ~.
+ * @param projectRoot Absolute project root; null means there is no project, as in a legacy conversation.
  */
 export function resolveInside(input: string, projectRoot: string | null): ResolvedPath {
   const expanded = expandTilde(input);
@@ -73,11 +73,11 @@ export function resolveInside(input: string, projectRoot: string | null): Resolv
 }
 
 /**
- * 判断 absPath 是否在 dirAbs 内（含 dirAbs 本身）。
+ * Determine whether absPath is inside dirAbs, including dirAbs itself.
  *
- * 用 path.relative + '..' 检查替代字符串前缀比较：
- *   - 跨平台正确（path.relative 在 macOS APFS 下保留大小写但比较合理）
- *   - 自然排除 `/Users/foo` 与 `/Users/foobar` 这种"前缀但非父目录"的歧义
+ * Use path.relative and '..' instead of string-prefix comparisons:
+ *   - correct across platforms; path.relative preserves case on macOS APFS while comparing appropriately;
+ *   - naturally excludes ambiguous prefix-only paths such as `/Users/foo` and `/Users/foobar`.
  */
 export function isPathInsideDir(absPath: string, dirAbs: string): boolean {
   const rel = relative(dirAbs, absPath);

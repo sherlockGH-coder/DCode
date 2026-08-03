@@ -18,7 +18,7 @@ function safeAddColumn(
 
 export function initializeSchema(database: Database.Database): void {
   database.exec(`
-    -- 对话表
+    -- Conversations table
     CREATE TABLE IF NOT EXISTS conversations (
       id TEXT PRIMARY KEY,
       title TEXT NOT NULL,
@@ -26,7 +26,7 @@ export function initializeSchema(database: Database.Database): void {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
-    -- 消息表
+    -- Messages table
     CREATE TABLE IF NOT EXISTS messages (
       id TEXT PRIMARY KEY,
       conversation_id TEXT NOT NULL,
@@ -38,7 +38,7 @@ export function initializeSchema(database: Database.Database): void {
       FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
     );
 
-    -- 索引：加速按对话查询消息
+    -- Index for faster message queries by conversation
     CREATE INDEX IF NOT EXISTS idx_messages_conversation
       ON messages(conversation_id, created_at);
   `);
@@ -140,7 +140,7 @@ export function initializeSchema(database: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_conversations_project
       ON conversations(project_path, updated_at DESC);
 
-    -- 优化 deleteMessagesFromTurn 查询：turn_id 索引
+    -- Optimize deleteMessagesFromTurn queries with a turn_id index
     CREATE INDEX IF NOT EXISTS idx_messages_turn_id
       ON messages(conversation_id, turn_id);
     CREATE INDEX IF NOT EXISTS idx_messages_context_epoch

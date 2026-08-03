@@ -4,15 +4,15 @@ import { compactDiffLines, parseDiff } from './diff-view/parseDiff';
 
 interface DiffViewProps {
   diff: string;
-  /** 文件名或路径，用于判定语法着色语言 */
+  /** Filename or path used to determine syntax highlighting. */
   filename?: string;
-  /** 传值则限高自滚（如 '200px'）；不传则填充父容器，由外层滚动 */
+  /** When provided, constrain the height and scroll internally (for example, '200px'); otherwise fill the parent and let the outer container scroll. */
   maxHeight?: string;
-  /** 顶部显示 +N -M 统计条 */
+  /** Show the +N -M summary bar at the top. */
   showStat?: boolean;
-  /** 审批面板使用更紧凑、克制的代码审查样式 */
+  /** Use a more compact, restrained code-review style in approval panels. */
   variant?: 'default' | 'review';
-  /** 容器额外类名（边框/圆角/背景等由调用方决定） */
+  /** Additional container classes; callers decide borders, radii, backgrounds, and so on. */
   className?: string;
 }
 
@@ -44,7 +44,7 @@ const DiffView: React.FC<DiffViewProps> = ({ diff, filename, maxHeight, showStat
   }, [lines]);
 
   if (!diff?.trim() || !hasVisibleChanges) {
-    return <div className="px-4 py-4 text-[12px] text-text-tertiary select-none text-center">无可见代码改动</div>;
+    return <div className="px-4 py-4 text-[12px] text-text-tertiary select-none text-center">No visible code changes</div>;
   }
 
   const rootClass = isReview
@@ -73,7 +73,7 @@ const DiffView: React.FC<DiffViewProps> = ({ diff, filename, maxHeight, showStat
         <div className="sticky top-0 left-0 z-10 flex w-full items-center gap-3 px-4 py-1.5 border-b border-hairline bg-bg-main text-[11px] select-none text-[#57606a] dark:text-[#abb2bf]">
           <span className="text-emerald-600 dark:text-[#98c379] font-semibold">+{added}</span>
           <span className="text-rose-600 dark:text-[#e06c75] font-semibold">-{deleted}</span>
-          <span className="text-text-tertiary dark:text-[#5c6370]">{displayLines.filter(l => l.type !== 'meta' && l.type !== 'hunk' && l.type !== 'gap').length} 行变动</span>
+          <span className="text-text-tertiary dark:text-[#5c6370]">{displayLines.filter(l => l.type !== 'meta' && l.type !== 'hunk' && l.type !== 'gap').length} changed lines</span>
         </div>
       )}
       <div className="min-w-max">

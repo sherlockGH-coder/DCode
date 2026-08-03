@@ -136,7 +136,7 @@ const App: React.FC = () => {
   const ensureConversation = React.useCallback(async (): Promise<string> => {
     if (conversationId) return conversationId;
     const id = await createConversation(chatProjectPath);
-    if (!id) throw new Error('无法创建对话');
+    if (!id) throw new Error('Could not create conversation');
     return id;
   }, [chatProjectPath, conversationId, createConversation]);
 
@@ -183,7 +183,7 @@ const App: React.FC = () => {
     feedback?: string;
   }) => {
     const plan = planMode.state?.activePlan;
-    if (!plan) throw new Error('计划已失效');
+    if (!plan) throw new Error('The plan is no longer available');
     const request = input.decision === 'approve'
       ? {
           conversationId: plan.conversationId,
@@ -207,7 +207,7 @@ const App: React.FC = () => {
     if (result.execution) {
       const execution = result.execution;
       await handleSend(
-        `执行已批准计划 v${execution.plan.version}`,
+        `Executing approved plan v${execution.plan.version}`,
         [],
         execution.strategy === 'fresh_context' ? [] : undefined,
         {
@@ -222,7 +222,7 @@ const App: React.FC = () => {
     return result;
   }, [handleSend, planMode]);
 
-  /** 编辑重试：截断消息历史后重新发送 */
+  /** Edit and retry: truncate message history and send again. */
   const handleEditSubmit = React.useCallback(async (editedContent: string, editedAttachments?: Attachment[]) => {
     try {
       await submitEditedMessageRetry({
@@ -238,11 +238,11 @@ const App: React.FC = () => {
         },
         sendMessage: handleSend,
         onTruncateError: (err) => {
-          console.warn('[App] 编辑重试截断历史失败，将仅用内存上下文继续重发:', err);
+          console.warn('[App] Failed to truncate history for edit and retry; resending with in-memory context only:', err);
         },
       });
     } catch (err) {
-      console.error('[App] 编辑重试失败:', err);
+      console.error('[App] Edit and retry failed:', err);
     }
   }, [lastUserMessage, conversationId, conversationMessages, setConversationMessages, handleSend]);
 
@@ -410,7 +410,7 @@ const App: React.FC = () => {
     try {
       const result = await window.deepseekApi.undoChanges(entries);
       if (!result.success) {
-        window.alert(result.error ?? '撤销失败。文件可能已经被后续修改。');
+        window.alert(result.error ?? 'Undo failed. The file may have been modified afterward.');
         return false;
       }
       setUndoDismissing({ conversationId, turnId });
@@ -425,7 +425,7 @@ const App: React.FC = () => {
         current?.conversationId === conversationId && current.turnId === turnId ? null : current
       ));
       const message = err instanceof Error ? err.message : String(err);
-      window.alert(`撤销失败: ${message}`);
+      window.alert(`Undo failed: ${message}`);
       return false;
     }
   }, [conversationId, deleteMessagesFromTurn]);
@@ -466,7 +466,7 @@ const App: React.FC = () => {
     ].join(':');
   }, [visibleMessages, pendingApprovalItems, chatItems.length]);
 
-  /** AskUserQuestion 提交处理：委托给 handleApprovalConfirm，传入 answers */
+  /** Submit AskUserQuestion answers through handleApprovalConfirm. */
   const handleQuestionSubmit = useCallback((toolCallId: string, answers: Record<string, string>) => {
     handleApprovalConfirm(toolCallId, true, undefined, undefined, undefined, answers);
   }, [handleApprovalConfirm]);

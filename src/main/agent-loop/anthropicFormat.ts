@@ -2,13 +2,13 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { Message } from '../../shared/types';
 
 /**
- * 将内部 Message 格式转为 Anthropic 消息格式
+ * Convert the internal Message format to Anthropic message format.
  *
- * Anthropic 消息格式要求：
- * - system prompt 作为独立参数（不在 messages 中）
- * - user 消息: { role: 'user', content: string | ContentBlock[] }
- * - assistant 消息: { role: 'assistant', content: ContentBlock[] }
- * - 工具结果: { role: 'user', content: [{ type: 'tool_result', tool_use_id, content }] }
+ * Anthropic message format:
+ * - the system prompt is a separate parameter, not part of messages;
+ * - user messages: { role: 'user', content: string | ContentBlock[] };
+ * - assistant messages: { role: 'assistant', content: ContentBlock[] };
+ * - tool results: { role: 'user', content: [{ type: 'tool_result', tool_use_id, content }] }.
  */
 export function convertMessagesToAnthropic(messages: Message[]): {
   systemPrompt: Anthropic.TextBlockParam[];
@@ -132,7 +132,7 @@ export function convertMessagesToAnthropic(messages: Message[]): {
 }
 
 /**
- * 将内部工具定义转为 Anthropic 格式
+ * Convert internal tool definitions to Anthropic format.
  */
 export function convertToolsToAnthropic(tools: any[]): Anthropic.Tool[] {
   return tools.map((t) => ({

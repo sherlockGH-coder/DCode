@@ -20,13 +20,13 @@ export async function transcribeSpeech(
   const normalizedMimeType = normalizeMimeType(mimeType);
 
   if (audio.byteLength === 0) {
-    throw new Error('录音内容为空');
+    throw new Error('The recording is empty');
   }
   if (audio.byteLength > MAX_AUDIO_BYTES) {
-    throw new Error('录音文件过大，请缩短录音时长后重试');
+    throw new Error('The recording file is too large. Shorten the recording and try again.');
   }
   if (!SUPPORTED_MIME_TYPES.has(normalizedMimeType)) {
-    throw new Error(`不支持的录音格式: ${mimeType || 'unknown'}`);
+    throw new Error(`Unsupported recording format: ${mimeType || 'unknown'}`);
   }
   const provider = createProvider();
 
@@ -41,7 +41,7 @@ function createProvider(): SpeechToTextProvider {
   const baseUrl = settingsManager.getSpeechBaseUrl();
   const apiKey = settingsManager.getSpeechApiKey();
   if (!apiKey && !isLoopbackBaseUrl(baseUrl)) {
-    throw new Error('语音输入需要先配置独立的 Speech API Key');
+    throw new Error('Voice input requires a separate Speech API key to be configured first');
   }
 
   return new OpenAITranscriptionProvider({

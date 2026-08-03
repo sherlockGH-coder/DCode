@@ -10,12 +10,12 @@ interface FolderSelectorProps {
   onCreateProject: (input: ProjectCreateInput) => Promise<Project | null>;
   onPickProjectParent: () => Promise<string | null>;
   /**
-   * 触发按钮的视觉变体：
-   *   - 'chip'   ：圆角胶丸（默认，输入框 footer / 工具条用）
-   *   - 'inline' ：行内文本风格"在 [项目名] 中 ▾"，用于欢迎页标题下方语义化标签
+   * Visual variants for the trigger button:
+   *   - 'chip'   : rounded pill (default, used in the input footer / toolbar)
+   *   - 'inline' : inline text style "in [project] ▾", used as a semantic label below the welcome title
    */
   variant?: 'chip' | 'inline';
-  /** 下拉面板展开方向。默认向下，欢迎页输入框内建议向上，避免贴住输入区域边界。 */
+  /** Direction of the dropdown. Defaults to down; the welcome input uses up to avoid the viewport edge. */
   placement?: 'top' | 'bottom';
 }
 
@@ -28,7 +28,7 @@ const IconFolderX: React.FC<{ size?: number; className?: string }> = ({ size = 1
 );
 
 function getErrorMessage(err: unknown): string {
-  const fallback = '创建项目失败，请检查项目名称和位置';
+  const fallback = 'Could not create the project. Check the project name and location.';
   const raw = err instanceof Error ? err.message : typeof err === 'string' ? err : fallback;
   return raw.replace(/^Error invoking remote method '[^']+': Error: /, '') || fallback;
 }
@@ -57,10 +57,10 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const currentProjectName = useMemo(() => {
-    if (!activeProject) return '不使用项目';
+    if (!activeProject) return 'No project';
     const found = projects.find((p) => p.path === activeProject);
     if (found) return found.name;
-    return '不使用项目';
+    return 'No project';
   }, [activeProject, projects]);
 
   const filteredProjects = useMemo(() => {
@@ -137,15 +137,15 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
     const nextName = projectName.trim();
     const nextParentPath = parentPath.trim();
     if (!nextName) {
-      setCreateError('请输入项目名称');
+      setCreateError('Enter a project name');
       return;
     }
     if (!nextParentPath) {
-      setCreateError('请选择项目位置');
+      setCreateError('Choose a project location');
       return;
     }
     if (/[\\/]/.test(nextName) || nextName === '.' || nextName === '..') {
-      setCreateError('项目名称不能包含路径分隔符或特殊目录名');
+      setCreateError('The project name cannot contain path separators or special directory names');
       return;
     }
 
@@ -154,7 +154,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
     try {
       const project = await onCreateProject({ parentPath: nextParentPath, name: nextName });
       if (!project) {
-        setCreateError('创建项目失败，请检查项目名称和位置');
+        setCreateError('Could not create the project. Check the project name and location.');
         return;
       }
       onSelectProject(project.path);
@@ -187,7 +187,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
             </>
           ) : (
             <span className="text-text-tertiary group-hover:text-text-secondary transition-colors">
-              未关联项目
+              No project
             </span>
           )}
           <IconChevronDown
@@ -224,7 +224,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索项目"
+                  placeholder="Search projects"
                 className="w-full bg-transparent text-[13px] text-text-primary outline-none border-none placeholder:text-text-tertiary"
               />
             </div>
@@ -262,7 +262,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                 })
               ) : (
                 <div className="px-3.5 py-3 text-center text-text-tertiary text-[12px] select-none">
-                  未找到匹配项目
+                  No matching projects
                 </div>
               )}
             </div>
@@ -287,7 +287,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
               >
                 <div className="flex items-center gap-2">
                   <IconFolderPlus size={15} className={showSubmenu ? 'text-accent' : 'text-text-tertiary'} />
-                  <span>添加新项目</span>
+                <span>Add project</span>
                 </div>
                 <IconChevronRight
                   size={12}
@@ -305,7 +305,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                     className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[7px] text-left text-[12.5px] text-text-primary hover:bg-bg-hover cursor-pointer border-none bg-transparent transition-colors"
                   >
                     <IconPlus size={13} className="text-text-tertiary shrink-0" />
-                    <span>新建空白项目</span>
+                <span>Create blank project</span>
                   </button>
                   <button
                     type="button"
@@ -314,7 +314,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                     className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[7px] text-left text-[12.5px] text-text-primary hover:bg-bg-hover cursor-pointer border-none bg-transparent transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <IconFolderSoft size={13} className="text-text-tertiary shrink-0" />
-                    <span>使用现有文件夹</span>
+                <span>Use existing folder</span>
                   </button>
                 </div>
               )}
@@ -332,7 +332,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
               >
                 <div className="flex items-center gap-2">
                   <IconFolderX size={15} className={activeProject === null ? 'text-accent' : 'text-text-tertiary'} />
-                  <span>不使用项目</span>
+                <span>No project</span>
                 </div>
                 {activeProject === null && <IconCheck size={14} className="text-accent shrink-0" />}
               </button>
@@ -357,13 +357,13 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
             >
               <div className="border-b border-hairline px-5 py-4">
                 <h2 id="create-project-title" className="text-[15px] font-medium text-text-primary">
-                  新建项目
+                New project
                 </h2>
               </div>
 
               <div className="flex flex-col gap-4 px-5 py-4">
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[12px] font-medium text-text-secondary">项目名称</span>
+                <span className="text-[12px] font-medium text-text-secondary">Project name</span>
                   <input
                     value={projectName}
                     onChange={(event) => {
@@ -378,7 +378,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                 </label>
 
                 <label className="flex flex-col gap-1.5">
-                  <span className="text-[12px] font-medium text-text-secondary">项目位置</span>
+                <span className="text-[12px] font-medium text-text-secondary">Project location</span>
                   <div className="flex items-center gap-2">
                     <input
                       value={parentPath}
@@ -397,7 +397,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                       className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-[8px] border border-hairline bg-transparent px-3 text-[12.5px] font-medium text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <IconFolderSoft size={14} className="shrink-0" />
-                      <span>{isPickingParent ? '选择中' : '选择'}</span>
+                      <span>{isPickingParent ? 'Selecting…' : 'Choose'}</span>
                     </button>
                   </div>
                 </label>
@@ -416,7 +416,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                   disabled={isCreating}
                   className="h-8 rounded-[8px] border border-hairline bg-transparent px-3.5 text-[12.5px] font-medium text-text-secondary transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  取消
+                  Cancel
                 </button>
                 <button
                   type="submit"
@@ -424,7 +424,7 @@ const FolderSelector: React.FC<FolderSelectorProps> = ({
                   className="inline-flex h-8 items-center gap-1.5 rounded-[8px] border-none bg-accent px-3.5 text-[12.5px] font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <IconPlus size={14} className="shrink-0" />
-                  <span>{isCreating ? '创建中' : '创建'}</span>
+                  <span>{isCreating ? 'Creating…' : 'Create'}</span>
                 </button>
               </div>
             </form>

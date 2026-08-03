@@ -1,8 +1,8 @@
 import { ipcRenderer } from 'electron';
 
 /**
- * 订阅一个 IPC 频道，返回取消订阅函数。
- * 回调只接收业务参数（自动剥离 IpcRendererEvent）。
+ * Subscribe to an IPC channel and return an unsubscribe function.
+ * The callback receives only business arguments; IpcRendererEvent is stripped automatically.
  */
 export function subscribe<T extends unknown[]>(
   channel: string,
@@ -18,8 +18,8 @@ export function subscribe<T extends unknown[]>(
 }
 
 /**
- * 订阅一个带「首参为 key」的 IPC 频道，只有 key 匹配时才回调（终端按 sessionId 过滤用）。
- * 返回取消订阅函数。
+ * Subscribe to an IPC channel whose first argument is a key; invoke the callback only when the key matches.
+ * Used to filter terminal events by sessionId. Return an unsubscribe function.
  */
 export function subscribeFiltered<T extends unknown[]>(
   channel: string,

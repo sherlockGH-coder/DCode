@@ -28,7 +28,7 @@ export const askUserQuestionTool: ToolExecutor = {
       properties: {
         questions: {
           type: 'array',
-          description: '要问用户的问题列表（1-4 个）',
+          description: 'List of questions to ask the user (1-4 items).',
           minItems: 1,
           maxItems: 4,
           items: {
@@ -128,7 +128,7 @@ export const askUserQuestionTool: ToolExecutor = {
     const decision = await approvalService.request({
       toolCallId: ctx.toolCallId,
       kind: 'ask_user_question',
-      command: questions.map((q) => q.question).join('；'),
+      command: questions.map((q) => q.question).join('; '),
       cwd: ctx.projectPath,
       questions,
       traceId: ctx.traceId,
@@ -140,7 +140,7 @@ export const askUserQuestionTool: ToolExecutor = {
 
     if (!decision.allowed || !decision.answers) {
       return {
-        content: '[User declined to answer] 用户未作答。请基于已有信息继续，或换一种方式询问。',
+        content: '[User declined to answer] The user did not answer. Continue based on the available information or ask in another way.',
         error: true,
         metadata: {
           kind: 'ask_user_question',
@@ -151,7 +151,7 @@ export const askUserQuestionTool: ToolExecutor = {
 
     const answerLines = Object.entries(decision.answers).map(([q, a]) => `"${q}"="${a}"`);
     return {
-      content: `用户已作答：${answerLines.join(', ')}。请根据这些选择继续执行。`,
+      content: `User answer: ${answerLines.join(', ')}. Continue based on these choices.`,
       metadata: {
         kind: 'ask_user_question',
         questions,

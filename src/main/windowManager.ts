@@ -89,7 +89,7 @@ function loadRenderer(win: BrowserWindow): void {
   const rendererUrl = process.env.ELECTRON_RENDERER_URL;
   const target = rendererUrl && rendererUrl.trim() ? rendererUrl.trim() : null;
 
-  // 加载失败以前是静默的：窗口白屏，日志里什么都没有
+  // Load failures used to be silent, leaving a blank window with no log output.
   const onFailure = (err: unknown) => {
     console.error(
       '[windowManager] Failed to load renderer:',

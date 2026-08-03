@@ -62,7 +62,7 @@ const ProjectBranchSelector: React.FC<{
               className="absolute left-0 bottom-full z-50 mb-1.5 min-w-[160px] max-w-[240px] bg-bg-main border border-hairline rounded-[14px] shadow-floating overflow-hidden py-1 animate-[menu-in_150ms_ease-out]"
             >
               <div className="px-3 py-1.5 border-b border-hairline text-[12px] font-normal text-text-tertiary select-none">
-                切换 Git 分支
+                Switch Git branch
               </div>
               <div className="max-h-[180px] overflow-y-auto py-1 custom-scrollbar">
                 {gitInfo.branches.map((branch) => {

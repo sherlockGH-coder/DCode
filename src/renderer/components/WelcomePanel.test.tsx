@@ -33,24 +33,24 @@ describe('WelcomePanel', () => {
   it('renders the four welcome actions without legacy helper text', () => {
     act(() => root?.render(<WelcomePanel onQuickAction={vi.fn()} />));
 
-    expect(container.textContent).toContain('准备构建什么？');
-    expect(container.textContent).toContain('从想法到实现，AI 与你一起完成');
+    expect(container.textContent).toContain('What do you want to build?');
+    expect(container.textContent).toContain('From idea to implementation, AI works with you');
     expect(container.querySelectorAll('.welcome-action-card')).toHaveLength(4);
-    expect(container.querySelector('button[aria-label="探索：帮我探索和分析当前代码库的架构与核心实现"]')).not.toBeNull();
-    expect(container.querySelector('button[aria-label="构建：帮我构建一个新的功能模块："]')).not.toBeNull();
-    expect(container.querySelector('button[aria-label="修复：帮我检查并修复代码中的问题："]')).not.toBeNull();
-    expect(container.querySelector('button[aria-label="审查：帮我审查最近的代码变更并给出改进建议"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="Explore: Explore and analyze the architecture and core implementation of this codebase"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="Build: Build a new feature module:"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="Fix: Inspect and fix issues in the code:"]')).not.toBeNull();
+    expect(container.querySelector('button[aria-label="Review: Review recent code changes and suggest improvements"]')).not.toBeNull();
     expect(container.textContent).not.toContain('DCode Workbench');
-    expect(container.textContent).not.toContain('Enter 执行');
+    expect(container.textContent).not.toContain('Press Enter to run');
   });
 
   it('passes the selected prompt to the composer integration', () => {
     const onQuickAction = vi.fn();
     act(() => root?.render(<WelcomePanel onQuickAction={onQuickAction} />));
 
-    const buildButton = container.querySelector('button[aria-label="构建：帮我构建一个新的功能模块："]') as HTMLButtonElement;
+    const buildButton = container.querySelector('button[aria-label="Build: Build a new feature module:"]') as HTMLButtonElement;
     act(() => buildButton.dispatchEvent(new window.Event('click', { bubbles: true })));
 
-    expect(onQuickAction).toHaveBeenCalledWith('帮我构建一个新的功能模块：');
+    expect(onQuickAction).toHaveBeenCalledWith('Build a new feature module:');
   });
 });

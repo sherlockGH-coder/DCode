@@ -9,14 +9,14 @@ import { computeSignature, readCache, writeCache } from './shell-env/cache';
 const MARKER = '___DEEPSEEK_SHELL_ENV_MARKER_97531___';
 
 /**
- * 首次解析（无任何缓存可用）时的超时上限。
+ * Timeout limit for the first parse when no cache is available.
  *
- * 原来是 15s，且每次启动都会走到——一个卡住的 rc 文件能让应用白屏 15 秒。
- * 现在只有真正的第一次启动才可能阻塞，超时也收紧了。
+ * It used to be 15 s on every startup, so a stuck rc file could blank the app for 15 seconds.
+ * Now only the true first startup can block, and the timeout is shorter.
  */
 const FIRST_RUN_TIMEOUT_MS = 8_000;
 
-/** 后台重新解析的超时，可以放宽，因为不阻塞任何东西。 */
+/** Timeout for background reparsing; it can be longer because nothing is blocked. */
 const BACKGROUND_TIMEOUT_MS = 20_000;
 
 const KEYS_TO_MERGE = [
@@ -55,11 +55,11 @@ function pickShell(): string {
 }
 
 /**
- * 保留 `-i`。
+ * Keep `-i`.
  *
- * 很多用户把 `export PATH=…` 写在 `.zshrc` 里，而 `.zshrc` 只有交互式 shell 才会
- * source。去掉 `-i` 能省下大部分耗时，但会漏掉这些配置——所以这里选择保住正确性，
- * 靠缓存把开销降到每次 rc 变更付一次，而不是每次启动都付。
+ * Many users put `export PATH=…` in `.zshrc`, which is sourced only by interactive shells.
+ * Removing `-i` would save most of the time but miss those settings, so preserve correctness
+ * and use the cache to pay the cost once per rc change instead of once per startup.
  */
 const SHELL_ARGS = ['-i', '-l', '-c'] as const;
 
@@ -108,7 +108,7 @@ function dumpShellEnv(shell: string, timeoutMs: number): string | null {
   return extractEnvBlock(result.stdout || '', result.stderr || '');
 }
 
-/** 异步版本，用于后台刷新缓存——不阻塞主线程。 */
+/** Async version for refreshing the cache in the background without blocking the main thread. */
 function dumpShellEnvAsync(shell: string): Promise<string | null> {
   return new Promise((resolve) => {
     let stdout = '';
@@ -159,7 +159,7 @@ function parseEnvBlock(block: string): Record<string, string> {
   return out;
 }
 
-/** 只保留我们关心的键，缓存体积小、也避免把敏感变量整份落盘。 */
+/** Keep only keys we care about to reduce cache size and avoid writing all sensitive variables to disk. */
 function pickMergeableKeys(shellEnv: Record<string, string>): Record<string, string> {
   const picked: Record<string, string> = {};
   for (const key of KEYS_TO_MERGE) {
@@ -187,7 +187,7 @@ function userDataDir(): string | null {
   }
 }
 
-/** 后台重新解析并刷新缓存；失败只记日志，不影响当前进程。 */
+/** Reparse and refresh the cache in the background; failures are logged without affecting the current process. */
 function revalidateInBackground(shell: string, signature: string, dir: string): void {
   void dumpShellEnvAsync(shell).then((envBlock) => {
     if (envBlock === null) return;
@@ -199,10 +199,10 @@ function revalidateInBackground(shell: string, signature: string, dir: string): 
 }
 
 /**
- * 解析并合并登录 shell 的环境变量。
+ * Parse and merge login-shell environment variables.
  *
- * 有缓存就立刻应用、绝不阻塞；签名过期时在后台重新解析，下次启动生效。
- * 只有从未成功解析过（真正的首次启动）才会同步等待。
+ * Apply a cache immediately without blocking; reparse an expired signature in the background for the next startup.
+ * Wait synchronously only when parsing has never succeeded, which is the true first startup.
  */
 export function resolveShellEnvironment(): void {
   if (process.platform === 'win32') return;
@@ -223,7 +223,7 @@ export function resolveShellEnvironment(): void {
     return;
   }
 
-  // 首次启动：没有任何可用值，只能同步解析
+  // First startup: no usable value exists, so parse synchronously.
   debugLog('shellEnv', 'No cache available, resolving environment via', shell);
   const envBlock = dumpShellEnv(shell, FIRST_RUN_TIMEOUT_MS);
   if (envBlock === null) return;

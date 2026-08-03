@@ -56,11 +56,11 @@ export async function openResolvedPath(finalPath: string, optionId: string): Pro
 
   const option = (await resolveFileOpenOptions(finalPath)).find((item) => item.id === optionId);
   if (!option || option.target !== 'app' || !option.appPath) {
-    return openFailure('app', '打开方式不可用。');
+    return openFailure('app', 'The selected application is unavailable.');
   }
 
   if (process.platform !== 'darwin') {
-    return openFailure('app', `${option.name} 打开方式当前仅支持 macOS。`, option.name);
+    return openFailure('app', `${option.name} is currently supported only on macOS.`, option.name);
   }
 
   const targetPath = option.opensDirectory ? dirname(finalPath) : finalPath;
@@ -294,5 +294,5 @@ function openFailure(target: FileOpenResult['target'], error: string, name?: str
 
 function formatExecError(err: unknown, appName: string): string {
   const details = err instanceof Error ? err.message : String(err);
-  return `无法用 ${appName} 打开文件：${details}`;
+  return `Could not open the file with ${appName}: ${details}`;
 }

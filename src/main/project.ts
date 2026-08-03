@@ -32,7 +32,7 @@ class ProjectManager {
       }
 
       if (existsSync(this.legacyStatePath)) {
-        console.log('[project] 检测到旧 workspace-state.json，开始迁移');
+        console.log('[project] Found legacy workspace-state.json; starting migration');
         const raw = readFileSync(this.legacyStatePath, 'utf-8');
         const legacy = JSON.parse(raw) as {
           folders?: Array<{ path: string; name: string; addedAt: number }>;
@@ -47,11 +47,11 @@ class ProjectManager {
         this.activeProject = legacy.activeFolder ?? null;
         this.save();
         try { renameSync(this.legacyStatePath, this.legacyStatePath + '.bak'); } catch {}
-        console.log('[project] 迁移完成，项目数:', this.projects.length);
+        console.log('[project] Migration complete; project count:', this.projects.length);
         return;
       }
     } catch (err) {
-      console.warn('[project] 加载状态失败，使用空状态:', err);
+      console.warn('[project] Failed to load state; using an empty state:', err);
       this.projects = [];
       this.activeProject = null;
     }
@@ -67,7 +67,7 @@ class ProjectManager {
       writeFileSync(tmpPath, JSON.stringify(state, null, 2), 'utf-8');
       renameSync(tmpPath, this.statePath);
     } catch (err) {
-      console.error('[project] 保存状态失败:', err);
+      console.error('[project] Failed to save state:', err);
       try { unlinkSync(tmpPath); } catch {}
     }
   }
@@ -75,8 +75,8 @@ class ProjectManager {
   async selectAndAddProject(): Promise<Project | null> {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory'],
-      title: '添加已有项目文件夹',
-      buttonLabel: '添加项目',
+      title: 'Add an existing project folder',
+      buttonLabel: 'Add project',
     });
     if (result.canceled || result.filePaths.length === 0) return null;
     return this.addProject(result.filePaths[0]);
@@ -85,8 +85,8 @@ class ProjectManager {
   async selectProjectParentDirectory(): Promise<string | null> {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory', 'createDirectory'],
-      title: '选择新项目位置',
-      buttonLabel: '选择位置',
+      title: 'Choose a location for the new project',
+      buttonLabel: 'Choose location',
     });
     if (result.canceled || result.filePaths.length === 0) return null;
     return resolve(result.filePaths[0]);
@@ -97,17 +97,17 @@ class ProjectManager {
     const projectName = normalizeProjectName(input.name);
     const projectPath = resolve(parentPath, projectName);
 
-    await assertDirectory(parentPath, '父目录不存在或不可访问');
+    await assertDirectory(parentPath, 'The parent directory does not exist or is not accessible.');
     assertChildPath(parentPath, projectPath);
 
     if (existsSync(projectPath)) {
-      throw new Error('目标文件夹已存在，请换一个项目名或使用“添加已有项目”。');
+      throw new Error('The target folder already exists. Choose another project name or use "Add an existing project".');
     }
 
     await mkdir(projectPath);
     const project = await this.addProject(projectPath);
     if (!project) {
-      throw new Error('项目文件夹已创建，但注册项目失败。');
+      throw new Error('The project folder was created, but registering the project failed.');
     }
     return project;
   }
@@ -118,11 +118,11 @@ class ProjectManager {
     try {
       const stats = await stat(resolvedPath);
       if (!stats.isDirectory()) {
-        console.warn('[project] 路径不是文件夹:', resolvedPath);
+        console.warn('[project] Path is not a folder:', resolvedPath);
         return null;
       }
     } catch {
-      console.warn('[project] 路径无效:', resolvedPath);
+      console.warn('[project] Invalid path:', resolvedPath);
       return null;
     }
 
@@ -144,7 +144,7 @@ class ProjectManager {
     if (this.projects.length === 1) this.activeProject = resolvedPath;
 
     this.save();
-    debugLog('project', '添加项目:', project.path);
+    debugLog('project', 'Adding project:', project.path);
     return project;
   }
 
@@ -159,7 +159,7 @@ class ProjectManager {
     }
 
     this.save();
-    debugLog('project', '移除项目:', resolvedPath);
+    debugLog('project', 'Removing project:', resolvedPath);
     return true;
   }
 
@@ -201,10 +201,10 @@ export const projectManager = new ProjectManager();
 function normalizeProjectName(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) {
-    throw new Error('项目名称不能为空。');
+    throw new Error('Project name cannot be empty.');
   }
   if (trimmed === '.' || trimmed === '..' || INVALID_PROJECT_NAME_RE.test(trimmed)) {
-    throw new Error('项目名称不能包含路径分隔符、控制字符或特殊目录名。');
+    throw new Error('Project name cannot contain path separators, control characters, or special directory names.');
   }
   return trimmed;
 }
@@ -223,6 +223,6 @@ async function assertDirectory(folderPath: string, message: string): Promise<voi
 function assertChildPath(parentPath: string, childPath: string): void {
   const normalizedParent = parentPath.endsWith(sep) ? parentPath : parentPath + sep;
   if (!childPath.startsWith(normalizedParent)) {
-    throw new Error('新项目路径必须位于所选父目录内。');
+    throw new Error('The new project path must be inside the selected parent directory.');
   }
 }

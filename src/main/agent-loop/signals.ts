@@ -25,7 +25,7 @@ export function mergeAbortSignals(...signals: Array<AbortSignal | undefined>): A
   return controller.signal;
 }
 
-/** 等待退避时间；用户中止时立即返回 false，避免 UI 已停止但 loop 仍在休眠。 */
+/** Wait for the backoff period; return false immediately when the user aborts so the loop does not sleep after the UI stops. */
 export function waitForAbortableDelay(delayMs: number, signal?: AbortSignal): Promise<boolean> {
   if (signal?.aborted) return Promise.resolve(false);
 

@@ -240,7 +240,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
       <div
         ref={projectMenuRef}
         role="menu"
-        aria-label="项目操作"
+        aria-label="Project actions"
         className="fixed z-[1000] min-w-[140px] py-1 bg-bg-main rounded-[14px] border border-hairline shadow-floating"
         style={{ left: projectMenuPosition.left, top: projectMenuPosition.top }}
         onClick={(e) => e.stopPropagation()}
@@ -256,7 +256,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
           }}
         >
           <IconX size={13} className="text-text-tertiary" />
-          移除项目
+          Remove project
         </button>
       </div>,
       document.body,
@@ -284,7 +284,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
       <div
         ref={menuRef}
         role="menu"
-        aria-label="会话操作"
+        aria-label="Conversation actions"
         className="fixed z-[1000] min-w-[140px] py-1 bg-bg-main rounded-[14px] border border-hairline shadow-floating"
         style={{ left: menuPosition.left, top: menuPosition.top }}
         onClick={(e) => e.stopPropagation()}
@@ -296,7 +296,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
           onClick={() => handleStartRename(conv)}
         >
           <IconEdit size={13} className="text-text-tertiary" />
-          重命名
+          Rename
         </button>
         <button
           type="button"
@@ -305,7 +305,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
           onClick={() => handleDeleteClick(conv)}
         >
           <IconX size={13} className="text-text-tertiary" />
-          删除对话
+          Delete conversation
         </button>
       </div>,
       document.body,
@@ -366,7 +366,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
                   }}
                   type="button"
                   className="absolute right-0 opacity-0 group-hover:opacity-100 border-none bg-transparent text-text-tertiary px-1.5 py-0.5 rounded-md hover:text-text-primary hover:bg-bg-hover transition-all cursor-pointer z-10 flex items-center justify-center"
-                  title="更多操作"
+                  title="More actions"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleMenuToggle(conv.id, e.currentTarget);
@@ -412,13 +412,13 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
                 nested ? 'pl-[22px]' : 'pl-2.5'
               }`}
               onClick={() => toggleConversationList(listId)}
-              title={isListExpanded ? '折叠显示' : '展开显示'}
+                title={isListExpanded ? 'Collapse' : 'Expand'}
             >
               <span className="shrink-0 transition-colors group-hover:text-text-secondary">
                 {isListExpanded ? <IconChevronDown size={13} /> : <IconChevronRight size={13} />}
               </span>
               <span className="flex-1 min-w-0 text-left whitespace-nowrap overflow-hidden text-ellipsis">
-                {isListExpanded ? '折叠显示' : `展开显示${hiddenCount > 0 ? `（${hiddenCount}）` : ''}`}
+                {isListExpanded ? 'Collapse' : `Show more${hiddenCount > 0 ? ` (${hiddenCount})` : ''}`}
               </span>
             </button>
           </li>
@@ -432,14 +432,14 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
   return (
     <section className="mt-2.5 flex flex-col gap-4.5">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between px-2.5 py-0.5">
+        <div className="flex items-center justify-between pl-2.5 pr-0 py-0.5">
           <h2 className="text-[12px] font-normal text-text-tertiary">
-            项目
+            Projects
           </h2>
           <button
             type="button"
             className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-transparent text-text-tertiary hover:bg-bg-hover hover:text-text-primary transition-all cursor-pointer"
-            title="添加项目"
+            title="Add project"
             onClick={onAddProject}
           >
             <IconFolderPlus size={16} />
@@ -483,7 +483,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
                     }}
                     type="button"
                     className="shrink-0 opacity-0 group-hover:opacity-100 border-none bg-transparent text-text-tertiary cursor-pointer p-0.5 rounded transition-all hover:text-text-primary hover:bg-bg-hover"
-                    title="更多操作"
+                  title="More actions"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleProjectMenuToggle(project.path, e.currentTarget);
@@ -495,7 +495,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
                   <button
                     type="button"
                     className="shrink-0 opacity-0 group-hover:opacity-100 border-none bg-transparent text-text-tertiary cursor-pointer p-0.5 rounded transition-all hover:text-text-primary hover:bg-bg-hover"
-                    title="在此项目下新建对话"
+                  title="New conversation in this project"
                     onClick={(e) => {
                       e.stopPropagation();
                       onNewProjectConversation(project.path);
@@ -525,14 +525,14 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between px-2.5 py-0.5">
+        <div className="flex items-center justify-between pl-2.5 pr-0 py-0.5">
           <h2 className="text-[12px] font-normal text-text-tertiary">
-            对话
+            Conversations
           </h2>
           <button
             type="button"
             className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-transparent text-text-tertiary hover:bg-bg-hover hover:text-text-primary transition-all cursor-pointer"
-            title="新建对话"
+            title="New conversation"
             onClick={onNewGlobalConversation}
           >
             <IconEdit size={14} />
@@ -546,12 +546,12 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
       {confirmDelete &&
         createPortal(
           <ConfirmDialog
-            title="删除对话"
-            confirmLabel="删除"
+            title="Delete conversation"
+            confirmLabel="Delete"
             onCancel={() => setConfirmDelete(null)}
             onConfirm={handleConfirmDelete}
           >
-            确认要删除对话 <span className="font-semibold text-text-primary">{confirmDelete.title}</span>？此操作不可撤销，所有消息将被永久删除。
+            Are you sure you want to delete <span className="font-semibold text-text-primary">{confirmDelete.title}</span>? This cannot be undone, and all messages will be permanently deleted.
           </ConfirmDialog>,
           document.body,
         )}
@@ -559,12 +559,12 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
       {confirmRemoveProject &&
         createPortal(
           <ConfirmDialog
-            title="移除项目"
-            confirmLabel="移除"
+            title="Remove project"
+            confirmLabel="Remove"
             onCancel={() => setConfirmRemoveProject(null)}
             onConfirm={handleConfirmRemoveProject}
           >
-            确认要移除项目 <span className="font-semibold text-text-primary">{confirmRemoveProject.name}</span>？此操作不会删除项目文件，仅从列表中移除。
+            Are you sure you want to remove <span className="font-semibold text-text-primary">{confirmRemoveProject.name}</span>? This will not delete project files; it only removes the project from the list.
           </ConfirmDialog>,
           document.body,
         )}

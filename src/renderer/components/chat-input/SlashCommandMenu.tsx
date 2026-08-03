@@ -29,11 +29,11 @@ const SlashCommandMenu: React.FC<{
       >
         <div className="flex items-center gap-2 px-4 py-2.5 border-b border-hairline">
           <span className="text-[12px] font-normal text-text-tertiary select-none">
-            命令
+            Commands
           </span>
           {filter && (
             <span className="text-[11px] text-text-tertiary">
-              匹配 "{filter}"
+              Matches for "{filter}"
             </span>
           )}
         </div>
@@ -42,7 +42,7 @@ const SlashCommandMenu: React.FC<{
           {builtinFiltered.length > 0 && (
             <>
               <div className="px-2.5 py-1 text-[12px] font-normal text-text-tertiary select-none">
-                系统命令
+                System commands
               </div>
               {builtinFiltered.map((cmd) => (
                 <SlashCommandRow
@@ -60,7 +60,7 @@ const SlashCommandMenu: React.FC<{
           {skillFiltered.length > 0 && (
             <>
               <div className="px-2.5 py-1 mt-1 text-[12px] font-normal text-text-tertiary select-none">
-                技能
+                Skills
               </div>
               {skillFiltered.map((cmd) => (
                 <SlashCommandRow
@@ -77,7 +77,7 @@ const SlashCommandMenu: React.FC<{
         </div>
 
         <div className="px-4 py-2 border-t border-hairline text-[11px] text-text-tertiary select-none">
-          输入 <code className="px-1 py-0.5 bg-bg-chip rounded-[5px] text-[10px] font-mono">/</code> 触发命令面板 · 输入关键词筛选
+          Type <code className="px-1 py-0.5 bg-bg-chip rounded-[5px] text-[10px] font-mono">/</code> to open the command panel · type a keyword to filter
         </div>
       </div>
     )}

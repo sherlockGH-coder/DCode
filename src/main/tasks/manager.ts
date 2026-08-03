@@ -275,7 +275,7 @@ export class TaskManager {
           });
           if (allBlockersDone) {
 
-            debugLog('tasks', `任务 "${blocked.title}" 的所有阻塞已解除，可开始执行`);
+            debugLog('tasks', `All blockers for task "${blocked.title}" are cleared; it can start`);
           }
         }
       }

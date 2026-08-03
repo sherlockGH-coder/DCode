@@ -93,8 +93,8 @@ const AgentToolCard: React.FC<{ item: Extract<ToolItem, { kind: 'agent' }>; hide
   };
   const resultText = parsedOutput.resultText ?? (parsedOutput.parsed ? undefined : output);
   const title = agents.length > 1
-    ? `${agents.length} 个子 Agent`
-    : (singleAgent.taskName || singleAgent.id || '子 Agent');
+    ? `${agents.length} child agents`
+    : (singleAgent.taskName || singleAgent.id || 'Child agent');
   const hasSingleAgentDetail = !!singleAgent.id || !!singleAgent.role || !!singleAgent.conversationId;
   const hasExpandableContent = !!resultText || agents.length > 0 || hasSingleAgentDetail;
 
@@ -102,12 +102,12 @@ const AgentToolCard: React.FC<{ item: Extract<ToolItem, { kind: 'agent' }>; hide
     || (item.action === 'spawn' && (item.timedOut || parsedOutput.timedOut));
   const isError = item.status === 'error' || !!singleAgent.error;
   const statusText = isError
-    ? '失败'
+    ? 'Failed'
     : isRunning
-      ? (item.timedOut || parsedOutput.timedOut ? '后台运行中' : '运行中')
+      ? (item.timedOut || parsedOutput.timedOut ? 'Running in background' : 'Running')
       : item.action === 'close'
-        ? '已关闭'
-        : '已完成';
+        ? 'Closed'
+        : 'Completed';
 
   const renderAgentRow = (agent: AgentDisplaySummary, index: number) => (
     <div key={agent.id ?? index} className="flex min-w-0 items-center gap-2 text-[12px] text-text-secondary">
@@ -143,7 +143,7 @@ const AgentToolCard: React.FC<{ item: Extract<ToolItem, { kind: 'agent' }>; hide
             <IconRobot size={15} className="text-current" />
           </span>
         )}
-        <span className="shrink-0 text-[13.5px] text-current">子 Agent</span>
+        <span className="shrink-0 text-[13.5px] text-current">Child agent</span>
         <span className="min-w-0 truncate font-mono text-[13.5px] text-current" title={title}>{title}</span>
         <span className={`shrink-0 text-[13px] ${isError ? 'text-diff-del' : 'text-text-tertiary'}`}>· {statusText}</span>
         {hasExpandableContent && (
@@ -175,7 +175,7 @@ const AgentToolCard: React.FC<{ item: Extract<ToolItem, { kind: 'agent' }>; hide
               )}
               {item.timedOut || parsedOutput.timedOut ? (
                 <div className="text-text-tertiary">
-                  仍在后台运行，稍后用 wait_agent 和该 agent_id 获取结果。
+                  Still running in the background. Use wait_agent with this agent_id later to retrieve the result.
                 </div>
               ) : null}
             </div>

@@ -3,34 +3,34 @@ import { closeMarkdown } from './streamingMarkdown';
 
 describe('closeMarkdown', () => {
   it('does not append underscores for snake_case tool names', () => {
-    const text = '现在测试 web_search、 web_fetch、 edit_file、 write_file 和 load_skill:';
+    const text = 'Testing web_search, web_fetch, edit_file, write_file, and load_skill:';
 
     expect(closeMarkdown(text)).toBe(text);
   });
 
   it('does not treat odd snake_case identifiers as unclosed emphasis', () => {
-    const text = '现在测试 edit_file、 wait_agent 和 list_agents:';
+    const text = 'Testing edit_file, wait_agent, and list_agents:';
 
     expect(closeMarkdown(text)).toBe(text);
   });
 
   it('still closes real underscore emphasis', () => {
-    expect(closeMarkdown('开始 _强调')).toBe('开始 _强调_');
+    expect(closeMarkdown('Start _emphasis')).toBe('Start _emphasis_');
   });
 
   it('ignores underscores inside inline code', () => {
-    const text = '调用 `web_search` 后读取 read_file:';
+    const text = 'Read read_file after calling `web_search`:';
 
     expect(closeMarkdown(text)).toBe(text);
   });
 
   it('does not treat a leading list marker as unclosed italic', () => {
-    const text = '结果如下：\n* 第一项\n* 第二项';
+    const text = 'The results are:\n* First item\n* Second item';
 
     expect(closeMarkdown(text)).toBe(text);
   });
 
   it('still closes real single-star italic mid-line', () => {
-    expect(closeMarkdown('这是 *强调')).toBe('这是 *强调*');
+    expect(closeMarkdown('This is *emphasis')).toBe('This is *emphasis*');
   });
 });

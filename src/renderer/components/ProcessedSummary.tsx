@@ -3,19 +3,19 @@ import { IconChevronRight } from './icons';
 
 interface Props {
   isProcessing: boolean;
-  /** 仅 processing 模式使用：首字到达时间戳 */
+  /** Used only in processing mode: timestamp when the first token arrives. */
   startedAt?: number;
-  /** 仅 completed 模式使用：最终时长 (ms) */
+  /** Used only in completed mode: final duration in milliseconds. */
   durationMs?: number;
-  /** 中间过程节点：completed 且 expanded 时渲染在分隔线下方；processing 时由父级铺在下方 */
+  /** Intermediate nodes: rendered below the separator when completed and expanded; laid out below by the parent while processing. */
   children?: React.ReactNode;
-  /** 是否真有中间过程（决定 completed 态是否提供展开按钮） */
+  /** Whether intermediate activity exists, which determines whether completed mode has an expand button. */
   hasIntermediate: boolean;
-  /** 完成后默认是否展开（默认收起） */
+  /** Whether to expand by default after completion; collapsed by default. */
   defaultExpanded?: boolean;
 }
 
-/** 紧凑时长：< 60s → "12s"，< 1h → "3m 2s"，否则 "1h 5m 30s" */
+/** Compact duration: < 60s -> "12s", < 1h -> "3m 2s", otherwise "1h 5m 30s". */
 function formatDuration(ms: number): string {
   if (!Number.isFinite(ms) || ms < 0) return '0s';
   const totalSecs = Math.floor(ms / 1000);
@@ -81,7 +81,7 @@ const ProcessedSummary: React.FC<Props> = ({
               <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
             </svg>
           )}
-          <span className="font-medium">已处理</span>
+          <span className="font-medium">Processed</span>
           <span className="font-medium tabular-nums ml-0.5">{formatDuration(elapsedMs)}</span>
         </span>
 

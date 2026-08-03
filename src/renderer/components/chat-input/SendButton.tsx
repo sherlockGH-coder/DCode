@@ -12,8 +12,8 @@ const SendButton: React.FC<{
     className="w-7 h-7 inline-flex items-center justify-center border-none rounded-full bg-accent text-white cursor-pointer transition-[background-color,opacity] duration-150 hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-accent shrink-0"
     onClick={isLoading ? onAbort : onSend}
     disabled={isLoading ? false : (!canSend || disabled)}
-    aria-label={isLoading ? '停止回复' : '发送'}
-    title={isLoading ? '停止回复' : '发送'}
+    aria-label={isLoading ? 'Stop response' : 'Send'}
+    title={isLoading ? 'Stop response' : 'Send'}
   >
     {isLoading ? (
       <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden>

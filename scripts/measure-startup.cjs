@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 /**
- * 冷启动耗时测量：从 spawn Electron 到渲染进程首帧可见。
+ * Measure cold-start time from spawning Electron to the first visible renderer frame.
  *
- * 用法：
- *   node scripts/measure-startup.cjs [轮数]
+ * Usage:
+ *   node scripts/measure-startup.cjs [rounds]
  *
- * 每轮使用全新的 userData 目录（模拟首次启动，无 shell env 缓存），
- * 以及一个复用的 userData 目录（模拟日常启动，有缓存）。
+ * Each round uses a new userData directory to simulate first launch without a shell-env cache,
+ * plus a reused userData directory to simulate daily launch with a cache.
  */
-const { _electron: electron } = require('@playwright/test');
+const { _electron: electron } = require('playwright-core');
 const { mkdtempSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join, resolve } = require('node:path');
@@ -44,7 +44,7 @@ function stats(label, samples) {
 }
 
 (async () => {
-  // 冷缓存：每轮一个新的 userData
+  // Cold cache: a new userData directory each round.
   const cold = [];
   for (let i = 0; i < ROUNDS; i++) {
     const dir = mkdtempSync(join(tmpdir(), 'deepseek-startup-cold-'));
@@ -55,13 +55,13 @@ function stats(label, samples) {
     }
   }
 
-  // 热 userData + 有 shell env 缓存（日常启动）
+  // Warm userData with a shell-env cache (daily startup).
   const warmDir = mkdtempSync(join(tmpdir(), 'deepseek-startup-warm-'));
   const warm = [];
-  // 热 userData + 每轮删掉 shell env 缓存（等价于优化前的行为）
+  // Warm userData while deleting the shell-env cache each round, equivalent to the pre-optimization behavior.
   const warmNoCache = [];
   try {
-    await launchOnce(warmDir); // 预热：建库 + 写入 shell env 缓存
+    await launchOnce(warmDir); // Warm up: create the database and write the shell-env cache.
 
     for (let i = 0; i < ROUNDS; i++) {
       warm.push(await launchOnce(warmDir));

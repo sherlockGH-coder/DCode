@@ -20,22 +20,22 @@ function isSimplePattern(pattern: string): boolean {
 function describeExplorationItem(item: ToolItem): string {
   switch (item.kind) {
     case 'read':
-      return `已读取 ${basename(item.path)}`;
+      return `Read ${basename(item.path)}`;
     case 'list_directory':
-      return `已列出 ${basename(item.path)}`;
+      return `Listed ${basename(item.path)}`;
     case 'glob': {
       const cleanPattern = item.pattern.replace(/\/?\*+.*$/, '');
       const target = basename(cleanPattern) || basename(item.pattern);
-      return target ? `已列出 ${target}` : '已列出文件';
+      return target ? `Listed ${target}` : 'Listed files';
     }
     case 'grep':
-      return isSimplePattern(item.pattern) ? `已搜索 ${item.pattern}` : '已搜索代码';
+      return isSimplePattern(item.pattern) ? `Searched ${item.pattern}` : 'Searched code';
     case 'web_search':
-      return `已搜索网页 ${item.query}`;
+      return `Searched the web for ${item.query}`;
     case 'web_fetch':
-      return `已抓取 ${item.title || item.url}`;
+      return `Fetched ${item.title || item.url}`;
     default:
-      return '已探索';
+      return 'Explored';
   }
 }
 

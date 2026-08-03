@@ -33,11 +33,11 @@ export function attachmentWarning(a: Attachment): string | null {
   const limit = isDoc ? WARN_THRESHOLD_DOC : WARN_THRESHOLD_TEXT;
   if (a.size > limit) {
     return isDoc
-      ? `${a.name} 较大 (${formatBytes(a.size)})，解析后可能超出模型上下文`
-      : `${a.name} 较大 (${formatBytes(a.size)})，可能超出模型上下文。建议改用 grep 检索关键内容`;
+      ? `${a.name} is large (${formatBytes(a.size)}); parsing it may exceed the model context`
+      : `${a.name} is large (${formatBytes(a.size)}); it may exceed the model context. Consider using grep to find the relevant content`;
   }
   if (a.kind === 'image' || a.kind === 'audio' || a.kind === 'video') {
-    return `当前 DeepSeek 模型不支持 ${a.kind}，模型只能看到路径与元信息`;
+    return `The current DeepSeek model does not support ${a.kind}; the model can see only the path and metadata`;
   }
   return null;
 }
@@ -119,15 +119,15 @@ export function normalizeContextUsagePercent(percent?: number | null): number | 
 export function formatCompactSlashCommandDescription(percent?: number | null): string {
   const normalized = normalizeContextUsagePercent(percent);
   return normalized === null
-    ? '压缩此会话的上下文'
-    : `压缩此会话的上下文（已使用 ${normalized}%）`;
+    ? 'Compact this conversation context'
+    : `Compact this conversation context (${normalized}% used)`;
 }
 
 export const BUILTIN_SLASH_COMMAND_NAMES = ['compact', 'plan', 'help'] as const;
 
 export const CompactContextRing: React.FC<{ percent?: number | null }> = ({ percent }) => {
   const normalized = normalizeContextUsagePercent(percent) ?? 0;
-  const label = `当前上下文已使用 ${normalized}%`;
+  const label = `Current context usage: ${normalized}%`;
 
   return (
     <svg

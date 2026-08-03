@@ -10,7 +10,7 @@ interface AppHeaderProps {
   isFullscreen: boolean;
   sidebarCollapsed: boolean;
   chatTitle: string;
-  /** 当前对话所属项目名（null 表示未归类对话） */
+  /** Name of the project that owns the current conversation, or null for unassigned conversations. */
   projectName: string | null;
   onShowSidebar: () => void;
   onNewConversation: () => void;
@@ -25,7 +25,7 @@ interface HeaderToolButtonProps {
 }
 
 const HEADER_ACTIONS_CLASS = 'inline-flex h-7 items-center gap-1.5';
-/* 侧栏收起后 header 左侧滑入的按钮簇：两个 28px 按钮 + 6px 间距 */
+/* Header action cluster revealed after the sidebar collapses: two 28px buttons with 6px spacing. */
 const HEADER_ACTIONS_REVEAL_CLASS = 'shrink-0 overflow-hidden transition-[width,margin-right,opacity] duration-[0.24s] ease-[cubic-bezier(0.32,0.72,0,1)] [-webkit-app-region:no-drag]';
 const HEADER_ACTIONS_VISIBLE_CLASS = 'w-[62px] opacity-100';
 const HEADER_ACTIONS_HIDDEN_CLASS = 'w-0 -mr-2.5 opacity-0 pointer-events-none';
@@ -96,10 +96,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         aria-hidden={!sidebarCollapsed}
         inert={sidebarCollapsed ? undefined : true}
       >
-        <HeaderToolButton label="显示侧栏" onClick={onShowSidebar}>
+        <HeaderToolButton label="Show sidebar" onClick={onShowSidebar}>
           <IconPanels size={16} />
         </HeaderToolButton>
-        <HeaderToolButton label="新对话" onClick={onNewConversation}>
+        <HeaderToolButton label="New conversation" onClick={onNewConversation}>
           <IconEdit size={16} />
         </HeaderToolButton>
       </div>

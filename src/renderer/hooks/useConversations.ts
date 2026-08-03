@@ -6,11 +6,11 @@ import { applyApprovalToMessages, type ActiveRequest } from './useMessages';
 const MAX_CACHED_CONVERSATIONS = 5;
 
 /**
- * 对话列表 + 当前选中对话的状态管理。
- * activeProject 改变时按项目过滤；同时清空当前选中对话，让用户回到「新对话」起点。
+ * Manage the conversation list and the currently selected conversation.
+ * Filter by project when activeProject changes and clear the selection so the user returns to the new-conversation state.
  *
- * messages 按 conversationId 缓存，切换对话不丢失后台流式更新的消息。
- * 使用 LRU 策略限制缓存数量，避免内存无限增长。
+ * Cache messages by conversationId so switching conversations does not lose background stream updates.
+ * Use an LRU policy to limit the cache and prevent unbounded memory growth.
  */
 export function useConversations(activeProject: string | null) {
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -24,16 +24,16 @@ export function useConversations(activeProject: string | null) {
   const messages = conversationId ? (messagesByConv[conversationId] ?? []) : [];
 
   /**
-   * 拉取当前项目下的对话。
-   *  - activeProject 为字符串：该项目下的对话
-   *  - activeProject 为 null：未归类的对话
+   * Load conversations for the current project.
+   *  - activeProject is a string: conversations in that project.
+   *  - activeProject is null: unassigned conversations.
    */
   const loadConversations = useCallback(async () => {
     try {
       const projConvs = await window.deepseekApi.getConversations();
       setConversations(projConvs as Conversation[]);
     } catch (err) {
-      console.error('加载对话列表失败:', err);
+      console.error('Failed to load conversation list:', err);
     }
   }, []);
 
@@ -116,13 +116,13 @@ export function useConversations(activeProject: string | null) {
       setActiveAttemptsState(attempts ?? {});
       setConversationId(convId);
     } catch (err) {
-      console.error('加载消息失败:', err);
+      console.error('Failed to load messages:', err);
     }
   }, [pruneConversationCache, touchConversationCache]);
 
   /**
-   * 更新指定对话的消息（供流式事件回调使用）。
-   * 调用方负责指定 convId 以确保后台对话的消息写入正确缓存。
+   * Update a conversation's messages for stream event callbacks.
+   * Callers must provide convId so background conversation updates enter the correct cache.
    */
   const setMessages = useCallback((convId: string, updater: (prev: Message[]) => Message[]) => {
     setMessagesByConv((prev) => {
@@ -135,14 +135,14 @@ export function useConversations(activeProject: string | null) {
     });
   }, [pruneConversationCache, touchConversationCache]);
 
-  /** 写 activeAttempts：内存 + DB 一起更新（DB 失败仅 console，UI 不阻塞） */
+  /** Write activeAttempts to memory and the DB; a DB failure is logged without blocking the UI. */
   const setActiveAttempts = useCallback(
     (updater: Record<string, number> | ((prev: Record<string, number>) => Record<string, number>)) => {
       setActiveAttemptsState((prev) => {
         const next = typeof updater === 'function' ? updater(prev) : updater;
         if (conversationId) {
           window.deepseekApi.setActiveAttempts(conversationId, next).catch((err) => {
-            console.error('[useConversations] 持久化 activeAttempts 失败:', err);
+            console.error('[useConversations] Failed to persist activeAttempts:', err);
           });
         }
         return next;
@@ -168,7 +168,7 @@ export function useConversations(activeProject: string | null) {
     if (projectPath === undefined) return null;
 
     try {
-      const convId = await window.deepseekApi.createConversation('新对话', projectPath);
+      const convId = await window.deepseekApi.createConversation('New conversation', projectPath);
       setMessagesByConv((prev) => {
         touchConversationCache(convId);
         return pruneConversationCache({
@@ -180,7 +180,7 @@ export function useConversations(activeProject: string | null) {
       await loadConversations();
       return convId;
     } catch (err) {
-      console.error('创建新对话失败:', err);
+      console.error('Failed to create conversation:', err);
       return null;
     }
   }, [loadConversations, pruneConversationCache, touchConversationCache]);
@@ -216,7 +216,7 @@ export function useConversations(activeProject: string | null) {
       });
       await loadConversations();
     } catch (err) {
-      console.error('删除对话失败:', err);
+      console.error('Failed to delete conversation:', err);
     }
   }, [conversationId, loadConversations]);
 

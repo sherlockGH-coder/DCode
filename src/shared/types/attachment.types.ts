@@ -1,4 +1,4 @@
-/** 附件大类：file 可通过 read_file 读取；image/audio/video 作为用户附件元数据保留。 */
+/** Attachment categories: file can be read with read_file; image/audio/video are retained as user-attachment metadata. */
 export type AttachmentKind = 'file' | 'image' | 'audio' | 'video';
 
 export interface Attachment {

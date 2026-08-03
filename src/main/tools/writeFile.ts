@@ -44,7 +44,7 @@ export const writeFileTool: ToolExecutor = {
     if (rawPath.startsWith('~') && (rawPath.length === 1 || rawPath[1] === '/')) {
       rawPath = join(homedir(), rawPath.slice(1));
     }
-    debugLog('tool', '写入文件:', rawPath);
+    debugLog('tool', 'Writing file:', rawPath);
 
     const { absolutePath: filePath } = resolveInside(rawPath, ctx.projectPath);
 
@@ -82,12 +82,12 @@ export const writeFileTool: ToolExecutor = {
       const diff = isNew ? buildAllAddedDiff(content) : buildLineDiff(oldContent, content);
 
       return {
-        content: `文件写入成功: ${filePath}`,
+        content: `File written successfully: ${filePath}`,
         metadata: { kind: 'write', path: filePath, isNew, diff },
       };
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);
-      throw new Error(`写入文件失败: ${error}`);
+      throw new Error(`Failed to write file: ${error}`);
     }
   },
 };

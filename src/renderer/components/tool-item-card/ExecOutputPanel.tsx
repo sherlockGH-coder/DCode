@@ -114,7 +114,7 @@ const ExecOutputPanel: React.FC<{ item: Extract<ToolItem, { kind: 'exec' }> }> =
         <button
           type="button"
           data-testid="copy-command-btn"
-          title="复制命令"
+            title="Copy command"
           className="absolute right-3.5 top-8 inline-flex h-6 w-6 items-center justify-center text-text-tertiary hover:text-text-primary transition-all cursor-pointer opacity-0 group-hover/cmd-section:opacity-100"
           onClick={handleCopyCommand}
         >
@@ -143,7 +143,7 @@ const ExecOutputPanel: React.FC<{ item: Extract<ToolItem, { kind: 'exec' }> }> =
           <button
             type="button"
             data-testid="exec-output-copy"
-            title="复制输出结果"
+            title="Copy output"
             className="absolute right-3.5 top-0.5 z-20 inline-flex h-6 w-6 items-center justify-center text-text-tertiary hover:text-text-primary transition-all cursor-pointer opacity-0 group-hover/output-section:opacity-100"
             onClick={handleCopyOutput}
           >
@@ -160,7 +160,7 @@ const ExecOutputPanel: React.FC<{ item: Extract<ToolItem, { kind: 'exec' }> }> =
 
       {exitCode !== undefined && exitCode !== 0 && (
         <div className="px-3 pb-2 pt-1 text-[12px] font-medium text-diff-del select-none shrink-0 text-right z-20 flex items-center justify-end gap-0.5">
-          退出码 {exitCode}
+          Exit code {exitCode}
         </div>
       )}
     </div>

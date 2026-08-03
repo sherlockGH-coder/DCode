@@ -12,7 +12,7 @@ import '@xterm/xterm/css/xterm.css';
 import { IconX, IconPlus } from './icons';
 import { createTerminalLayout } from './terminalLayout';
 
-/** 终端小图标 — 用于 Tab 标签 */
+/** Small terminal icon used in the tab label. */
 const IconTerminal: React.FC<{ size?: number; className?: string }> = ({
   size = 13,
   className,
@@ -38,7 +38,7 @@ interface TerminalPanelProps {
   cwd: string | null;
   resizeTick?: number;
   visible: boolean;
-  /** 关闭最后一个 tab 时触发，让父组件折叠底板 */
+  /** Fired when the last tab closes so the parent can collapse the bottom panel. */
   onAllClosed?: () => void;
 }
 
@@ -175,7 +175,7 @@ const TerminalView: React.FC<TerminalViewProps> = ({
     termRef.current = term;
     fitRef.current = fit;
 
-    /* ---- 抹平所有 xterm 内层的背景色，消除右侧异色竖条 ---- */
+    /* ---- Flatten all xterm inner background colors to remove the mismatched right strip. ---- */
     const wipeXtermBackgrounds = () => {
       if (!hostRef.current || !term.element) return;
       const xtermEl = term.element;
@@ -183,7 +183,7 @@ const TerminalView: React.FC<TerminalViewProps> = ({
       const screen = xtermEl.querySelector<HTMLElement>('.xterm-screen');
       const scrollArea = xtermEl.querySelector<HTMLElement>('.xterm-scroll-area');
 
-      // 让终端区所有层透出外层 ide-terminal-body 的统一背景
+      // Let every terminal layer show the shared ide-terminal-body background.
       hostRef.current.style.backgroundColor = 'transparent';
       xtermEl.style.backgroundColor = 'transparent';
       if (screen) screen.style.backgroundColor = 'transparent';
@@ -197,8 +197,8 @@ const TerminalView: React.FC<TerminalViewProps> = ({
     safeFitAndSync(sessionId, term, fit, host);
 
     let cancelled = false;
-    // 用 ?? 而不是三元真值判断：document.fonts.ready 是 Promise，恒为真值，
-    // 真正要判断的是它存不存在
+    // Use ?? rather than a truthiness ternary: document.fonts.ready is always a truthy Promise;
+    // what matters is whether it exists.
     const fontsReady: Promise<unknown> =
       (typeof document !== 'undefined' ? document.fonts?.ready : undefined) ?? Promise.resolve();
     void fontsReady.then(() => {
@@ -210,7 +210,7 @@ const TerminalView: React.FC<TerminalViewProps> = ({
       term.write(data);
     });
     const offExit = window.terminalApi.onExit(sessionId, ({ exitCode }) => {
-      term.write(`\r\n\x1b[2m[进程已退出 (code ${exitCode})]\x1b[0m\r\n`);
+      term.write(`\r\n\x1b[2m[Process exited (code ${exitCode})]\x1b[0m\r\n`);
     });
 
     void window.terminalApi.attach(sessionId).then(() => {
@@ -242,7 +242,7 @@ const TerminalView: React.FC<TerminalViewProps> = ({
     };
   }, [sessionId]);
 
-  /* 监听明暗主题切换，动态刷新终端配色 */
+  /* Listen for light/dark theme changes and refresh terminal colors. */
   useEffect(() => {
     const term = termRef.current;
     if (!term) return;
@@ -250,9 +250,9 @@ const TerminalView: React.FC<TerminalViewProps> = ({
     const applyTheme = () => {
       const isDark = document.documentElement.classList.contains('dark');
       const c = readThemeColors();
-      // 更新 xterm 主题
+      // Update the xterm theme.
       term.options.theme = buildXtermTheme(c, isDark);
-      // 同步外层 CSS 背景（xterm 内部层仍透出 CSS 背景）
+      // Sync the outer CSS background; xterm inner layers still expose it.
       const viewport = term.element?.querySelector<HTMLElement>('.xterm-viewport');
       if (viewport) viewport.style.backgroundColor = 'transparent';
     };
@@ -327,7 +327,7 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
       setTabs((prev) => [...prev, newTab]);
       setActiveId(newTab.id);
     } catch (err) {
-      console.error('[TerminalPanel] 创建终端失败', err);
+      console.error('[TerminalPanel] Failed to create terminal', err);
     }
   }, []);
 
@@ -375,7 +375,7 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
 
   const tabBar = useMemo(
     () => (
-      <div className="ide-tab-bar" role="tablist" aria-label="终端标签页">
+      <div className="ide-tab-bar" role="tablist" aria-label="Terminal tabs">
         <div className="ide-tabs-scroll">
           {tabs.map((t) => {
             const isActive = t.id === activeId;
@@ -388,7 +388,7 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
                 title={t.cwd}
                 className={`ide-tab${isActive ? ' active' : ''}`}
               >
-                {/* 终端图标 */}
+                {/* Terminal icon */}
                 <span className="ide-tab-icon">
                   <IconTerminal size={14} />
                 </span>
@@ -399,7 +399,7 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
                     e.stopPropagation();
                     closeTab(t.id);
                   }}
-                  aria-label="关闭标签"
+                  aria-label="Close tab"
                 >
                   ✕
                 </span>
@@ -407,13 +407,13 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
             );
           })}
         </div>
-        {/* 右侧操作按钮 */}
+        {/* Right-side actions */}
         <div className="ide-tab-actions">
           <button
             type="button"
             className="ide-tab-action"
-            aria-label="新建终端"
-            title="新建终端 (⌘T)"
+            aria-label="New terminal"
+            title="New terminal (⌘T)"
             onClick={() => addTab()}
           >
             <IconPlus size={14} className="shrink-0 text-current" />
@@ -422,8 +422,8 @@ const TerminalPanel: React.FC<TerminalPanelProps> = ({
             <button
               type="button"
               className="ide-tab-action"
-              aria-label="关闭全部终端"
-              title="关闭全部终端"
+              aria-label="Close all terminals"
+              title="Close all terminals"
               onClick={closeAll}
             >
               <IconX size={14} className="shrink-0 text-current" />

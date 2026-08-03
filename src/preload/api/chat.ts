@@ -16,17 +16,17 @@ export const chatApi = {
     return ipcRenderer.invoke('chat:stream', messages, model, conversationId, attachments, reasoningEffort, turnId, attemptNo, planExecution);
   },
 
-  /** 中断指定会话正在进行的对话请求；不传 conversationId 则中断未关联会话的请求 */
+  /** Interrupt an in-progress request for a conversation; omit conversationId to interrupt an unassociated request. */
   abortChat: (conversationId?: string) => {
     return ipcRenderer.invoke('chat:abort', conversationId);
   },
 
-  /** 删除指定消息及之后所有消息（编辑重试时截断用） */
+  /** Delete a message and all following messages, used to truncate edit-and-retry history. */
   truncateMessages: (conversationId: string, messageId: string) => {
     return ipcRenderer.invoke('chat:truncate', conversationId, messageId);
   },
 
-  /** 压缩对话上下文：用 AI 摘要替换旧消息 */
+  /** Compact conversation context by replacing old messages with an AI summary. */
   compactConversation: (conversationId: string) => {
     return ipcRenderer.invoke('compact:run', conversationId) as Promise<{
       summary: string;
@@ -67,7 +67,7 @@ export const chatApi = {
     return subscribe('chat:tool-message-persisted', callback);
   },
 
-  /** 主进程在 429 / 5xx / 网络错误时指数退避，期间通过此事件让前端显示"正在重试…" */
+  /** The main process uses exponential backoff for 429, 5xx, and network errors; this event lets the frontend show "Retrying...". */
   onStreamRetry: (
     callback: (conversationId: string, info: { attempt: number; maxAttempts: number; delayMs: number; reason: string }) => void,
   ) => {

@@ -14,7 +14,7 @@ const CompressionSeparator: React.FC<CompressionSeparatorProps> = ({ summary }) 
         <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-border to-transparent" />
         <div className="flex items-center gap-2 text-[12px] font-sans tracking-wide">
           <IconCompress size={14} className="text-accent/80" />
-          <span>以上历史对话已被压缩 (Context Compressed)</span>
+          <span>Earlier conversation history was compressed (Context Compressed)</span>
         </div>
         <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-border to-transparent" />
       </div>
@@ -29,7 +29,7 @@ const CompressionSeparator: React.FC<CompressionSeparatorProps> = ({ summary }) 
             <span className="flex items-center justify-center w-5 h-5 rounded-lg bg-accent/10 text-accent">
               <IconArchive size={12} />
             </span>
-            <span className="text-[13px] font-medium text-text-secondary">查看先前对话历史摘要 (View Context Summary)</span>
+            <span className="text-[13px] font-medium text-text-secondary">View the earlier conversation summary (View Context Summary)</span>
           </div>
           <span className="text-text-tertiary">
             {expanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}

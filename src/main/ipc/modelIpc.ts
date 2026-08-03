@@ -11,7 +11,7 @@ function getCacheKey(): string {
   return `${settingsManager.getBaseUrl()}|${settingsManager.getApiKey()}`;
 }
 
-/** 使缓存失效（设置变更时调用） */
+/** Invalidate the cache when settings change. */
 export function invalidateModelCache(): void {
   cachedModels = null;
   cacheTimestamp = 0;
@@ -19,8 +19,8 @@ export function invalidateModelCache(): void {
 }
 
 /**
- * 从 baseURL 构建 /v1/models 的完整 URL
- * 规则：去掉 /v1 或 /anthropic 后缀（如果有），再拼接 /v1/models
+ * Build the complete /v1/models URL from baseURL.
+ * Remove a trailing /v1 or /anthropic suffix when present, then append /v1/models.
  */
 function buildModelsUrl(baseUrl: string): string {
   let url = baseUrl.replace(/\/+$/, '');
@@ -72,7 +72,7 @@ async function fetchAvailableModels(): Promise<string[]> {
     });
 
     if (!response.ok) {
-      console.warn(`[models] 请求失败: HTTP ${response.status}`);
+      console.warn(`[models] Request failed: HTTP ${response.status}`);
       return defaultModels;
     }
 
@@ -91,7 +91,7 @@ async function fetchAvailableModels(): Promise<string[]> {
     }
 
     if (models.length === 0) {
-      console.warn('[models] API 返回空列表，使用默认列表');
+      console.warn('[models] API returned an empty list; using the default list');
       return defaultModels;
     }
 
@@ -100,7 +100,7 @@ async function fetchAvailableModels(): Promise<string[]> {
     cacheKey = currentKey;
     return models;
   } catch (err) {
-    console.warn('[models] 请求失败:', (err as Error)?.message);
+    console.warn('[models] Request failed:', (err as Error)?.message);
     return defaultModels;
   } finally {
     clearTimeout(timeout);

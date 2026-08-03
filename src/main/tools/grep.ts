@@ -8,13 +8,13 @@ import { createIgnoreFilter, type IgnoreFilter } from './ignoreFilter';
 import { DEFAULT_IO_CONCURRENCY } from '../utils/concurrency';
 import { collectRelativeFilePaths } from './fileTraversal';
 
-/** 超过此大小的文件跳过不搜——避免把打包产物、日志整个读进内存再逐行切分。 */
+/** Skip files over this size to avoid loading bundled artifacts and logs into memory for line-by-line scanning. */
 const MAX_SEARCHABLE_BYTES = 20 * 1024 * 1024;
 
-/** 每批并行处理的文件数。批与批之间按顺序推进，保证输出稳定且可提前终止。 */
+/** Number of files processed in parallel per batch. Batches proceed in order for stable output and early termination. */
 const SCAN_BATCH_SIZE = DEFAULT_IO_CONCURRENCY * 4;
 
-/** 二进制嗅探窗口：前 8KB 里出现 NUL 字节即判定为二进制。 */
+/** Binary sniffing window: a NUL byte in the first 8 KB marks a file as binary. */
 const BINARY_SNIFF_BYTES = 8192;
 
 const BINARY_EXTS = new Set([
@@ -88,13 +88,13 @@ async function collectSearchFiles(searchPath: string, ignore: IgnoreFilter): Pro
 }
 
 interface LoadedFile {
-  /** 文件文本；跳过（二进制/过大/读失败）时为 null。 */
+  /** File text; null when skipped because it is binary, too large, or unreadable. */
   text: string | null;
-  /** 因体积超限被跳过 */
+  /** Skipped because it exceeded the size limit. */
   tooLarge: boolean;
 }
 
-/** 读取候选文件，顺带做体积与二进制判定。任何失败都降级为「跳过」。 */
+/** Read a candidate file and check its size and binary status; any failure degrades to "skipped". */
 async function loadSearchableFile(filePath: string): Promise<LoadedFile> {
   const ext = extname(filePath).toLowerCase();
   if (BINARY_EXTS.has(ext)) return { text: null, tooLarge: false };
@@ -104,7 +104,7 @@ async function loadSearchableFile(filePath: string): Promise<LoadedFile> {
     if (info.size > MAX_SEARCHABLE_BYTES) return { text: null, tooLarge: true };
 
     const buffer = await readFile(filePath);
-    // 扩展名之外再做一次内容嗅探，捕获无扩展名/非常见后缀的二进制文件
+    // Sniff content in addition to checking the extension to catch binary files without common extensions.
     const sniffEnd = Math.min(buffer.length, BINARY_SNIFF_BYTES);
     if (buffer.indexOf(0, 0) !== -1 && buffer.indexOf(0, 0) < sniffEnd) {
       return { text: null, tooLarge: false };
@@ -116,11 +116,11 @@ async function loadSearchableFile(filePath: string): Promise<LoadedFile> {
 }
 
 /**
- * 按批并行扫描文件：批内并发，批间顺序推进。
+ * Scan files in ordered batches: concurrent within each batch and sequential between batches.
  *
- * `shouldStop` 在每批结束后被调用，返回 true 就不再读取后续文件——
- * 这样 head_limit 能真正省下 I/O，而不是扫完全仓库再 slice。
- * 结果按文件顺序回调，因此输出与并发无关，保持确定性。
+ * Call `shouldStop` after each batch; when it returns true, stop reading later files.
+ * This lets head_limit save I/O instead of scanning the whole repository and slicing afterward.
+ * Invoke results in file order so output remains deterministic and independent of concurrency.
  */
 async function scanFiles(
   files: readonly string[],
@@ -145,7 +145,7 @@ async function scanFiles(
   return { skippedTooLarge };
 }
 
-/** 预计算换行位置，把「偏移量 → 行号」从 O(n) 降到 O(log n)。 */
+/** Precompute newline positions to reduce offset-to-line lookup from O(n) to O(log n). */
 function buildLineIndex(content: string): number[] {
   const starts = [0];
   for (let i = content.indexOf('\n'); i !== -1; i = content.indexOf('\n', i + 1)) {
@@ -307,7 +307,7 @@ export const grepTool: ToolExecutor = {
 
     const effectiveLimit = headLimit === 0 ? Infinity : headLimit;
 
-    debugLog('tool', '搜索:', pattern, 'mode:', outputMode, 'in', rawPath);
+    debugLog('tool', 'Searching:', pattern, 'mode:', outputMode, 'in', rawPath);
 
     const searchPath = resolveInside(rawPath, ctx.projectPath).absolutePath;
 
@@ -322,7 +322,7 @@ export const grepTool: ToolExecutor = {
       const ignore = createIgnoreFilter(respectGitignore);
       const allFiles = await collectSearchFiles(searchPath, ignore);
 
-      // glob 只编译一次，而不是在 per-file 谓词里反复构造
+      // Compile the glob once instead of rebuilding it in the per-file predicate.
       const globMatches = globFilter ? createGlobMatcher(globFilter) : null;
       const files = allFiles.filter((file) => {
         if (globMatches && !globMatches(relativeDisplayPath(searchPath, file))) return false;
@@ -330,12 +330,12 @@ export const grepTool: ToolExecutor = {
         return true;
       });
 
-      /** 已够返回一页时提前收工，省下后续文件的 I/O。 */
+      /** Stop early once enough results exist for one page to save I/O on later files. */
       const enough = (collected: number): boolean =>
         effectiveLimit !== Infinity && collected > offset + effectiveLimit;
 
       const noteSkipped = (skipped: number): string =>
-        skipped > 0 ? `\n（另有 ${skipped} 个文件超过 ${MAX_SEARCHABLE_BYTES / 1024 / 1024}MB 未搜索）` : '';
+        skipped > 0 ? `\n(${skipped} additional files over ${MAX_SEARCHABLE_BYTES / 1024 / 1024} MB were not searched)` : '';
 
       if (outputMode === 'files_with_matches') {
         const matchedFiles: string[] = [];
@@ -352,18 +352,18 @@ export const grepTool: ToolExecutor = {
 
         const paged = matchedFiles.slice(offset, offset + effectiveLimit);
         const truncated = matchedFiles.length > offset + effectiveLimit;
-        const suffix = truncated ? `\n（还有更多结果，使用 offset: ${offset + effectiveLimit} 翻页）` : '';
+        const suffix = truncated ? `\n(More results are available; use offset ${offset + effectiveLimit} to paginate.)` : '';
         return {
           content: paged.length > 0
-            ? `找到 ${matchedFiles.length} 个匹配文件:\n${paged.join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`
-            : `未找到匹配 "${pattern}" 的文件${noteSkipped(skippedTooLarge)}`,
+            ? `Found ${matchedFiles.length} matching files:\n${paged.join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`
+            : `No files matched "${pattern}"${noteSkipped(skippedTooLarge)}`,
           metadata: { kind: 'grep', pattern, matchCount: matchedFiles.length, fileCount: matchedFiles.length },
         };
       }
 
       if (outputMode === 'count') {
         const counts: CountResult[] = [];
-        // count 模式要按次数排序，必须扫完全部文件才能确定名次
+        // Count mode sorts by frequency, so every file must be scanned to determine the ranking.
         const { skippedTooLarge } = await scanFiles(
           files,
           (file, content) => {
@@ -382,11 +382,11 @@ export const grepTool: ToolExecutor = {
         const paged = counts.slice(offset, offset + effectiveLimit);
         const totalMatches = counts.reduce((sum, c) => sum + c.count, 0);
         const truncated = counts.length > offset + effectiveLimit;
-        const suffix = truncated ? `\n（还有更多结果，使用 offset: ${offset + effectiveLimit} 翻页）` : '';
+        const suffix = truncated ? `\n(More results are available; use offset ${offset + effectiveLimit} to paginate.)` : '';
         return {
           content: paged.length > 0
-            ? `匹配统计（${counts.length} 个文件，共 ${totalMatches} 处）:\n${paged.map((c) => `${c.file}: ${c.count}`).join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`
-            : `未找到匹配 "${pattern}" 的结果${noteSkipped(skippedTooLarge)}`,
+            ? `Match counts (${counts.length} files, ${totalMatches} matches):\n${paged.map((c) => `${c.file}: ${c.count}`).join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`
+            : `No matches found for "${pattern}"${noteSkipped(skippedTooLarge)}`,
           metadata: { kind: 'grep', pattern, matchCount: totalMatches, fileCount: counts.length },
         };
       }
@@ -399,8 +399,8 @@ export const grepTool: ToolExecutor = {
           const relPath = relativeDisplayPath(searchPath, file);
 
           if (multiline) {
-            // 预建换行索引，行号查询变成二分；此前每个匹配都要 slice + split，
-            // 匹配数多的文件会退化成 O(n·m)
+            // Prebuild the newline index so line lookup is binary search; previously every match used slice + split,
+            // which degraded to O(n*m) for files with many matches.
             const lineStarts = buildLineIndex(content);
             const re = new RegExp(pattern, flags + 'g');
             let m: RegExpExecArray | null;
@@ -434,7 +434,7 @@ export const grepTool: ToolExecutor = {
 
       if (totalMatchCount === 0) {
         return {
-          content: `未找到匹配 "${pattern}" 的结果${noteSkipped(skippedTooLarge)}`,
+          content: `No matches found for "${pattern}"${noteSkipped(skippedTooLarge)}`,
           metadata: { kind: 'grep', pattern, matchCount: 0, fileCount: 0 },
         };
       }
@@ -449,15 +449,15 @@ export const grepTool: ToolExecutor = {
       });
 
       const truncated = totalMatchCount > offset + effectiveLimit;
-      const suffix = truncated ? `\n（还有更多结果，使用 offset: ${offset + effectiveLimit} 翻页）` : '';
+      const suffix = truncated ? `\n(More results are available; use offset ${offset + effectiveLimit} to paginate.)` : '';
 
       return {
-        content: `找到 ${totalMatchCount} 条匹配${truncated ? '（已截断）' : ''}:\n${resultLines.join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`,
+        content: `Found ${totalMatchCount} matches${truncated ? ' (truncated)' : ''}:\n${resultLines.join('\n')}${suffix}${noteSkipped(skippedTooLarge)}`,
         metadata: { kind: 'grep', pattern, matchCount: totalMatchCount, fileCount },
       };
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);
-      throw new Error(`搜索失败: ${error}`);
+      throw new Error(`Search failed: ${error}`);
     }
   },
 };

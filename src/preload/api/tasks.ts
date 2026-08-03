@@ -7,27 +7,27 @@ export const tasksApi = {
     return ipcRenderer.invoke('task:create', scope, input, projectPath, conversationId);
   },
 
-  /** 获取单个任务 */
+  /** Get one task. */
   taskGet: (id: string): Promise<Task | undefined> => {
     return ipcRenderer.invoke('task:get', id);
   },
 
-  /** 列出任务 */
+  /** List tasks. */
   taskList: (status?: TaskStatus, scope?: TaskScope, conversationId?: string | null): Promise<Task[]> => {
     return ipcRenderer.invoke('task:list', status, scope, conversationId);
   },
 
-  /** 更新任务 */
+  /** Update a task. */
   taskUpdate: (id: string, input: TaskUpdateInput, projectPath: string | null): Promise<Task | undefined> => {
     return ipcRenderer.invoke('task:update', id, input, projectPath);
   },
 
-  /** 删除任务 */
+  /** Delete a task. */
   taskDelete: (id: string, projectPath: string | null): Promise<boolean> => {
     return ipcRenderer.invoke('task:delete', id, projectPath);
   },
 
-  /** 订阅任务列表变化 */
+  /** Subscribe to task-list changes. */
   onTasksChanged: (callback: () => void): (() => void) => {
     return subscribe('task:changed', callback);
   },

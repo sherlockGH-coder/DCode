@@ -27,7 +27,7 @@ describe('computeSignature', () => {
       const before = computeSignature('/bin/zsh', home);
 
       writeFileSync(rc, 'export PATH=/a:/b:$PATH\n');
-      // 保证 mtime 一定不同，避免同秒写入被忽略
+      // Ensure mtime differs so writes in the same second are not ignored.
       const future = new Date(Date.now() + 5000);
       utimesSync(rc, future, future);
 

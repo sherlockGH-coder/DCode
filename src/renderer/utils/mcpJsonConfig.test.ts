@@ -59,6 +59,6 @@ describe('parseMcpServerJson', () => {
         one: { command: 'npx' },
         two: { command: 'node' },
       },
-    }))).toThrow('一次只能导入一个 MCP server JSON');
+    }))).toThrow('Only one MCP server JSON object can be imported at a time');
   });
 });

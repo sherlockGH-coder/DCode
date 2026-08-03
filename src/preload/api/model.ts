@@ -2,7 +2,7 @@ import { ipcRenderer } from 'electron';
 import type { SpeechTranscriptionResult } from '../../shared/types';
 
 export const modelApi = {
-  /** 获取可用模型列表 */
+  /** Get the available model list. */
   getModels: () => {
     return ipcRenderer.invoke('chat:getModels');
   },

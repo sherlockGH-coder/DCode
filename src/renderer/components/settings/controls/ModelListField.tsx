@@ -2,13 +2,13 @@ import React from 'react';
 import { IconPlus, IconTrash } from '../../icons';
 
 interface ModelListFieldProps {
-  /** 当前自定义模型列表 */
+  /** Current custom model list. */
   models: string[];
-  /** 当前默认模型名（用于高亮列表项） */
+  /** Current default model name, used to highlight the list item. */
   defaultModel: string;
-  /** 列表增删后回调（已 trim + 去重 + 去空） */
+  /** Called after list changes, with trimmed, unique, non-empty values. */
   onModelsChange: (next: string[]) => void;
-  /** 点击星标把某个模型设为默认 */
+  /** Set a model as the default when its star is clicked. */
   onSetDefault: (model: string) => void;
   placeholder?: string;
 }
@@ -53,12 +53,12 @@ const ModelListField: React.FC<ModelListFieldProps> = ({
   const commitDraft = () => {
     const next = normalize(draft);
     if (!next) {
-      setError('请输入模型名');
+      setError('Enter a model name');
       inputRef.current?.focus();
       return;
     }
     if (normalizedModels.includes(next)) {
-      setError('该模型已添加');
+      setError('This model has already been added');
       inputRef.current?.select();
       return;
     }
@@ -102,7 +102,7 @@ const ModelListField: React.FC<ModelListFieldProps> = ({
           className="h-9 shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 text-[13px] font-medium text-text-primary transition-colors hover:bg-[rgba(0,0,0,0.035)] disabled:cursor-default disabled:opacity-45 disabled:hover:bg-white"
         >
           <IconPlus size={13} />
-          添加
+          Add
         </button>
       </div>
 
@@ -125,8 +125,8 @@ const ModelListField: React.FC<ModelListFieldProps> = ({
                   type="button"
                   onClick={() => onSetDefault(model)}
                   disabled={isDefault}
-                  title={isDefault ? '当前默认模型' : '设为默认'}
-                  aria-label={isDefault ? `${model}（当前默认）` : `将 ${model} 设为默认`}
+                  title={isDefault ? 'Current default model' : 'Set as default'}
+                  aria-label={isDefault ? `${model} (current default)` : `Set ${model} as default`}
                   className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border-none bg-transparent transition-colors ${
                     isDefault
                       ? 'text-accent cursor-default'
@@ -146,15 +146,15 @@ const ModelListField: React.FC<ModelListFieldProps> = ({
 
                 {isDefault && (
                   <span className="shrink-0 rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-medium text-accent">
-                    默认
+                    Default
                   </span>
                 )}
 
                 <button
                   type="button"
                   onClick={() => remove(index)}
-                  title="删除模型"
-                  aria-label={`删除模型 ${model}`}
+                  title="Delete model"
+                  aria-label={`Delete model ${model}`}
                   className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border-none bg-transparent text-text-tertiary transition-colors hover:bg-red-50 hover:text-red-500"
                 >
                   <IconTrash size={13} />

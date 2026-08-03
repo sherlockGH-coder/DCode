@@ -41,31 +41,31 @@ const PluginsPage: React.FC<Props> = ({ activeProject }) => {
     <div className="flex-1 min-h-0 overflow-y-auto bg-[#F7F8FA] text-text-primary dark:bg-zinc-950">
       <div className="mx-auto w-full max-w-[980px] px-6 py-9 sm:px-10">
         <SettingsPageHeader
-          title="MCP 服务器"
+          title="MCP servers"
           action={
             <PrimaryButton
             type="button"
             onClick={() => setEditor({ scope: activeProject ? 'project' : 'user', initial: null })}
           >
             <IconPlus size={14} className="text-current" />
-            <span>添加服务器</span>
+            <span>Add server</span>
             </PrimaryButton>
           }
         />
 
         {isLoading ? (
           <SettingsGroup className="flex min-h-[220px] items-center justify-center">
-            <p className="text-[13px] font-medium text-text-tertiary">加载 MCP 配置...</p>
+            <p className="text-[13px] font-medium text-text-tertiary">Loading MCP configuration...</p>
           </SettingsGroup>
         ) : sortedServers.length === 0 ? (
           <SettingsGroup className="flex min-h-[220px] flex-col items-center justify-center px-6 text-center">
-            <p className="mb-3 text-[13px] font-medium text-text-tertiary">暂无 MCP 服务器</p>
+            <p className="mb-3 text-[13px] font-medium text-text-tertiary">No MCP servers</p>
             <PrimaryButton
               type="button"
               onClick={() => setEditor({ scope: activeProject ? 'project' : 'user', initial: null })}
             >
               <IconPlus size={14} className="text-current" />
-              添加服务器
+              Add server
             </PrimaryButton>
           </SettingsGroup>
         ) : (
@@ -104,10 +104,10 @@ const PluginsPage: React.FC<Props> = ({ activeProject }) => {
             className="w-[400px] max-w-full rounded-[10px] border border-hairline bg-bg-body p-6 shadow-[var(--shadow-floating)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="mb-2 text-[17px] font-semibold text-text-primary">移除服务器</h3>
+            <h3 className="mb-2 text-[17px] font-semibold text-text-primary">Remove server</h3>
             <p className="mb-7 text-[13px] leading-relaxed text-text-secondary">
-              确认移除 <span className="rounded-md border border-rose-500/15 bg-rose-500/[0.08] px-1.5 py-0.5 font-mono font-medium text-rose-600">{confirmDelete.name}</span>？
-              这会停止运行中的 MCP 进程并从配置文件中删除。
+              Confirm removing <span className="rounded-md border border-rose-500/15 bg-rose-500/[0.08] px-1.5 py-0.5 font-mono font-medium text-rose-600">{confirmDelete.name}</span>?
+              This stops the running MCP process and removes it from the configuration file.
             </p>
             <div className="flex flex-col gap-2">
               <button
@@ -115,14 +115,14 @@ const PluginsPage: React.FC<Props> = ({ activeProject }) => {
                 className="w-full rounded-lg bg-rose-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-700"
                 onClick={handleDelete}
               >
-                确认移除
+                Remove
               </button>
               <SecondaryButton
                 type="button"
                 className="w-full"
                 onClick={() => setConfirmDelete(null)}
               >
-                取消
+                Cancel
               </SecondaryButton>
             </div>
           </div>

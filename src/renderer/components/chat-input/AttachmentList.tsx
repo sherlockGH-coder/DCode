@@ -32,7 +32,7 @@ const AttachmentList: React.FC<{
                   type="button"
                   className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center cursor-pointer border-none bg-black/50 hover:bg-black/70 text-white rounded-full text-[11px] font-bold shadow transition-all duration-200 hover:scale-110"
                   onClick={() => onRemove(a.id)}
-                  aria-label={`移除 ${a.name}`}
+                  aria-label={`Remove ${a.name}`}
                 >
                   ×
                 </button>
@@ -77,7 +77,7 @@ const AttachmentList: React.FC<{
                       : 'text-text-tertiary hover:bg-black/10 dark:hover:bg-white/20 hover:text-text-primary'
                   }`}
                   onClick={() => onRemove(a.id)}
-                  aria-label={`移除 ${a.name}`}
+                  aria-label={`Remove ${a.name}`}
                 >
                   ×
                 </button>

@@ -1,9 +1,9 @@
 /**
- * cache_stability.test.ts — 字节稳定性测试
+ * cache_stability.test.ts - byte-stability tests
  *
- * 覆盖场景：
- * 1. 压缩后恢复：pruneWithSummary 产生一致输出
- * 2. 消息选择：selectMessagesToCompact 正确分流
+ * Covered scenarios:
+ * 1. Recovery after compaction: pruneWithSummary produces consistent output.
+ * 2. Message selection: selectMessagesToCompact routes messages correctly.
  */
 import { describe, it, expect } from 'vitest';
 import { pruneWithSummary, selectMessagesToCompact } from '../main/compact';
@@ -22,8 +22,8 @@ function makeMessage(overrides: Partial<Message> = {}): Message {
   };
 }
 
-describe('压缩后恢复 (compression recovery)', () => {
-  it('pruneWithSummary 无摘要时原样返回副本（非同一引用）', () => {
+describe('Compression recovery', () => {
+  it('pruneWithSummary returns an unchanged copy without a summary (not the same reference)', () => {
     const messages: Message[] = [
       makeMessage({ id: 'sys', role: 'system', content: 'System' }),
       makeMessage({ id: 'u1', role: 'user', content: 'Hello' }),
@@ -34,7 +34,7 @@ describe('压缩后恢复 (compression recovery)', () => {
     expect(result).not.toBe(messages);
   });
 
-  it('pruneWithSummary 有摘要时正确裁剪并注入摘要消息', () => {
+  it('pruneWithSummary prunes and injects a summary message when a summary exists', () => {
     const messages: Message[] = [
       makeMessage({ id: 'm1', role: 'user', content: 'First' }),
       makeMessage({ id: 'm2', role: 'assistant', content: 'Response 1' }),
@@ -54,7 +54,7 @@ describe('压缩后恢复 (compression recovery)', () => {
     expect(result[3].id).toBe('m5');
   });
 
-  it('pruneWithSummary 边界 id 不存在时保留全量', () => {
+  it('pruneWithSummary keeps all messages when the boundary ID is missing', () => {
     const messages: Message[] = [
       makeMessage({ id: 'm1', role: 'user', content: 'First' }),
     ];
@@ -64,7 +64,7 @@ describe('压缩后恢复 (compression recovery)', () => {
     expect(result[1]).toEqual(messages[0]);
   });
 
-  it('pruneWithSummary 幂等：多次调用结果一致', () => {
+  it('pruneWithSummary is idempotent and repeated calls match', () => {
     const messages: Message[] = [
       makeMessage({ id: 'm1', role: 'user', content: 'First' }),
       makeMessage({ id: 'm2', role: 'assistant', content: 'Response' }),
@@ -77,7 +77,7 @@ describe('压缩后恢复 (compression recovery)', () => {
     expect(stableJson(result1)).toBe(stableJson(result2));
   });
 
-  it('selectMessagesToCompact 正确分流', () => {
+  it('selectMessagesToCompact routes messages correctly', () => {
     const messages: Message[] = [
       makeMessage({ id: 'sys', role: 'system', content: 'System' }),
       makeMessage({ id: 'u1', role: 'user', content: 'First', turnId: 't1' }),

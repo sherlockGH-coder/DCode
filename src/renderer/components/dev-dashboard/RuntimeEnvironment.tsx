@@ -66,20 +66,20 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
     try {
       const commitResult = await window.deepseekApi.gitCommit(activeProject, message, includeUnstaged);
       if (!commitResult.success) {
-        setError(commitResult.error || '提交失败。');
+          setError(commitResult.error || 'Commit failed.');
         return;
       }
       if (pushAfterCommit) {
         const pushResult = await window.deepseekApi.gitPush(activeProject);
         if (!pushResult.success) {
           await refresh();
-          setError(pushResult.error || '提交成功，但推送失败。');
+          setError(pushResult.error || 'Commit succeeded, but push failed.');
           return;
         }
       }
       await finishSuccessfulAction();
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : '提交操作失败。');
+      setError(actionError instanceof Error ? actionError.message : 'Commit operation failed.');
     } finally {
       setBusyAction(null);
     }
@@ -92,12 +92,12 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
     try {
       const result = await window.deepseekApi.gitPush(activeProject);
       if (!result.success) {
-        setError(result.error || '推送失败。');
+      setError(result.error || 'Push failed.');
         return;
       }
       await finishSuccessfulAction();
     } catch (actionError) {
-      setError(actionError instanceof Error ? actionError.message : '推送操作失败。');
+      setError(actionError instanceof Error ? actionError.message : 'Push operation failed.');
     } finally {
       setBusyAction(null);
     }
@@ -134,8 +134,8 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
             type="text"
             value={message}
             onChange={(event) => setMessage(event.target.value)}
-            placeholder="提交信息（留空将自动生成）"
-            aria-label="提交信息"
+            placeholder="Commit message (leave empty to generate automatically)"
+            aria-label="Commit message"
             disabled={Boolean(busyAction)}
             className="h-10 w-full border-0 border-b border-hairline bg-transparent px-0 text-[14px] text-text-primary outline-none placeholder:text-text-tertiary focus:border-accent"
           />
@@ -148,7 +148,7 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
               disabled={Boolean(busyAction)}
               className="h-4 w-4 accent-accent"
             />
-            包含未暂存的更改
+            Include unstaged changes
           </label>
 
           {error && (
@@ -166,7 +166,7 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
             className="flex h-10 w-full items-center gap-3 rounded-[9px] border-0 bg-transparent px-3 text-left text-[13.5px] font-medium text-text-primary hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-35"
           >
             <CommitIcon className="shrink-0" />
-            <span>{busyAction === 'commit' ? '正在提交…' : '提交'}</span>
+            <span>{busyAction === 'commit' ? 'Committing…' : 'Commit'}</span>
           </button>
           <button
             type="button"
@@ -175,7 +175,7 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
             className="flex h-10 w-full items-center gap-3 rounded-[9px] border-0 bg-transparent px-3 text-left text-[13.5px] font-medium text-text-primary hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-35"
           >
             <PushIcon className="shrink-0" />
-            <span>{busyAction === 'commit-push' ? '正在提交并推送…' : '提交并推送'}</span>
+            <span>{busyAction === 'commit-push' ? 'Committing and pushing…' : 'Commit and push'}</span>
           </button>
           <button
             type="button"
@@ -184,7 +184,7 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
             className="flex h-10 w-full items-center gap-3 rounded-[9px] border-0 bg-transparent px-3 text-left text-[13.5px] font-medium text-text-primary hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-35"
           >
             <PushIcon className="shrink-0" />
-            <span>{busyAction === 'push' ? '正在推送…' : '推送'}</span>
+            <span>{busyAction === 'push' ? 'Pushing…' : 'Push'}</span>
           </button>
         </div>
       </section>
@@ -194,10 +194,10 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
 
   return (
     <section className="shrink-0 border-b border-hairline px-2 pb-2 pt-1" data-testid="runtime-environment">
-      <h3 className="px-2 py-2 text-[12px] font-medium text-text-tertiary">运行环境</h3>
+      <h3 className="px-2 py-2 text-[12px] font-medium text-text-tertiary">Runtime environment</h3>
       <div className="flex items-center gap-2.5 rounded-[7px] px-2 py-1.5 text-[13px] text-text-primary">
         <IconBranch size={15} className="shrink-0 text-text-secondary" />
-        <span className="min-w-0 flex-1 truncate">{status?.hasGit ? status.branch : '非 Git 项目'}</span>
+        <span className="min-w-0 flex-1 truncate">{status?.hasGit ? status.branch : 'Non-Git project'}</span>
       </div>
       <button
         type="button"
@@ -211,7 +211,7 @@ const RuntimeEnvironment: React.FC<{ activeProject: string | null }> = ({ active
         <CommitIcon className="shrink-0 text-text-secondary" />
         <span className="flex-1">Commit or push</span>
         {status && status.aheadCount > 0 ? (
-          <span className="text-[11px] text-text-tertiary">领先 {status.aheadCount}</span>
+          <span className="text-[11px] text-text-tertiary">{status.aheadCount} ahead</span>
         ) : null}
       </button>
       {panel}

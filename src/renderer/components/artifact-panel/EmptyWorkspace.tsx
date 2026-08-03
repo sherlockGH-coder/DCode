@@ -10,9 +10,9 @@ const EmptyWorkspace: React.FC = () => (
         <path d="M8 16h5" />
       </svg>
     </div>
-    <div className="text-[13px] font-semibold text-text-secondary">暂无打开的工作区内容</div>
+    <div className="text-[13px] font-semibold text-text-secondary">No workspace content is open</div>
     <div className="mt-1 max-w-[220px] text-[11.5px] leading-relaxed text-text-tertiary">
-      文件、diff、预览和执行计划会在这里打开。
+      Files, diffs, previews, and execution plans open here.
     </div>
   </div>
 );

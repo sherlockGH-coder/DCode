@@ -56,7 +56,7 @@ const SkillCard: React.FC<Props> = ({ skill, onToggle, onEdit, onDelete }) => {
           {skill.allowedTools && skill.allowedTools.length > 0 && (
             <span className="inline-flex items-center gap-1 rounded-[4px] bg-[#F1F1F3] px-[7px] py-[2px] text-[11px] font-medium text-[#6B7280] dark:bg-white/[0.08] dark:text-white/45">
               <span className="text-[9px] opacity-60">●</span>
-              {skill.allowedTools.length} 个工具
+              {skill.allowedTools.length} tools
             </span>
           )}
           {skill.name === 'claude-design' && (
@@ -105,7 +105,7 @@ const SkillCard: React.FC<Props> = ({ skill, onToggle, onEdit, onDelete }) => {
             type="button"
             className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#9CA3AF] transition-colors hover:bg-black/[0.04] hover:text-[#4B5563] dark:text-white/28 dark:hover:bg-white/[0.06] dark:hover:text-white/50"
             onClick={() => onEdit(skill)}
-            title="编辑"
+            title="Edit"
           >
             <IconEdit size={14} />
           </button>
@@ -115,7 +115,7 @@ const SkillCard: React.FC<Props> = ({ skill, onToggle, onEdit, onDelete }) => {
             type="button"
             className="flex h-[30px] w-[30px] items-center justify-center rounded-[6px] text-[#9CA3AF] transition-colors hover:bg-rose-500/[0.08] hover:text-rose-600 dark:text-white/28 dark:hover:bg-rose-500/[0.12] dark:hover:text-rose-300"
             onClick={() => onDelete(skill)}
-            title="删除"
+            title="Delete"
           >
             <IconTrash size={14} />
           </button>
@@ -124,7 +124,7 @@ const SkillCard: React.FC<Props> = ({ skill, onToggle, onEdit, onDelete }) => {
           <ToggleSwitch
             checked={skill.enabled}
             onChange={(checked) => onToggle(skill.name, checked)}
-            label={`${skill.name} 启用状态`}
+            label={`${skill.name} enabled`}
           />
         </div>
       </div>

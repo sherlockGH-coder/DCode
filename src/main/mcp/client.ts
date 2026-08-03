@@ -11,7 +11,7 @@ const CLIENT_INFO = { name: 'deepseek-app', version: '0.1.0' };
 const CONNECT_TIMEOUT_MS = 15000;
 
 export interface McpToolFull extends McpToolEntry {
-  /** 原始 inputSchema（OpenAI tool parameters 兼容） */
+  /** Original inputSchema, compatible with OpenAI tool parameters. */
   inputSchema: Record<string, unknown>;
   annotations?: {
     readOnlyHint?: boolean;
@@ -45,7 +45,7 @@ export class McpClient {
   get status(): McpStatus { return this._status; }
   get tools(): McpToolFull[] { return [...this._tools]; }
   get lastError(): string | undefined { return this._lastError; }
-  /** 服务器握手时返回的使用说明（InitializeResult.instructions），未提供则 undefined */
+  /** Usage instructions returned during the server handshake (InitializeResult.instructions), if provided. */
   get instructions(): string | undefined { return this._instructions; }
 
   async connect(): Promise<void> {
@@ -107,7 +107,7 @@ export class McpClient {
 
   async callTool(name: string, args: Record<string, unknown>, signal?: AbortSignal): Promise<McpCallResult> {
     if (!this.client || this._status !== 'connected') {
-      throw new Error(`MCP server "${this.serverName}" 未连接`);
+      throw new Error(`MCP server "${this.serverName}" is not connected`);
     }
     const result = await this.client.callTool({ name, arguments: args }, undefined, { signal });
     const isError = !!result.isError;

@@ -19,11 +19,11 @@ describe('reconstructToolItems', () => {
       toolCall('ask_user_question', {
         questions: [
           {
-            question: '你想选择哪个方案？',
-            header: '方案',
+            question: 'Which approach do you want to choose?',
+            header: 'Approach',
             options: [
-              { label: 'A', description: '第一个方案' },
-              { label: 'B', description: '第二个方案' },
+              { label: 'A', description: 'The first approach' },
+              { label: 'B', description: 'The second approach' },
             ],
             multiSelect: false,
           },
@@ -34,7 +34,7 @@ describe('reconstructToolItems', () => {
     expect(items).toHaveLength(1);
     expect(items[0].kind).toBe('ask_user_question');
     expect(items[0].status).toBe('error');
-    expect('output' in items[0] ? items[0].output : '').toContain('问题已失效');
+    expect('output' in items[0] ? items[0].output : '').toContain('This question expired');
   });
 
   it('keeps other unfinished tools running while loading history', () => {
@@ -50,9 +50,9 @@ describe('reconstructToolItems', () => {
   it('uses persisted tool results when they exist', () => {
     const questions = [
       {
-        question: '继续吗？',
-        header: '确认',
-        options: [{ label: '继续', description: '继续任务' }],
+        question: 'Continue?',
+        header: 'Confirmation',
+        options: [{ label: 'Continue', description: 'Continue the task' }],
         multiSelect: false,
       },
     ];
@@ -62,13 +62,13 @@ describe('reconstructToolItems', () => {
     const toolMessage: Message = {
       id: 'tool_result',
       role: 'tool',
-      content: '用户已作答："继续吗？"="继续"。',
+      content: 'User answer: "Continue?"="Continue".',
       tool_call_id: call.id,
       name: 'ask_user_question',
       metadata: {
         kind: 'ask_user_question',
         questions,
-        answers: { '继续吗？': '继续' },
+        answers: { 'Continue?': 'Continue' },
       },
     };
 
@@ -76,29 +76,29 @@ describe('reconstructToolItems', () => {
 
     expect(items[0].status).toBe('done');
     expect(items[0].kind === 'ask_user_question' ? items[0].questions : undefined).toEqual(questions);
-    expect(items[0].kind === 'ask_user_question' ? items[0].answers : undefined).toEqual({ '继续吗？': '继续' });
+    expect(items[0].kind === 'ask_user_question' ? items[0].answers : undefined).toEqual({ 'Continue?': 'Continue' });
   });
 
   it('recovers answers from legacy ask-user result text without metadata', () => {
     const call = toolCall('ask_user_question', {
       questions: [{
-        question: '继续吗？',
-        header: '确认',
-        options: [{ label: '继续', description: '继续任务' }],
+        question: 'Continue?',
+        header: 'Confirmation',
+        options: [{ label: 'Continue', description: 'Continue the task' }],
         multiSelect: false,
       }],
     });
     const toolMessage: Message = {
       id: 'legacy_tool_result',
       role: 'tool',
-      content: '用户已作答："继续吗？"="继续"。请根据这些选择继续执行。',
+      content: 'User answer: "Continue?"="Continue". Continue based on these choices.',
       tool_call_id: call.id,
       name: 'ask_user_question',
     };
 
     const items = reconstructToolItems([call], [toolMessage]);
 
-    expect(items[0].kind === 'ask_user_question' ? items[0].answers : undefined).toEqual({ '继续吗？': '继续' });
+    expect(items[0].kind === 'ask_user_question' ? items[0].answers : undefined).toEqual({ 'Continue?': 'Continue' });
   });
 
   it('reconstructs agent tool cards from persisted metadata', () => {

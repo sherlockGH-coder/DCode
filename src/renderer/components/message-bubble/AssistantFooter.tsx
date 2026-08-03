@@ -45,7 +45,7 @@ const AssistantFooter: React.FC<{
             className="flex items-center justify-center w-5.5 h-5.5 rounded hover:bg-bg-hover text-text-tertiary hover:text-text-primary transition-colors duration-150 border-none bg-transparent cursor-pointer disabled:opacity-30 disabled:cursor-default"
             onClick={onResponsePrev}
             disabled={responseCurrent !== undefined && responseCurrent <= 1}
-            title="上一个回复"
+            title="Previous response"
           >
             <IconChevronLeft size={13} />
           </button>
@@ -55,7 +55,7 @@ const AssistantFooter: React.FC<{
             className="flex items-center justify-center w-5.5 h-5.5 rounded hover:bg-bg-hover text-text-tertiary hover:text-text-primary transition-colors duration-150 border-none bg-transparent cursor-pointer disabled:opacity-30 disabled:cursor-default"
             onClick={onResponseNext}
             disabled={responseCurrent !== undefined && responseTotal !== undefined && responseCurrent >= responseTotal}
-            title="下一个回复"
+            title="Next response"
           >
             <IconChevronRight size={13} />
           </button>
@@ -68,7 +68,7 @@ const AssistantFooter: React.FC<{
         type="button"
         onClick={() => onMenuOpenChange(!isMenuOpen)}
         className="flex items-center justify-center w-7 h-7 rounded-[7px] hover:bg-bg-hover text-text-tertiary hover:text-text-primary transition-colors duration-150 border-none bg-transparent cursor-pointer"
-        title="更多操作"
+        title="More actions"
       >
         {copied ? <IconCheck size={16} className="text-accent shrink-0" /> : <IconDots size={16} className="shrink-0" />}
       </button>
@@ -87,7 +87,7 @@ const AssistantFooter: React.FC<{
               className="w-full flex items-center gap-2 px-3 py-2 text-left text-[12.5px] text-text-primary hover:bg-bg-hover border-none bg-transparent cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <IconCopy size={13} className="text-text-secondary shrink-0" />
-              <span>复制纯文本</span>
+              <span>Copy plain text</span>
             </button>
             <button
               type="button"
@@ -101,7 +101,7 @@ const AssistantFooter: React.FC<{
               <svg width="13" height="13" viewBox="0 0 1024 1024" fill="currentColor" className="text-text-secondary shrink-0" aria-hidden>
                 <path d="M128 128h768a42.666667 42.666667 0 0 1 42.666667 42.666667v682.666666a42.666667 42.666667 0 0 1-42.666667 42.666667H128a42.666667 42.666667 0 0 1-42.666667-42.666667V170.666667a42.666667 42.666667 0 0 1 42.666667-42.666667z m42.666667 85.333333v597.333334h682.666666V213.333333H170.666667z m128 448H213.333333v-298.666666h85.333334l85.333333 85.333333 85.333333-85.333333h85.333334v298.666666h-85.333334v-170.666666l-85.333333 85.333333-85.333333-85.333333v170.666666z m469.333333-128h85.333333l-128 128-128-128h85.333334v-170.666666h85.333333v170.666666z" />
               </svg>
-              <span>复制 Markdown</span>
+              <span>Copy Markdown</span>
             </button>
           </div>
       )}

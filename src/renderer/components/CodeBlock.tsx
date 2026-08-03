@@ -115,16 +115,16 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, code }) => {
           <button
             className="border-none bg-transparent p-0 text-[12.5px] cursor-pointer transition-colors duration-150 text-text-tertiary hover:text-text-primary"
             onClick={handleCopy}
-            title={copied ? '已复制到剪贴板' : '复制代码'}
+            title={copied ? 'Copied to clipboard' : 'Copy code'}
           >
-            {copied ? '已复制' : '复制'}
+            {copied ? 'Copied' : 'Copy'}
           </button>
           <button
             className="border-none bg-transparent p-0 text-[12.5px] cursor-pointer transition-colors duration-150 text-text-tertiary hover:text-text-primary"
             onClick={handlePreview}
-            title="在工作区预览"
+            title="Preview in workspace"
           >
-            预览
+            Preview
           </button>
         </div>
       </div>

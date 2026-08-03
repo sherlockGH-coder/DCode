@@ -20,7 +20,7 @@ function bashApproval(): PendingApprovalRequest {
     toolCallId: 'call_bash',
     kind: 'bash_exec',
     command: 'echo ok',
-    description: '测试 bash_exec 工具',
+    description: 'Test the bash_exec tool',
     cwd: '/tmp',
     conversationId: 'conv_1',
     turnId: 'turn_1',
@@ -71,6 +71,6 @@ describe('approval recovery', () => {
     const restoredItem = restored[0].toolItems?.[0];
 
     expect(restoredItem?.status).toBe('awaiting_approval');
-    expect(restoredItem?.approvalDescription).toBe('测试 bash_exec 工具');
+    expect(restoredItem?.approvalDescription).toBe('Test the bash_exec tool');
   });
 });

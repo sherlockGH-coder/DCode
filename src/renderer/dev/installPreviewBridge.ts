@@ -65,7 +65,7 @@ const previewProjectState: ProjectState = {
 
 const previewConversations: Conversation[] = [{
   id: CONVERSATION_ID,
-  title: '审查 coding agent harness',
+  title: 'Review the coding agent harness',
   project_path: PROJECT_PATH,
   created_at: '2026-07-10 04:00:00',
   updated_at: '2026-07-10 05:00:00',
@@ -76,7 +76,7 @@ const previewMessages: Message[] = [
   {
     id: TURN_ID,
     role: 'user',
-    content: '检查这个项目的 agent loop、工具调用和前端展示，修复高风险问题。',
+    content: 'Inspect this project’s agent loop, tool calls, and frontend behavior, then fix high-risk issues.',
     turnId: TURN_ID,
     attemptNo: 0,
     seq: 0,
@@ -85,8 +85,8 @@ const previewMessages: Message[] = [
   {
     id: 'preview-assistant-1',
     role: 'assistant',
-    content: '我先确认执行边界与消息流，再检查工具调度和权限策略。',
-    reasoning_content: '需要同时追踪主进程调度、IPC 持久化和渲染层重建，避免只修复视觉症状。',
+    content: 'I will first confirm the execution boundaries and message flow, then inspect tool scheduling and permission policies.',
+    reasoning_content: 'I need to trace main-process scheduling, IPC persistence, and renderer reconstruction together so I do not fix only the visual symptom.',
     tool_calls: [
       {
         id: 'preview-read',
@@ -130,7 +130,7 @@ const previewMessages: Message[] = [
   {
     id: 'preview-assistant-2',
     role: 'assistant',
-    content: '已确认非并发安全工具可能重叠执行，并且中止信号没有传到底层命令。现在修复调度器并补回归测试。',
+    content: 'I confirmed that non-concurrency-safe tools could overlap and that abort signals were not reaching the underlying commands. I will now fix the scheduler and add regression tests.',
     tool_calls: [
       {
         id: 'preview-edit',
@@ -180,7 +180,7 @@ const previewMessages: Message[] = [
   {
     id: 'preview-assistant-final',
     role: 'assistant',
-    content: '关键风险已经收敛：写入类工具按顺序执行，安全读取仍可并行；用户中止会传入底层命令；项目外文件读取需要确认；agent loop 增加轮数上限。验证已通过。',
+    content: 'The key risks are contained: write tools run sequentially while safe reads remain parallel; user aborts reach the underlying commands; reads outside the project require confirmation; and the agent loop has a turn limit. Verification passed.',
     usage: {
       prompt_tokens: 18240,
       completion_tokens: 1240,

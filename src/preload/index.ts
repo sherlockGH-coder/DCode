@@ -41,7 +41,7 @@ contextBridge.exposeInMainWorld('deepseekApi', {
 });
 
 contextBridge.exposeInMainWorld('conversationsApi', {
-  /** 订阅对话列表变更（任务创建新对话时触发） */
+  /** Subscribe to conversation-list changes, emitted when a task creates a conversation. */
   onChanged: (callback: () => void): (() => void) => {
     return subscribe('conversations:changed', callback);
   },

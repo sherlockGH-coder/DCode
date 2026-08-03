@@ -3,10 +3,10 @@ import { defaultUrlTransform } from 'react-markdown';
 const SAFE_DATA_IMAGE = /^data:image\/(png|jpeg|jpg|gif|webp|avif)/i;
 
 /**
- * react-markdown 的 urlTransform 回调。
- * 1. 放行 data:image/png, data:image/jpeg 等内联图片 URI
- * 2. 阻止其他 data: URI（如 data:text/html 含脚本）
- * 3. 委托 defaultUrlTransform 处理 javascript:, vbscript: 等
+ * urlTransform callback for react-markdown.
+ * 1. Allow inline image URIs such as data:image/png and data:image/jpeg.
+ * 2. Block other data: URIs, such as data:text/html containing scripts.
+ * 3. Delegate javascript:, vbscript:, and similar schemes to defaultUrlTransform.
  */
 export function safeUrlTransform(value: string): string {
   if (!value) return value;

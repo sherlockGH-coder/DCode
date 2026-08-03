@@ -76,7 +76,7 @@ describe('ExplorationGroup', () => {
     act(() => {
       root?.render(React.createElement(ExplorationGroup, {
         items,
-        summary: 'Read a file、已搜索 1 次和已列出文件',
+        summary: 'Read a file, Searched 1 times and Listed files',
       }));
     });
 
@@ -84,16 +84,16 @@ describe('ExplorationGroup', () => {
     expect(summary).not.toBeNull();
     expect(summary?.getAttribute('data-tool-icon')).toBe('search');
     expect(summary?.textContent).toContain('Read a file');
-    expect(summary?.textContent).toContain('已搜索');
-    expect(summary?.textContent).toContain('已列出文件');
+    expect(summary?.textContent).toContain('Searched');
+    expect(summary?.textContent).toContain('Listed files');
     expect(summary?.outerHTML).toContain('text-text-secondary');
 
     const details = Array.from(container.querySelectorAll('[data-testid="exploration-detail"]'));
     expect(details).toHaveLength(3);
     expect(details.map((detail) => detail.textContent)).toEqual([
-      '已读取 DiffView.tsx',
-      '已列出 preview',
-      '已搜索代码',
+      'Read DiffView.tsx',
+      'Listed preview',
+      'Searched code',
     ]);
     expect(container.textContent).not.toContain('/Users/conan');
     expect(container.textContent).not.toContain('src/renderer/components/preview/DiffView.tsx');

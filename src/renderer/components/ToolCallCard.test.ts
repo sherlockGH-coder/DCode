@@ -38,7 +38,7 @@ describe('ToolCallCard', () => {
             type: 'function',
             function: {
               name: 'update_plan',
-              arguments: JSON.stringify({ explanation: '整理界面', plan: [{ step: '改工具行', status: 'in_progress' }] }),
+              arguments: JSON.stringify({ explanation: 'Organize the interface', plan: [{ step: 'Adjust the tool row', status: 'in_progress' }] }),
             },
           },
         ],
@@ -50,7 +50,7 @@ describe('ToolCallCard', () => {
     expect(container.querySelector('[data-testid="tool-call-card"]')).toBeNull();
     expect(container.querySelector('[data-testid="tool-call-name"]')?.textContent).toContain('update_plan');
     expect(container.querySelector('[data-testid="tool-call-status"]')).toBeNull();
-    expect(row?.textContent).not.toContain('执行中');
+    expect(row?.textContent).not.toContain('Running');
     expect(row?.textContent).toContain('explanation');
     expect(row?.outerHTML).toContain('min-h-6');
     expect(row?.outerHTML).toContain('bg-transparent');

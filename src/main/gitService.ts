@@ -92,11 +92,11 @@ export async function checkoutGitBranch(
   try {
     const branches = await getGitBranches(projectPath);
     if (!branches) {
-      return { success: false, error: '不是 Git 仓库，或 git 命令不可用。' };
+      return { success: false, error: 'This is not a Git repository, or the git command is unavailable.' };
     }
 
     if (!branches.branches.includes(branch)) {
-      return { success: false, error: `分支不存在: ${branch}` };
+      return { success: false, error: `Branch does not exist: ${branch}` };
     }
 
     await runGit(projectPath, ['checkout', branch]);
@@ -178,7 +178,7 @@ export async function commitGitChanges(
       .split('\n')
       .map((file) => file.trim())
       .filter(Boolean);
-    if (stagedFiles.length === 0) return { success: false, error: '没有可提交的暂存更改。' };
+    if (stagedFiles.length === 0) return { success: false, error: 'There are no staged changes to commit.' };
 
     const commitMessage = message.trim() || `Update ${stagedFiles.length} ${stagedFiles.length === 1 ? 'file' : 'files'}`;
     await runGit(projectPath, ['commit', '-m', commitMessage]);
@@ -200,7 +200,7 @@ export async function pushGitChanges(projectPath: string): Promise<GitActionResu
       const branch = (await runGit(projectPath, ['rev-parse', '--abbrev-ref', 'HEAD'])).trim();
       const remotes = (await runGit(projectPath, ['remote'])).split('\n').map((item) => item.trim()).filter(Boolean);
       const remote = remotes.includes('origin') ? 'origin' : remotes[0];
-      if (!remote) return { success: false, error: '当前仓库没有可用的远程仓库。' };
+      if (!remote) return { success: false, error: 'The current repository has no available remote.' };
       await runGit(projectPath, ['push', '--set-upstream', remote, branch]);
       return { success: true };
     } catch (fallbackError) {

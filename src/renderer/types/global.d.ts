@@ -1,8 +1,8 @@
 /**
  * ==============================================================================
- * src/renderer/types/global.d.ts — 全局类型声明
+ * src/renderer/types/global.d.ts - global type declarations
  * ==============================================================================
- * 定义所有挂载到 window 对象上的全局类型和接口
+ * Define the global types and interfaces mounted on the window object.
  * ==============================================================================
  */
 
@@ -11,7 +11,7 @@ import type { ToolResultMetadata, Project, ProjectCreateInput, ProjectState, Att
 declare global {
   interface Window {
     /**
-     * Electron 环境信息
+     * Electron environment information.
      */
     electronEnv?: {
       platform: string;
@@ -23,7 +23,7 @@ declare global {
     };
 
     /**
-     * DeepSeek API 接口
+     * DeepSeek API interface.
      */
     deepseekApi: {
 
@@ -207,14 +207,14 @@ declare global {
     };
 
     /**
-     * 对话列表变更订阅
+     * Conversation-list change subscription.
      */
     conversationsApi: {
       onChanged: (callback: () => void) => () => void;
     };
 
     /**
-     * 终端（PTY）API
+     * Terminal (PTY) API.
      */
     terminalApi: {
       create: (

@@ -2,22 +2,22 @@ import { ipcRenderer } from 'electron';
 import type { Attachment } from '../../shared/types';
 
 export const attachmentApi = {
-  /** 弹出系统多选文件对话框，返回 Attachment[]（用户取消返回空数组） */
+  /** Open the system multi-file dialog and return Attachment[]; return an empty array when cancelled. */
   pickFiles: (): Promise<Attachment[]> => {
     return ipcRenderer.invoke('dialog:openFiles');
   },
 
-  /** 校验单个路径并返回 Attachment（拖拽 / 粘贴路径用），不存在或非文件返回 null */
+  /** Validate one path and return an Attachment for dragged or pasted paths; return null when missing or not a file. */
   statPath: (path: string): Promise<Attachment | null> => {
     return ipcRenderer.invoke('fs:statPath', path);
   },
 
-  /** 从系统剪贴板读取图片并保存为临时文件后返回 Attachment；无图片返回 null */
+  /** Read an image from the system clipboard, save it as a temporary file, and return an Attachment; return null when there is no image. */
   pasteClipboardImage: (): Promise<Attachment | null> => {
     return ipcRenderer.invoke('clipboard:pasteImage');
   },
 
-  /** 读取文件内容（工作区预览用） */
+  /** Read file contents for workspace previews. */
   readFileContent: (filePath: string): Promise<{ content: string; name: string; path: string } | null> => {
     return ipcRenderer.invoke('fs:readFile', filePath);
   },

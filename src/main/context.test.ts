@@ -8,46 +8,46 @@ import {
 } from './context';
 
 describe('getSystemContext', () => {
-  it('包含操作系统信息', () => {
+  it('includes operating system information', () => {
     const ctx = getSystemContext(null);
     expect(ctx.environmentInfo).toBeDefined();
-    expect(ctx.environmentInfo).toContain('操作系统');
+    expect(ctx.environmentInfo).toContain('Operating system');
   });
 
-  it('有 projectPath 时包含项目路径', () => {
+  it('includes the project path when projectPath is set', () => {
     const ctx = getSystemContext('/Users/test/proj');
     expect(ctx.projectPath).toBe('/Users/test/proj');
     expect(ctx.environmentInfo).toContain('/Users/test/proj');
-    expect(ctx.environmentInfo).toContain('工具默认工作目录: /Users/test/proj');
+    expect(ctx.environmentInfo).toContain('Default tool working directory: /Users/test/proj');
   });
 
-  it('无 projectPath 时不含项目路径字段', () => {
+  it('omits the project path field when projectPath is not set', () => {
     const ctx = getSystemContext(null);
     expect(ctx.projectPath).toBeUndefined();
   });
 
-  it('允许远端运行器覆盖宿主机环境描述', () => {
-    const ctx = getSystemContext(null, '- 操作系统: Harbor Linux sandbox\n- 工具连接到隔离任务容器');
+  it('allows a remote runner to override the host environment description', () => {
+    const ctx = getSystemContext(null, '- Operating system: Harbor Linux sandbox\n- Tool connected to an isolated task container');
     expect(ctx.environmentInfo).toContain('Harbor Linux sandbox');
     expect(ctx.environmentInfo).not.toContain('macOS');
   });
 });
 
 describe('formatSystemContext', () => {
-  it('格式化为 # 运行环境 块', () => {
+  it('formats an # Environment block', () => {
     const ctx = getSystemContext(null);
     const text = formatSystemContext(ctx);
-    expect(text).toContain('# 运行环境');
+    expect(text).toContain('# Runtime environment');
   });
 
-  it('同一环境多次格式化结果一致（缓存稳定）', () => {
+  it('formats the same environment identically on repeated calls (stable cache)', () => {
     const ctx = getSystemContext('/proj');
     expect(formatSystemContext(ctx)).toBe(formatSystemContext(ctx));
   });
 });
 
-describe('getUserContext - currentDate 缓存稳定性', () => {
-  it('currentDate 用「天」粒度，不含秒级时间戳', () => {
+describe('getUserContext - currentDate cache stability', () => {
+  it('currentDate has day-level granularity and no seconds-level timestamp', () => {
     const ctx = getUserContext({});
     expect(ctx.currentDate).toBeDefined();
 
@@ -56,13 +56,13 @@ describe('getUserContext - currentDate 缓存稳定性', () => {
     expect(ctx.currentDate).not.toMatch(/\d{2}:\d{2}:\d{2}/);
   });
 
-  it('同一天内多次调用 currentDate byte 完全一致', () => {
+  it('returns byte-identical currentDate values on the same day', () => {
     const ctx1 = getUserContext({});
     const ctx2 = getUserContext({});
     expect(ctx1.currentDate).toBe(ctx2.currentDate);
   });
 
-  it('不会把函数源码注入（回归测试：formatCurrentTime 误用）', () => {
+  it('does not inject function source (regression test for accidental formatCurrentTime use)', () => {
     const ctx = getUserContext({});
     expect(ctx.currentDate).not.toContain('function');
     expect(ctx.currentDate).not.toContain('=>');
@@ -70,56 +70,56 @@ describe('getUserContext - currentDate 缓存稳定性', () => {
   });
 });
 
-describe('getUserContext - 各字段收集', () => {
-  it('deepseekMdSources 注入', () => {
+describe('getUserContext - field collection', () => {
+  it('injects deepseekMdSources', () => {
     const sources = [
-      { filePath: '/home/.deepseek/DEEPSEEK.md', contents: '全局规则', scope: 'user' as const },
-      { filePath: '/proj/DEEPSEEK.md', contents: '项目规则', scope: 'project' as const },
+      { filePath: '/home/.deepseek/DEEPSEEK.md', contents: 'Global rules', scope: 'user' as const },
+      { filePath: '/proj/DEEPSEEK.md', contents: 'Project rules', scope: 'project' as const },
     ];
     const ctx = getUserContext({ deepseekMdSources: sources });
     expect(ctx.deepseekMdSources).toEqual(sources);
   });
 
-  it('memoryContext 注入', () => {
-    const ctx = getUserContext({ memoryContext: '用户偏好 X' });
-    expect(ctx.memoryContext).toBe('用户偏好 X');
+  it('injects memoryContext', () => {
+    const ctx = getUserContext({ memoryContext: 'User preference X' });
+    expect(ctx.memoryContext).toBe('User preference X');
   });
 
-  it('enabledSkills 格式化为列表', () => {
+  it('formats enabledSkills as a list', () => {
     const ctx = getUserContext({
       enabledSkills: [
-        { name: 'pdf', description: '处理 PDF' },
-        { name: 'code-review', description: '代码审查' },
+        { name: 'pdf', description: 'Process PDFs' },
+        { name: 'code-review', description: 'Review code' },
       ],
     });
-    expect(ctx.skillsContext).toContain('pdf: 处理 PDF');
-    expect(ctx.skillsContext).toContain('code-review: 代码审查');
+    expect(ctx.skillsContext).toContain('pdf: Process PDFs');
+    expect(ctx.skillsContext).toContain('code-review: Review code');
   });
 
-  it('空 enabledSkills 不产生 skillsContext', () => {
+  it('does not create skillsContext for empty enabledSkills', () => {
     const ctx = getUserContext({ enabledSkills: [] });
     expect(ctx.skillsContext).toBeUndefined();
   });
 
-  it('mcpInstructions 按 server 分块', () => {
+  it('groups mcpInstructions by server', () => {
     const ctx = getUserContext({
       mcpInstructions: [
-        { serverName: 'grok-search', instructions: '先 plan_intent 再 web_search' },
-        { serverName: 'vision', instructions: '只在允许的附件路径上检视图片' },
+        { serverName: 'grok-search', instructions: 'Run plan_intent before web_search' },
+        { serverName: 'vision', instructions: 'Inspect images only at allowed attachment paths' },
       ],
     });
     expect(ctx.mcpInstructionsContext).toContain('## grok-search');
-    expect(ctx.mcpInstructionsContext).toContain('先 plan_intent 再 web_search');
+    expect(ctx.mcpInstructionsContext).toContain('Run plan_intent before web_search');
     expect(ctx.mcpInstructionsContext).toContain('## vision');
-    expect(ctx.mcpInstructionsContext).toContain('只在允许的附件路径上检视图片');
+    expect(ctx.mcpInstructionsContext).toContain('Inspect images only at allowed attachment paths');
   });
 
-  it('空 mcpInstructions 不产生 mcpInstructionsContext', () => {
+  it('does not create mcpInstructionsContext for empty mcpInstructions', () => {
     const ctx = getUserContext({ mcpInstructions: [] });
     expect(ctx.mcpInstructionsContext).toBeUndefined();
   });
 
-  it('附件列表格式化', () => {
+  it('formats the attachment list', () => {
     const ctx = getUserContext({
       attachments: [
         { path: '/a.txt', mimeType: 'text/plain', size: 2048, kind: 'file' },
@@ -132,25 +132,25 @@ describe('getUserContext - 各字段收集', () => {
 });
 
 describe('formatUserContext', () => {
-  it('空 context（仅 currentDate）不产生前置 reminder', () => {
+  it('does not create a leading reminder for an empty context (currentDate only)', () => {
 
     const text = formatUserContext(getUserContext({}));
     expect(text).toBe('');
   });
 
-  it('完全空的 UserContext 返回空字符串', () => {
+  it('returns an empty string for a completely empty UserContext', () => {
     const text = formatUserContext({});
     expect(text).toBe('');
   });
 
-  it('包含所有字段时结构完整', () => {
+  it('has the complete structure when all fields are present', () => {
     const ctx = getUserContext({
       deepseekMdSources: [
-        { filePath: '/proj/DEEPSEEK.md', contents: 'MD内容', scope: 'project' },
+        { filePath: '/proj/DEEPSEEK.md', contents: 'Markdown content', scope: 'project' },
       ],
-      memoryContext: '记忆',
+      memoryContext: 'Memory content',
       enabledSkills: [{ name: 's1', description: 'd1' }],
-      mcpInstructions: [{ serverName: 'srv1', instructions: '用法说明' }],
+      mcpInstructions: [{ serverName: 'srv1', instructions: 'Usage instructions' }],
       attachments: [{ path: '/f.txt', mimeType: 'text/plain', size: 100, kind: 'file' }],
     });
     const text = formatUserContext(ctx);
@@ -160,38 +160,38 @@ describe('formatUserContext', () => {
     expect(text).toContain('# MCP Server Instructions');
     expect(text).not.toContain('# Memory');
     expect(text).not.toContain('# Available Skills');
-    expect(text).not.toContain('# 附件清单');
-    expect(text).not.toContain('# 当前日期');
+    expect(text).not.toContain('# Attachments');
+    expect(text).not.toContain('# Current date');
     expect(text).toContain('</system-reminder>');
   });
 
-  it('MCP instructions 渲染为 ## <server> 块', () => {
+  it('renders MCP instructions as ## <server> blocks', () => {
     const ctx = getUserContext({
       mcpInstructions: [
-        { serverName: 'grok-search', instructions: '调用前先规划查询' },
-        { serverName: 'filesystem', instructions: '仅访问授权目录' },
+        { serverName: 'grok-search', instructions: 'Plan the query before calling' },
+        { serverName: 'filesystem', instructions: 'Access authorized directories only' },
       ],
     });
     const text = formatUserContext(ctx);
     expect(text).toContain('# MCP Server Instructions');
     expect(text).toContain('## grok-search');
-    expect(text).toContain('调用前先规划查询');
+    expect(text).toContain('Plan the query before calling');
     expect(text).toContain('## filesystem');
-    expect(text).toContain('仅访问授权目录');
+    expect(text).toContain('Access authorized directories only');
   });
 
-  it('无 MCP instructions 时不产生 MCP 块', () => {
+  it('does not create an MCP block when there are no MCP instructions', () => {
     const text = formatUserContext(getUserContext({}));
     expect(text).not.toContain('# MCP Server Instructions');
   });
 
-  it('相同稳定输入两次格式化 byte 一致（缓存前缀稳定）', () => {
+  it('formats identical stable input to identical bytes twice (stable cache prefix)', () => {
     const sources = [
       { filePath: '/proj/DEEPSEEK.md', contents: 'MD', scope: 'project' as const },
     ];
     const opts = {
       deepseekMdSources: sources,
-      memoryContext: '记忆',
+      memoryContext: 'Memory content',
       enabledSkills: [{ name: 's1', description: 'd1' }],
     };
     const text1 = formatUserContext(getUserContext(opts));
@@ -201,10 +201,10 @@ describe('formatUserContext', () => {
     expect(text1).not.toContain('# Available Skills');
   });
 
-  it('DEEPSEEK.md 用 <INSTRUCTIONS> 包裹', () => {
+  it('wraps DEEPSEEK.md in <INSTRUCTIONS>', () => {
     const ctx = getUserContext({
       deepseekMdSources: [
-        { filePath: '/p/DEEPSEEK.md', contents: '内容', scope: 'project' },
+        { filePath: '/p/DEEPSEEK.md', contents: 'Content', scope: 'project' },
       ],
     });
     const text = formatUserContext(ctx);
@@ -214,32 +214,32 @@ describe('formatUserContext', () => {
 });
 
 describe('formatTailUserContext', () => {
-  it('空 context（仅 currentDate）产生尾部日期 reminder', () => {
+  it('creates a trailing date reminder for an empty context (currentDate only)', () => {
     const text = formatTailUserContext(getUserContext({}));
     expect(text).toContain('<system-reminder>');
-    expect(text).toContain('# 当前日期');
+    expect(text).toContain('# Current date');
   });
 
-  it('完全空的 UserContext 返回空字符串', () => {
+  it('returns an empty string for a completely empty UserContext', () => {
     const text = formatTailUserContext({});
     expect(text).toBe('');
   });
 
-  it('尾部 reminder 包含动态上下文，不包含 DEEPSEEK/MCP 稳定上下文', () => {
+  it('trailing reminders include dynamic context but not stable DEEPSEEK/MCP context', () => {
     const ctx = getUserContext({
       deepseekMdSources: [
-        { filePath: '/proj/DEEPSEEK.md', contents: 'MD内容', scope: 'project' },
+        { filePath: '/proj/DEEPSEEK.md', contents: 'Markdown content', scope: 'project' },
       ],
-      memoryContext: '记忆',
+      memoryContext: 'Memory content',
       enabledSkills: [{ name: 's1', description: 'd1' }],
-      mcpInstructions: [{ serverName: 'srv1', instructions: '用法说明' }],
+      mcpInstructions: [{ serverName: 'srv1', instructions: 'Usage instructions' }],
       attachments: [{ path: '/f.txt', mimeType: 'text/plain', size: 100, kind: 'file' }],
     });
     const text = formatTailUserContext(ctx);
     expect(text).toContain('# Memory');
     expect(text).toContain('# Available Skills');
-    expect(text).toContain('# 附件清单');
-    expect(text).toContain('# 当前日期');
+    expect(text).toContain('# Attachments');
+    expect(text).toContain('# Current date');
     expect(text).not.toContain('DEEPSEEK.md instructions');
     expect(text).not.toContain('# MCP Server Instructions');
   });

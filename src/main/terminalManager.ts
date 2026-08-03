@@ -7,18 +7,18 @@ import { TerminalOutputBuffer } from './terminal/outputBuffer';
 interface TerminalSession {
   pty: IPty;
   sender: WebContents;
-  /** 回放缓冲：attach 时把断连期间的输出补给渲染进程 */
+  /** Replay buffer: send output accumulated while disconnected when attaching. */
   buffer: TerminalOutputBuffer;
-  /** attach 之后才开始向 sender 推送 */
+  /** Push to the sender only after attach. */
   attached: boolean;
-  /** 尚未发送的输出分片，按 FLUSH_INTERVAL_MS 合并成一条 IPC */
+  /** Output chunks not yet sent, combined into one IPC event per FLUSH_INTERVAL_MS. */
   pending: string[];
   flushTimer: NodeJS.Timeout | null;
 }
 
 const sessions = new Map<string, TerminalSession>();
 
-/** 已经挂过 destroyed 监听的 WebContents，避免重复注册 */
+/** WebContents with a destroyed listener already attached, to avoid duplicate registration. */
 const watchedSenders = new WeakSet<WebContents>();
 
 function pickShell(): { file: string; args: string[] } {
@@ -54,8 +54,8 @@ function resolveCwd(input: string | null | undefined): string {
 const MAX_BUFFER = 256 * 1024;
 
 /**
- * 输出合批窗口。PTY 的 onData 在高输出量下每秒可触发数百次，
- * 逐个 chunk 发 IPC 会淹没渲染进程；按一帧的节奏合并成一条即可。
+ * Output batching window. PTY onData can fire hundreds of times per second with high output;
+ * sending one IPC event per chunk can overwhelm the renderer, so combine events at roughly one frame.
  */
 const FLUSH_INTERVAL_MS = 16;
 
@@ -66,7 +66,7 @@ function clearFlushTimer(s: TerminalSession): void {
   }
 }
 
-/** 立即把待发送分片合并成一条 IPC 发出。 */
+/** Immediately combine pending chunks and send one IPC event. */
 function flushPending(sessionId: string, s: TerminalSession): void {
   clearFlushTimer(s);
   if (s.pending.length === 0) return;
@@ -98,7 +98,7 @@ function killSession(sessionId: string) {
   try { s.pty.kill(); } catch {}
 }
 
-/** 关闭并回收全部终端会话。应用退出前调用，避免留下孤儿 shell 进程。 */
+/** Close and reap all terminal sessions. Call before app exit to avoid orphaned shell processes. */
 export function killAllTerminalSessions(): void {
   for (const sessionId of [...sessions.keys()]) {
     killSession(sessionId);
@@ -106,10 +106,10 @@ export function killAllTerminalSessions(): void {
 }
 
 /**
- * 窗口销毁时回收绑定在它上面的会话。
+ * Reap sessions bound to a window when the window is destroyed.
  *
- * 之前只有显式 `terminal:kill` 和 PTY 自然退出两条清理路径，
- * 关掉一个带活跃终端的窗口会让 shell 进程和它的 256KB 缓冲永久留在内存里。
+ * Previously cleanup happened only through explicit `terminal:kill` and natural PTY exit.
+ * Closing a window with an active terminal left its shell process and 256 KB buffer in memory.
  */
 function killSessionsBoundTo(sender: WebContents): void {
   for (const [sessionId, s] of [...sessions.entries()]) {
@@ -172,7 +172,7 @@ export function registerTerminalIpc() {
       pty.onExit(({ exitCode, signal }) => {
         const cur = sessions.get(sessionId);
         if (cur) {
-          // 先把残余输出发完，再报退出，避免丢掉最后一屏
+          // Send remaining output before reporting exit so the final screen is not lost.
           flushPending(sessionId, cur);
           clearFlushTimer(cur);
           if (!cur.sender.isDestroyed()) {
@@ -194,7 +194,7 @@ export function registerTerminalIpc() {
     s.attached = true;
     watchSender(event.sender);
 
-    // 回放已缓冲的输出；pending 里的内容已经在 buffer 中，清掉避免重复
+    // Replay buffered output; pending content is already in the buffer, so clear it to avoid duplicates.
     s.pending.length = 0;
     clearFlushTimer(s);
 

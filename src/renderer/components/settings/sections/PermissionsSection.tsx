@@ -21,20 +21,20 @@ const BASH_OPTIONS: {
 }[] = [
   {
     value: 'default',
-    label: '默认审批',
-    desc: '本地只读工具自动执行；bash、文件写入、联网请求和外部状态变更仍会弹窗确认。',
+    label: 'Default approval',
+    desc: 'Local read-only tools run automatically; bash, file writes, network requests, and external state changes still require confirmation.',
     icon: <IconAsk />,
   },
   {
     value: 'auto_review',
-    label: '文件操作自动放行',
-    desc: '本地文件读取、搜索、写入和编辑会自动执行；bash、联网请求和任务变更仍需确认。',
+    label: 'Auto-allow file operations',
+    desc: 'Local file reads, searches, writes, and edits run automatically; bash, network requests, and task changes still require confirmation.',
     icon: <IconAllow />,
   },
   {
     value: 'full_access',
-    label: '完全访问',
-    desc: '不弹权限审批，AI 可直接执行工具和终端命令。仅在完全信任的本地开发环境使用。',
+    label: 'Full access',
+    desc: 'Skip permission prompts; AI can run tools and terminal commands directly. Use only in a fully trusted local development environment.',
     icon: <IconUnlock />,
   },
 ];
@@ -73,10 +73,10 @@ const FullAccessConfirmDialog: React.FC<{
         onClick={(event) => event.stopPropagation()}
       >
         <h3 id="confirm-full-access-title" className="text-[17px] font-bold text-text-primary">
-          启用完全访问模式？
+          Enable full access mode?
         </h3>
         <p className="mt-2.5 text-[13px] leading-relaxed text-text-secondary">
-          启用后，AI 可以直接执行工具和终端命令，不再显示权限审批。请仅在完全信任的本地开发环境中使用。
+          Once enabled, AI can run tools and terminal commands directly without permission prompts. Use this only in a fully trusted local development environment.
         </p>
         <div className="mt-[22px] flex justify-end gap-2">
           <button
@@ -86,7 +86,7 @@ const FullAccessConfirmDialog: React.FC<{
             onClick={onCancel}
             className="inline-flex h-[34px] items-center justify-center rounded-[6px] border border-hairline bg-bg-main px-3 text-[13px] font-semibold text-text-primary transition-colors hover:bg-bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-45"
           >
-            取消
+            Cancel
           </button>
           <button
             type="button"
@@ -94,7 +94,7 @@ const FullAccessConfirmDialog: React.FC<{
             onClick={onConfirm}
             className="inline-flex h-[34px] items-center justify-center rounded-[6px] border border-red-600 bg-red-600 px-3 text-[13px] font-semibold text-white transition-colors hover:border-red-700 hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30 disabled:cursor-not-allowed disabled:opacity-55"
           >
-            {isSaving ? '启用中...' : '启用完全访问'}
+            {isSaving ? 'Enabling...' : 'Enable full access'}
           </button>
         </div>
       </div>
@@ -122,7 +122,7 @@ const PermissionsSection: React.FC<Props> = ({ settings, patch }) => {
       showSaved();
       return true;
     } catch (err) {
-      setError((err as Error).message || '保存失败');
+      setError((err as Error).message || 'Failed to save');
       setSaveState('idle');
       return false;
     }
@@ -151,15 +151,15 @@ const PermissionsSection: React.FC<Props> = ({ settings, patch }) => {
   return (
     <div className="pb-10">
       <SettingsPageHeader
-        title="权限控制"
+        title="Permissions"
         action={<SavePill state={saveState} error={error} />}
       />
 
       <div className="space-y-9">
         <section>
-          <SectionTitle>工具审批策略</SectionTitle>
+          <SectionTitle>Tool approval policy</SectionTitle>
           <SettingsGroup>
-            <div role="radiogroup" aria-label="工具审批策略">
+            <div role="radiogroup" aria-label="Tool approval policy">
               {BASH_OPTIONS.map((option) => {
                 const selected = settings.permissions.bashExec === option.value;
                 return (
@@ -201,17 +201,17 @@ const PermissionsSection: React.FC<Props> = ({ settings, patch }) => {
 
         {settings.permissions.bashExec === 'full_access' && (
           <section>
-            <SectionTitle>风险提示</SectionTitle>
+            <SectionTitle>Risk notice</SectionTitle>
             <SettingsGroup>
               <div className="grid min-h-[76px] grid-cols-[minmax(0,1fr)_auto] items-center gap-6 px-5 py-4">
                 <div className="min-w-0">
-                  <div className="text-[14px] font-semibold text-text-primary">完全访问已启用</div>
+                  <div className="text-[14px] font-semibold text-text-primary">Full access is enabled</div>
                   <p className="mt-1 max-w-[640px] text-[13px] leading-[1.48] text-text-secondary">
-                    当前不会显示工具权限审批。涉及删除、安装、网络或凭据相关操作时，请确认当前环境完全可信。
+                    Tool permission prompts are currently disabled. Confirm that this environment is fully trusted before deletion, installation, network, or credential-related operations.
                   </p>
                 </div>
                 <span className="inline-flex h-6 items-center rounded-full bg-red-500/10 px-2.5 text-[11.5px] font-semibold text-red-600 dark:text-red-400">
-                  高风险
+                  High risk
                 </span>
               </div>
             </SettingsGroup>

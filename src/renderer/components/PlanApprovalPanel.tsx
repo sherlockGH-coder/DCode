@@ -66,7 +66,7 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
     let active = true;
     let secondFrame = 0;
     setToken(null);
-    // 双 rAF 确保计划完成两帧渲染后才签发审批 token
+    // Use two animation frames so the approval token is issued only after the plan renders.
     const firstFrame = window.requestAnimationFrame(() => {
       secondFrame = window.requestAnimationFrame(() => {
         void window.deepseekApi.markPlanPresented({
@@ -161,13 +161,13 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
       data-testid="plan-approval-panel"
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      aria-label="计划审批"
+      aria-label="Plan approval"
       className="plan-approval-panel flex max-h-[min(72vh,720px)] flex-col overflow-hidden rounded-[12px] border border-hairline bg-bg-main outline-none transition-[border-color,box-shadow] focus-visible:border-accent/45 focus-visible:ring-[3px] focus-visible:ring-accent-bg animate-[menu-in_150ms_ease-out]"
     >
       <header className="plan-approval-header flex shrink-0 items-center gap-2.5 border-b border-hairline px-4 py-3 sm:px-5">
         <IconPlan size={14} className="shrink-0 text-text-secondary" />
         <span className="plan-status-dot" aria-hidden />
-        <span className="text-[12px] font-medium text-text-secondary">实施计划 · 等待批准</span>
+        <span className="text-[12px] font-medium text-text-secondary">Implementation plan · Awaiting approval</span>
       </header>
 
       <div className="plan-document-layout min-h-0 flex-1">
@@ -183,7 +183,7 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
           <ActionButton
             action="approve_same"
             variant="primary"
-            title="批准，保留上下文执行"
+            title="Approve and execute with context"
             icon={<CheckIcon />}
             selected={selectedAction === 'approve_same'}
             disabled={!token || submitting}
@@ -194,7 +194,7 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
           <ActionButton
             action="approve_fresh"
             variant="secondary"
-            title="批准，清空上下文执行"
+            title="Approve and execute with fresh context"
             icon={<SweepIcon />}
             selected={selectedAction === 'approve_fresh'}
             disabled={!token || submitting}
@@ -205,7 +205,7 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
           <ActionButton
             action="reject"
             variant={rejectExpanded ? 'dangerActive' : 'danger'}
-            title="继续规划"
+            title="Continue planning"
             icon={<XIcon />}
             selected={selectedAction === 'reject'}
             disabled={!token || submitting}
@@ -229,7 +229,7 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
                 }
               }}
               onFocus={() => selectAction('reject')}
-              placeholder="可选：告诉 AI 计划需要如何调整…"
+              placeholder="Optional: tell the AI how to adjust the plan…"
               rows={3}
               className="max-h-[240px] min-h-[76px] w-full resize-y rounded-[8px] border border-hairline bg-bg-main px-3 py-2 text-[13px] leading-5 text-text-primary outline-none placeholder:text-text-tertiary focus:border-accent/45 focus:ring-[3px] focus:ring-accent-bg"
               disabled={submitting}
@@ -245,7 +245,7 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
                 }}
                 className="h-9 rounded-[8px] px-3 text-[13px] font-medium text-text-secondary transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50 border-0 bg-transparent cursor-pointer"
               >
-                取消
+                Cancel
               </button>
               <button
                 type="button"
@@ -254,7 +254,7 @@ const PlanApprovalPanel: React.FC<Props> = ({ plan, modeRevision, onDecision }) 
                 onClick={() => submitDecision('reject')}
                 className="h-9 rounded-[8px] bg-diff-del px-3 text-[13px] font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 border-0 cursor-pointer"
               >
-                重新规划
+                Replan
               </button>
             </div>
           </div>

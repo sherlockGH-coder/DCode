@@ -121,7 +121,7 @@ describe('useMessages slash command handling', () => {
 
     await act(async () => {
       await current?.sendMessage({
-        userInput: '帮我做一个天气卡片',
+        userInput: 'Build a weather card for me',
         attachments: [],
         conversationId: 'conv_empty',
         existingMessages: [],
@@ -133,7 +133,7 @@ describe('useMessages slash command handling', () => {
     });
 
     expect(window.deepseekApi.createConversation).not.toHaveBeenCalled();
-    expect(window.deepseekApi.updateConversationTitle).toHaveBeenCalledWith('conv_empty', '帮我做一个天气卡片');
+    expect(window.deepseekApi.updateConversationTitle).toHaveBeenCalledWith('conv_empty', 'Build a weather card');
   });
 
   it('keeps multiple tool calls from one assistant response on a single assistant message', async () => {
@@ -159,7 +159,7 @@ describe('useMessages slash command handling', () => {
     const setMessages = vi.fn((updater: (prev: Message[]) => Message[]) => {
       messages = updater(messages);
     });
-    const content = '这个 PNG 图片是有效的，`1254×1254` 像素。';
+    const content = 'This PNG image is valid at `1254×1254` pixels.';
 
     const Harness = () => {
       current = useMessages();
@@ -172,7 +172,7 @@ describe('useMessages slash command handling', () => {
 
     await act(async () => {
       await current?.sendMessage({
-        userInput: '读取图片',
+        userInput: 'Read the image',
         attachments: [],
         conversationId: 'conv_multi_tool',
         existingMessages: [],

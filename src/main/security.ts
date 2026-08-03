@@ -3,13 +3,13 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 /**
- * 渲染层展示的是模型生成的 Markdown，其中的链接不可信。
+ * The renderer displays model-generated Markdown, so its links are untrusted.
  *
- * 此前主窗口既没有 `setWindowOpenHandler` 也没有 `will-navigate` 守卫：
- * 一个普通的 `<a href="https://…">` 就能把应用外壳整个导航走，
- * `target="_blank"` 则会打开一个没有地址栏、共享同一 session 的 Electron 窗口。
- * 这里把「导航」和「打开外链」彻底分开：应用窗口只允许停留在自己的页面上，
- * 其余一律交给系统浏览器。
+ * Previously the main window had neither a `setWindowOpenHandler` nor a `will-navigate` guard:
+ * an ordinary `<a href="https://…">` could navigate the entire app shell,
+ * while `target="_blank"` opened an Electron window without an address bar that shared the same session.
+ * Keep navigation and opening external links separate: the app window may stay only on its own pages;
+ * everything else is handed to the system browser.
  */
 
 const EXTERNAL_SCHEMES = /^(https?|mailto):/i;
@@ -18,7 +18,7 @@ function rendererFileUrl(): string {
   return pathToFileURL(join(__dirname, '../renderer/index.html')).toString();
 }
 
-/** 去掉 query 与 hash，避免 `#/route` 这类前端路由被当成外部导航。 */
+/** Remove query and hash so frontend routes such as `#/route` are not treated as external navigation. */
 function stripFragment(url: string): string {
   const hash = url.indexOf('#');
   const query = url.indexOf('?');
@@ -29,7 +29,7 @@ function stripFragment(url: string): string {
 export function isInternalUrl(url: string): boolean {
   const devUrl = process.env.ELECTRON_RENDERER_URL;
   if (devUrl && devUrl.trim() && url.startsWith(devUrl.trim())) return true;
-  // 打包后只认渲染进程自己那一个 HTML，不放行任意 file://
+  // In packaged builds, allow only the renderer's own HTML, not arbitrary file:// URLs.
   return stripFragment(url) === stripFragment(rendererFileUrl());
 }
 
@@ -40,9 +40,9 @@ function openExternally(url: string): void {
   });
 }
 
-/** 给窗口装上导航守卫。 */
+/** Install navigation guards on a window. */
 export function bindNavigationGuards(win: BrowserWindow): void {
-  // 所有 window.open / target=_blank 一律不在应用内开窗，转交系统浏览器
+  // Never open window.open or target=_blank inside the app; hand them to the system browser.
   win.webContents.setWindowOpenHandler(({ url }) => {
     openExternally(url);
     return { action: 'deny' };
@@ -54,24 +54,23 @@ export function bindNavigationGuards(win: BrowserWindow): void {
     openExternally(url);
   });
 
-  // 重定向同样要拦，否则 will-navigate 放行后仍可能被带走
+  // Block redirects too, or will-navigate could still let the window be taken elsewhere.
   win.webContents.on('will-redirect', (event, url) => {
     if (isInternalUrl(url)) return;
     event.preventDefault();
   });
 
-  // 未使用 <webview>，直接禁掉这条攻击面
+  // No <webview> is used, so disable this attack surface.
   win.webContents.on('will-attach-webview', (event) => {
     event.preventDefault();
   });
 }
 
 /**
- * 渲染进程的 CSP。
+ * Content Security Policy for the renderer.
  *
- * 开发模式下 Vite 的 HMR 与 React Refresh 需要 eval 和 websocket，
- * 打包后收紧。样式侧的 `unsafe-inline` 无法去掉：Tailwind 运行时与
- * 语法高亮组件都会注入内联 style。
+ * In development, Vite HMR and React Refresh need eval and websockets; tighten the policy in packaged builds.
+ * The style-side `unsafe-inline` cannot be removed because Tailwind runtime and syntax-highlighting components inject inline styles.
  */
 function buildCsp(isDev: boolean): string {
   const devUrl = (process.env.ELECTRON_RENDERER_URL || '').trim();
@@ -91,7 +90,7 @@ function buildCsp(isDev: boolean): string {
     "font-src 'self' data: local-file:",
     "media-src 'self' data: blob: local-file:",
     `connect-src ${connectSrc}`,
-    // HtmlPreview 用的是 srcdoc + sandbox="" 的 iframe
+    // HtmlPreview uses an iframe with srcdoc and sandbox="".
     "frame-src 'self' data: blob:",
     "worker-src 'self' blob:",
     "object-src 'none'",
@@ -102,10 +101,10 @@ function buildCsp(isDev: boolean): string {
 }
 
 /**
- * 给会话挂上 CSP 响应头。
+ * Attach CSP response headers to the session.
  *
- * `local-file:` 由 `protocol.handle` 接管，不经过 webRequest，
- * 所以这里只影响渲染进程自身的文档与资源请求。
+ * `local-file:` is handled by `protocol.handle` and does not pass through webRequest,
+ * so this affects only the renderer's own document and resource requests.
  */
 export function applyContentSecurityPolicy(targetSession: Session = session.defaultSession): void {
   const isDev = Boolean((process.env.ELECTRON_RENDERER_URL || '').trim());

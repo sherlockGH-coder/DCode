@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => {
   const userMessage: Message = {
     id: 'user_1',
     role: 'user',
-    content: '分析项目',
+    content: 'Analyze the project',
     created_at: '2026-06-16 01:00:00',
     turnId: 'user_1',
     attemptNo: 0,
@@ -18,8 +18,8 @@ const mocks = vi.hoisted(() => {
   const assistantMessage: Message = {
     id: 'assistant_1',
     role: 'assistant',
-    content: '最终答案',
-    reasoning_content: '最终回复的思考过程',
+    content: 'Final answer',
+    reasoning_content: 'Reasoning for the final reply',
     created_at: '2026-06-16 01:00:38',
     duration: 38_000,
     turnId: 'user_1',
@@ -29,7 +29,7 @@ const mocks = vi.hoisted(() => {
 
   const conversation: Conversation = {
     id: 'conv_1',
-    title: '分析项目',
+    title: 'Analyze the project',
     project_path: '/tmp/project',
     created_at: '2026-06-16 01:00:00',
     updated_at: '2026-06-16 01:00:38',
@@ -226,7 +226,7 @@ vi.mock('./components/AppHeader', async () => {
       ReactActual.createElement(
         'button',
         { 'data-testid': 'app-header-new-conversation', onClick: onNewConversation },
-        '新对话',
+        'New conversation',
       ),
       rightContent,
     ),
@@ -323,9 +323,9 @@ describe('App completed turn rendering', () => {
     const processedButton = container.querySelector('[data-testid="processed-summary-toggle"]');
 
     expect(processedButton).not.toBeNull();
-    expect(processedButton?.textContent).toContain('已处理');
+    expect(processedButton?.textContent).toContain('Processed');
     expect(processedButton?.textContent).toContain('38s');
-    expect(container.textContent).toContain('最终答案');
+    expect(container.textContent).toContain('Final answer');
     expect(container.querySelector('[data-testid="exploration-activity-summary"]')).toBeNull();
 
     act(() => {
@@ -333,13 +333,13 @@ describe('App completed turn rendering', () => {
     });
 
     const reasoningToggle = container.querySelector('[data-testid="reasoning-activity-toggle"]') as HTMLButtonElement;
-    expect(reasoningToggle.textContent).toContain('已深度思考，思考了 38秒');
-    expect(container.textContent).not.toContain('最终回复的思考过程');
+    expect(reasoningToggle.textContent).toContain('Thought deeply · thought for 38s');
+    expect(container.textContent).not.toContain('Reasoning for the final reply');
 
     act(() => {
       reasoningToggle.dispatchEvent(new window.Event('click', { bubbles: true }));
     });
-    expect(container.textContent).toContain('最终回复的思考过程');
+    expect(container.textContent).toContain('Reasoning for the final reply');
   });
 
   it('keeps consecutive reasoning runs collapsed independently around assistant text', () => {
@@ -349,7 +349,7 @@ describe('App completed turn rendering', () => {
         {
           id: 'user_1',
           role: 'user',
-          content: '分析项目',
+          content: 'Analyze the project',
           created_at: '2026-06-16 01:00:00',
           turnId: 'user_1',
           attemptNo: 0,
@@ -357,8 +357,8 @@ describe('App completed turn rendering', () => {
         {
           id: 'assistant_1_mid',
           role: 'assistant',
-          content: '先检查代码结构',
-          reasoning_content: '中间步骤的思考过程',
+          content: 'First inspect the code structure',
+          reasoning_content: 'Reasoning for the intermediate step',
           created_at: '2026-06-16 01:00:10',
           duration: 10_000,
           turnId: 'user_1',
@@ -368,8 +368,8 @@ describe('App completed turn rendering', () => {
         {
           id: 'assistant_1_final',
           role: 'assistant',
-          content: '最终答案',
-          reasoning_content: '最终回复的思考过程',
+          content: 'Final answer',
+          reasoning_content: 'Reasoning for the final reply',
           created_at: '2026-06-16 01:00:38',
           duration: 28_000,
           turnId: 'user_1',
@@ -384,7 +384,7 @@ describe('App completed turn rendering', () => {
 
       const processedToggle = container.querySelector('[data-testid="processed-summary-toggle"]') as HTMLButtonElement;
       expect(processedToggle).not.toBeNull();
-      expect(container.textContent).toContain('最终答案');
+      expect(container.textContent).toContain('Final answer');
 
       act(() => {
         processedToggle.dispatchEvent(new window.Event('click', { bubbles: true }));
@@ -394,15 +394,15 @@ describe('App completed turn rendering', () => {
         container.querySelectorAll('[data-testid="reasoning-activity-toggle"]'),
       );
       expect(processedButtons).toHaveLength(2);
-      expect(processedButtons[0].textContent).toContain('已深度思考，思考了 10秒');
-      expect(processedButtons[1].textContent).toContain('已深度思考，思考了 28秒');
+      expect(processedButtons[0].textContent).toContain('Thought deeply · thought for 10s');
+      expect(processedButtons[1].textContent).toContain('Thought deeply · thought for 28s');
 
       act(() => {
         processedButtons[0].dispatchEvent(new window.Event('click', { bubbles: true }));
       });
 
-      expect(container.textContent).toContain('先检查代码结构');
-      expect(container.textContent).toContain('中间步骤的思考过程');
+      expect(container.textContent).toContain('First inspect the code structure');
+      expect(container.textContent).toContain('Reasoning for the intermediate step');
     } finally {
       mocks.messages = originalMessages;
     }
@@ -413,10 +413,10 @@ describe('App completed turn rendering', () => {
     try {
       mocks.messages = [
         {
-          id: 'user_activity', role: 'user', content: '检查项目', turnId: 'user_activity', attemptNo: 0,
+          id: 'user_activity', role: 'user', content: 'Inspect the project', turnId: 'user_activity', attemptNo: 0,
         },
         {
-          id: 'assistant_explore_1', role: 'assistant', content: '', reasoning_content: '先定位代码',
+          id: 'assistant_explore_1', role: 'assistant', content: '', reasoning_content: 'First locate the code',
           duration: 61_000, turnId: 'user_activity', attemptNo: 1, seq: 0,
           toolItems: [
             {
@@ -430,7 +430,7 @@ describe('App completed turn rendering', () => {
           ],
         },
         {
-          id: 'assistant_explore_2', role: 'assistant', content: '', reasoning_content: '继续验证结果',
+          id: 'assistant_explore_2', role: 'assistant', content: '', reasoning_content: 'Continue validating the result',
           duration: 4_000, turnId: 'user_activity', attemptNo: 1, seq: 1,
           toolItems: [{
             id: 'grep_activity_2', toolCallId: 'call_grep_activity_2', name: 'grep', kind: 'grep',
@@ -445,7 +445,7 @@ describe('App completed turn rendering', () => {
           }],
         },
         {
-          id: 'assistant_activity_final', role: 'assistant', content: '检查完成',
+          id: 'assistant_activity_final', role: 'assistant', content: 'Inspection complete',
           turnId: 'user_activity', attemptNo: 1, seq: 3,
         },
       ];
@@ -464,7 +464,7 @@ describe('App completed turn rendering', () => {
         container.querySelectorAll('[data-testid="exploration-activity-summary"]'),
       );
       expect(summaries).toHaveLength(2);
-      expect(summaries[0].textContent).toContain('思考了 1分1秒，读取 1 个文件，搜索 1 次');
+      expect(summaries[0].textContent).toContain('Thought for 1m 1s, Read 1 files, Searched 1 times');
       expect(summaries[0].getAttribute('data-tool-icon')).toBe('book');
       expect(summaries[1].getAttribute('data-tool-icon')).toBe('search');
       const processedContent = container.querySelector('[data-testid="processed-summary-content"]') as HTMLElement;
@@ -473,9 +473,9 @@ describe('App completed turn rendering', () => {
       expect(summaries[0].className).not.toContain('px-2');
       expect(summaries[1].className).not.toContain('px-2');
       expect(standaloneCommand.className).not.toContain('px-2');
-      expect(container.textContent).toContain('已运行');
+      expect(container.textContent).toContain('Ran');
       expect(container.textContent).toContain('pnpm test');
-      expect(container.textContent).toContain('检查完成');
+      expect(container.textContent).toContain('Inspection complete');
     } finally {
       mocks.messages = originalMessages;
     }
@@ -504,7 +504,7 @@ describe('App completed turn rendering', () => {
     });
 
     expect(container.querySelector('[data-testid="task-monitor-popover"]')).toBeNull();
-    expect(container.querySelector('[aria-label="显示任务监控"]')).toBeNull();
+    expect(container.querySelector('[aria-label="Show task monitor"]')).toBeNull();
   });
 
   it('places task progress above the composer without changing workspace controls', async () => {
@@ -517,8 +517,8 @@ describe('App completed turn rendering', () => {
 
     expect(composer?.contains(progress)).toBe(false);
     expect(container.querySelector('[data-testid="chat-input"]')?.contains(progress)).toBe(true);
-    expect(container.querySelector('[aria-label="显示产物面板"]')).not.toBeNull();
-    expect(container.querySelector('[aria-label="显示终端"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Show artifact panel"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Show terminal"]')).not.toBeNull();
   });
 
   it('replaces task progress with a pending approval above the composer', async () => {
@@ -543,7 +543,7 @@ describe('App completed turn rendering', () => {
       });
 
       expect(container.querySelector('[data-testid="task-progress-accessory"]')).toBeNull();
-      expect(container.textContent).toContain('终端命令');
+      expect(container.textContent).toContain('Terminal command');
       expect(container.textContent).toContain('pnpm test');
       expect(container.querySelector('[data-testid="chat-input-composer"]')).not.toBeNull();
     } finally {
@@ -576,13 +576,13 @@ describe('App completed turn rendering', () => {
     const mainHeader = container.querySelector('[data-testid="app-header"]');
     const artifactPanel = container.querySelector('[data-testid="artifact-panel"]');
 
-    expect(mainHeader?.querySelector('[aria-label="显示任务监控"]')).toBeNull();
-    // 工作区打开时 dock 保持挂载以便过渡动画，但必须处于不可见且不可交互状态
+    expect(mainHeader?.querySelector('[aria-label="Show task monitor"]')).toBeNull();
+    // Keep the dock mounted for its transition, but make it hidden and non-interactive while the workspace is open.
     const dock = mainHeader?.querySelector('[data-testid="workspace-dock"]');
     expect(dock?.getAttribute('aria-hidden')).toBe('true');
     expect(dock?.hasAttribute('inert')).toBe(true);
     expect(dock?.className).toContain('pointer-events-none');
-    expect(artifactPanel?.querySelector('[aria-label="显示任务监控"]')).toBeNull();
+    expect(artifactPanel?.querySelector('[aria-label="Show task monitor"]')).toBeNull();
   });
 
   it('provides a dismiss layer when the sidebar is open on a narrow layout', async () => {
@@ -598,7 +598,7 @@ describe('App completed turn rendering', () => {
     const resizeIndicator = resizeHandle?.querySelector('.sidebar-resize-indicator');
 
     expect(dismissLayer).not.toBeNull();
-    expect(dismissLayer?.getAttribute('aria-label')).toBe('收起侧栏');
+    expect(dismissLayer?.getAttribute('aria-label')).toBe('Collapse sidebar');
     expect(sidebarShell?.contains(resizeHandle)).toBe(true);
     expect(resizeIndicator?.className).toContain('top-3 bottom-3');
 

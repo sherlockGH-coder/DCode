@@ -1,12 +1,12 @@
 import type { Message } from '../../shared/types';
 
 /**
- * 按激活分支过滤消息：每个 turn 只保留 (user 消息 + 该 turn 激活 attempt 的所有 assistant/tool 消息)。
+ * Filter messages by the active branch: keep only the user message and all assistant/tool messages from the active attempt for each turn.
  *
- * 默认激活：activeAttempts 中已记录的值；未记录则 fallback 到该 turn 的 max(attemptNo)。
+ * Default activation: use the value recorded in activeAttempts; otherwise fall back to the turn's max(attemptNo).
  *
- * `overrideAttempts` 用于重试场景：传 `{ [turnId]: newAttemptNo }` 让该 turn 临时切到一个尚无消息的新 attempt，
- * 这样过滤结果里该 turn 只剩 user 消息（assistant/tool 都不带回 API）。
+ * `overrideAttempts` is used for retries: pass `{ [turnId]: newAttemptNo }` to temporarily switch the turn to a new attempt with no messages,
+ * so the filtered result contains only the user message for that turn and sends no assistant/tool messages back to the API.
  */
 export function filterActiveBranch(
   messages: Message[],
@@ -35,7 +35,7 @@ export function filterActiveBranch(
   });
 }
 
-/** 计算指定 turn 当前已有的最大 attemptNo（不存在则返回 0） */
+/** Calculate the current maximum attemptNo for a turn, returning 0 when none exists. */
 export function getMaxAttemptForTurn(messages: Message[], turnId: string): number {
   let max = 0;
   for (const m of messages) {
@@ -44,7 +44,7 @@ export function getMaxAttemptForTurn(messages: Message[], turnId: string): numbe
   return max;
 }
 
-/** 找到 conversation 中最后一个 user 消息 — 用于判断"是否最后一个 turn"（重试入口可见性） */
+/** Find the last user message in a conversation to determine whether it is the last turn and whether the retry entry is visible. */
 export function findLastUserMessage(messages: Message[]): Message | undefined {
   for (let i = messages.length - 1; i >= 0; i--) {
     if (messages[i].role === 'user') return messages[i];

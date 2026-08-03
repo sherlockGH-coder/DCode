@@ -1,10 +1,10 @@
 import type { Message, PlanUpdateItem, ToolCall, ToolItem, ToolResultMetadata } from '../../shared/types';
 import { nameToKind } from './toolDescriptions';
 
-const INTERRUPTED_ASK_USER_OUTPUT = '问题已失效：应用重启后，原来的等待确认无法继续。请重新发送或继续输入。';
+const INTERRUPTED_ASK_USER_OUTPUT = 'This question expired because the app was restarted. The previous pending confirmation cannot continue. Send it again or continue typing.';
 
 function parseLegacyAskUserAnswers(output?: string): Record<string, string> | undefined {
-  if (!output?.includes('用户已作答：')) return undefined;
+  if (!output || (!output.includes('User answer:') && !output.includes('\u7528\u6237\u5df2\u4f5c\u7b54\uff1a'))) return undefined;
   const entries = [...output.matchAll(/"([^"]+)"="([^"]*)"/g)].map((match) => [match[1], match[2]] as const);
   return entries.length > 0 ? Object.fromEntries(entries) : undefined;
 }
@@ -50,7 +50,7 @@ function parsePlanItems(value: unknown): PlanUpdateItem[] {
   });
 }
 
-/** 从 tool_call 创建初始 ToolItem（status=running） */
+/** Create the initial ToolItem from a tool_call with status=running. */
 export function createToolItemFromStart(event: { id: string; name: string; arguments: string }): ToolItem {
   const kind = nameToKind(event.name);
   const base = {
@@ -107,7 +107,7 @@ export function createToolItemFromStart(event: { id: string; name: string; argum
   }
 }
 
-/** 用 metadata 更新 ToolItem 为完成/错误状态 */
+/** Update a ToolItem to a completed or error state using metadata. */
 export function applyMetadata(item: ToolItem, metadata: ToolResultMetadata | undefined, status: 'done' | 'error', output?: string): ToolItem {
   if (!metadata) {
     if (item.kind === 'ask_user_question') {
@@ -179,8 +179,8 @@ export function applyMetadata(item: ToolItem, metadata: ToolResultMetadata | und
 }
 
 /**
- * 从持久化的 tool_calls + tool 消息重建 ToolItem[]
- * 用于加载历史对话时恢复工具活动 UI
+ * Rebuild ToolItem[] from persisted tool_calls and tool messages.
+ * Used to restore tool activity UI when loading a historical conversation.
  */
 export function reconstructToolItems(
   toolCalls: ToolCall[],

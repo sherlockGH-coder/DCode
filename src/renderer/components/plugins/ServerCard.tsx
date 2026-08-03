@@ -50,7 +50,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
           type="button"
           className="flex h-6 w-full cursor-pointer items-center justify-center rounded-md border-none bg-transparent text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-secondary"
           onClick={() => setExpanded(!expanded)}
-          title={expanded ? '折叠' : '展开'}
+          title={expanded ? 'Collapse' : 'Expand'}
         >
           <IconChevronDown size={13} className={`transition-transform duration-150 ${expanded ? 'rotate-0' : '-rotate-90'}`} />
         </button>
@@ -61,11 +61,11 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
             <ScopeBadge scope={server.scope} />
           </div>
           <div className="mt-[3px] flex min-w-0 items-center gap-1.5 font-mono text-[12px] text-text-secondary">
-            <span className="shrink-0">{server.tools.length} 个工具</span>
+            <span className="shrink-0">{server.tools.length} tools</span>
             <span className="shrink-0 text-text-tertiary">·</span>
             <span className="shrink-0">{server.config.transport}</span>
             <span className="shrink-0 text-text-tertiary">·</span>
-            <span className="truncate">{server.enabled ? commandSummary(server) : '已停用'}</span>
+            <span className="truncate">{server.enabled ? commandSummary(server) : 'Disabled'}</span>
             {server.lastError && (
               <>
                 <span className="shrink-0 text-text-tertiary">·</span>
@@ -80,7 +80,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
             onClick={onRestart}
-            title="重连"
+            title="Reconnect"
           >
             <IconHistory size={14} className="text-current" />
           </button>
@@ -88,7 +88,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-bg-hover hover:text-text-primary"
             onClick={onEdit}
-            title="设置"
+            title="Settings"
           >
             <IconEdit size={15} />
           </button>
@@ -96,7 +96,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
             type="button"
             className="flex h-7 w-7 items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-rose-500/[0.08] hover:text-rose-600 dark:hover:text-rose-300"
             onClick={onDelete}
-            title="删除"
+            title="Delete"
           >
             <IconTrash size={15} />
           </button>
@@ -106,7 +106,7 @@ const ServerCard: React.FC<Props> = ({ server, onToggle, onEdit, onDelete, onRes
           <ToggleSwitch
             checked={server.enabled}
             onChange={onToggle}
-            label={`${server.name} 启用状态`}
+            label={`${server.name} enabled`}
           />
         </div>
       </div>

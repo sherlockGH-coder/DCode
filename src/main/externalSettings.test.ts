@@ -31,7 +31,7 @@ describe('external settings', () => {
 
     expect(resolveExternalApiKey(settings, {
       profileId: 'default',
-      profileName: '默认配置',
+      profileName: 'Default profile',
     })).toBe('profile-key');
   });
 

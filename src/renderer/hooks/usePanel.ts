@@ -8,7 +8,7 @@ interface PanelConfig {
   direction: 'horizontal' | 'vertical';
   defaultCollapsed?: boolean;
   persistCollapsed?: boolean;
-  /** 是否翻转增量逻辑（如右侧面板拉左边缘增加宽度） */
+  /** Whether to invert the resize delta, for example when dragging the left edge of a right panel. */
   invertDelta?: boolean;
 }
 
@@ -94,7 +94,7 @@ export function usePanel(config: PanelConfig) {
 
       if (isHorizontal) {
         panel.style.width = `${next}px`;
-        // 内层刚性宽度跟随拖拽实时更新（开合动画时它保持不变，内容整体滑动）
+        // Keep the inner fixed width in sync with dragging; during the open/close animation it stays fixed while the content slides as a whole.
         panel.style.setProperty('--panel-size', `${next}px`);
       } else {
         panel.style.height = `${next}px`;

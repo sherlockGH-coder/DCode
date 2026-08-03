@@ -31,7 +31,7 @@ describe('createIgnoreFilter', () => {
     filter.addRules('', 'release/\n');
     expect(filter.ignores('release', true)).toBe(true);
     expect(filter.ignores('release/app.dmg', false)).toBe(true);
-    // 同名文件不该被目录规则命中
+    // A file with the same name must not match a directory-only rule.
     expect(filter.ignores('release', false)).toBe(false);
   });
 

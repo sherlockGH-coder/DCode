@@ -81,8 +81,8 @@ describe('ChatInput slash commands', () => {
 
     expect(compactRing).not.toBeNull();
     expect(compactRing?.outerHTML).toContain('stroke-dasharray="67 100"');
-    expect(compactRing?.getAttribute('aria-label')).toBe('当前上下文已使用 67%');
-    expect(container.textContent).toContain('压缩此会话的上下文（已使用 67%）');
+    expect(compactRing?.getAttribute('aria-label')).toBe('Current context usage: 67%');
+    expect(container.textContent).toContain('Compact this conversation context (67% used)');
   });
 
   it('does not register clear as a slash command', () => {
@@ -112,7 +112,7 @@ describe('ChatInput slash commands', () => {
     expect(slot?.className).not.toContain('overflow-hidden');
     expect(projectFooter).not.toBeNull();
     expect(projectFooter?.textContent).toContain('OS');
-    expect(container.textContent).not.toContain('上下文');
+    expect(container.textContent).not.toContain('context');
   });
 
   it('does not render the project footer inside an existing conversation', () => {
@@ -148,24 +148,24 @@ describe('ChatInput slash commands', () => {
     });
 
     act(() => root?.render(renderInput('execute')));
-    const plus = container.querySelector('button[aria-label="附加选项"]') as HTMLButtonElement;
+    const plus = container.querySelector('button[aria-label="More options"]') as HTMLButtonElement;
     act(() => plus.dispatchEvent(new window.Event('click', { bubbles: true })));
 
     const planMenuItem = [...container.querySelectorAll('[role="menuitem"]')]
-      .find((item) => item.textContent?.includes('计划')) as HTMLButtonElement;
+      .find((item) => item.textContent?.includes('Plan')) as HTMLButtonElement;
     expect(planMenuItem).not.toBeNull();
     act(() => planMenuItem.dispatchEvent(new window.Event('click', { bubbles: true })));
     expect(onModeChange).toHaveBeenCalledWith('plan');
 
     act(() => root?.render(renderInput('plan')));
     const indicator = container.querySelector('[data-testid="plan-mode-indicator"]') as HTMLElement;
-    const microphone = container.querySelector('button[aria-label="语音输入"]') as HTMLButtonElement;
-    expect(indicator.textContent).toContain('计划');
+    const microphone = container.querySelector('button[aria-label="Voice input"]') as HTMLButtonElement;
+    expect(indicator.textContent).toContain('Plan');
     const toolbarItems = [...(microphone.parentElement?.children ?? [])];
     expect(toolbarItems.indexOf(indicator)).toBe(toolbarItems.indexOf(microphone) + 1);
     expect(container.querySelector('[data-testid="plan-mode-toggle"]')).toBeNull();
 
-    const close = container.querySelector('button[aria-label="关闭计划模式"]') as HTMLButtonElement;
+    const close = container.querySelector('button[aria-label="Close plan mode"]') as HTMLButtonElement;
     act(() => close.dispatchEvent(new window.Event('click', { bubbles: true })));
     expect(onModeChange).toHaveBeenLastCalledWith('execute');
   });
@@ -180,7 +180,7 @@ describe('ChatInput slash commands', () => {
         selectedModel: 'deepseek-v4-flash',
         onModelChange: vi.fn(),
         onReasoningEffortChange: vi.fn(),
-        statusAccessory: React.createElement('div', { 'data-testid': 'status-accessory' }, '正在执行 · 1/3'),
+        statusAccessory: React.createElement('div', { 'data-testid': 'status-accessory' }, 'Executing · 1/3'),
       }));
     });
 

@@ -27,13 +27,13 @@ interface LoadDeepseekMdOptions {
   maxBytes?: number;
 }
 
-/** 综合「用户覆写 > 默认 .md」的最终 system prompt — 调用方每次发请求前取一次 */
+/** Final system prompt combining user override and the default .md; callers read it before each request. */
 export function getEffectiveSystemPrompt(): string {
   const override = settingsManager.getSystemPromptOverride().trim();
   return override || defaultSystemPrompt;
 }
 
-/** 用户级配置目录：~/.deepseek/ */
+/** User-level configuration directory: ~/.deepseek/. */
 function getUserDeepseekDir(): string {
   return join(app.getPath('home'), '.deepseek');
 }
@@ -45,16 +45,16 @@ function readDeepseekSource(filePath: string, maxBytes: number): ReadDeepseekSou
     const isOversized = byteLength > maxBytes;
     const text = (isOversized ? data.slice(0, maxBytes) : data).trim();
     if (isOversized) {
-      console.warn(`[prompts] ${filePath} 超过 ${maxBytes} bytes，已截断注入`);
+      console.warn(`[prompts] ${filePath} exceeds ${maxBytes} bytes; truncating before injection`);
     }
     return text ? { contents: text, bytesRead: Math.min(byteLength, maxBytes) } : null;
   } catch (err) {
-    console.warn(`[prompts] 读取 DEEPSEEK.md 失败: ${filePath}`, err);
+    console.warn(`[prompts] Failed to read DEEPSEEK.md: ${filePath}`, err);
     return null;
   }
 }
 
-/** 查找目录下的 DEEPSEEK.md（不含 .local） */
+/** Find DEEPSEEK.md in a directory, excluding .local. */
 function findDeepseekMdInDir(dir: string): string | null {
   const candidate = join(dir, DEEPSEEK_MD_FILENAME);
   try {
@@ -63,7 +63,7 @@ function findDeepseekMdInDir(dir: string): string | null {
   return null;
 }
 
-/** 查找目录下的 .deepseek/DEEPSEEK.md */
+/** Find .deepseek/DEEPSEEK.md in a directory. */
 function findProjectDeepseekMd(dir: string): string | null {
   const candidate = join(dir, PROJECT_DEEPSEEK_DIR, DEEPSEEK_MD_FILENAME);
   try {
@@ -72,7 +72,7 @@ function findProjectDeepseekMd(dir: string): string | null {
   return null;
 }
 
-/** 扫描 .deepseek/rules/*.md（按文件名排序） */
+/** Scan .deepseek/rules/*.md in filename order. */
 function findRulesInDir(dir: string): string[] {
   const rulesDir = join(dir, PROJECT_DEEPSEEK_DIR, DEEPSEEK_RULES_DIRNAME);
   try {
@@ -191,16 +191,16 @@ function collectDeepseekSources(
 }
 
 /**
- * 加载 DEEPSEEK.md 配置（多层级）
- * 返回结构化的 sources 数组，每个条目包含 filePath / contents / scope
+ * Load DEEPSEEK.md configuration from multiple levels.
+ * Return structured sources, each containing filePath, contents, and scope.
  *
- * 加载顺序：
- * 1. User 层：~/.deepseek/DEEPSEEK.md（全局私人指令）
- * 2. Project 层（从仓库根到 projectPath 逐层）：
- *    - DEEPSEEK.md（仓库根级别）
- *    - .deepseek/DEEPSEEK.md
- *    - .deepseek/rules/*.md（按文件名排序）
- * 3. Local 层：DEEPSEEK.local.md（项目根，不签入代码库）
+ * Load order:
+ * 1. User level: ~/.deepseek/DEEPSEEK.md (private global instructions).
+ * 2. Project level, one directory at a time from repository root to projectPath:
+ *    - DEEPSEEK.md at the repository root;
+ *    - .deepseek/DEEPSEEK.md;
+ *    - .deepseek/rules/*.md in filename order.
+ * 3. Local level: DEEPSEEK.local.md at the project root, not checked into the codebase.
  */
 export function loadDeepseekMdSources(
   projectPath: string | null,
@@ -214,7 +214,7 @@ export function loadDeepseekMdSources(
 }
 
 /**
- * 向后兼容：返回拼接后的单一字符串（旧接口）
+ * Backward compatibility: return one concatenated string for the legacy interface.
  */
 export function loadDeepseekMd(
   projectPath: string | null,

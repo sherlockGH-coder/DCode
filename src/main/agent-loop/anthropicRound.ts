@@ -93,7 +93,7 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
   const resetIdleTimer = () => {
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(() => {
-      log('⚠ 流空闲超时 (%ds)，自动中断', STREAM_IDLE_TIMEOUT_MS / 1000);
+      log('⚠ Stream idle timeout (%ds); aborting automatically', STREAM_IDLE_TIMEOUT_MS / 1000);
       idleController.abort();
     }, STREAM_IDLE_TIMEOUT_MS);
   };
@@ -110,7 +110,7 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
       break;
     } catch (err) {
       if (signal?.aborted) {
-        log('⏹ 已中断（请求发起阶段）');
+        log('⏹ Aborted while starting the request');
         break;
       }
 
@@ -120,7 +120,7 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
       if (isRetryable) {
         const delay = getRetryDelayMs(attempt);
         const reason = getRetryReason(e);
-        log(`⚠ 请求失败 (attempt ${attempt + 1}/${MAX_STREAM_RETRY_ATTEMPTS}), ${delay}ms 后重试: ${e.message}`);
+      log(`⚠ Request failed (attempt ${attempt + 1}/${MAX_STREAM_RETRY_ATTEMPTS}); retrying in ${delay}ms: ${e.message}`);
         callbacks.onStreamRetry?.({
           attempt: attempt + 1,
           maxAttempts: MAX_STREAM_RETRY_ATTEMPTS,
@@ -129,13 +129,13 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
         });
         const completedDelay = await waitForAbortableDelay(delay, signal);
         if (!completedDelay) {
-          log('⏹ 已中断（重试等待阶段）');
+          log('⏹ Aborted while waiting to retry');
           break;
         }
         continue;
       }
 
-      logErr(`✗ 请求失败:`, e.message);
+      logErr(`✗ Request failed:`, e.message);
       callbacks.onError(e instanceof Error ? e : new Error(String(e)));
       return { status: 'return', finalContent };
     }
@@ -250,7 +250,7 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
     if (idleTimer) clearTimeout(idleTimer);
 
     if (idleController.signal.aborted && !signal?.aborted) {
-      log(`⚠ 流空闲超时中断 | 已收 chunks=${chunkCount} | 已输出=${assistantContent.length}字`);
+      log(`⚠ Stream idle timeout; aborting | chunks received=${chunkCount} | output=${assistantContent.length} characters`);
       if (assistantContent || reasoningContent) {
         const partial: Message = {
           id: randomUUID(),
@@ -263,12 +263,12 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
         if (reasoningContent) partial.reasoning_content = reasoningContent;
         callbacks.onAssistantMessage?.(partial);
       }
-      callbacks.onError(new Error(`流空闲超时（${STREAM_IDLE_TIMEOUT_MS / 1000}s 无响应）`));
+      callbacks.onError(new Error(`Stream idle timeout (${STREAM_IDLE_TIMEOUT_MS / 1000}s without a response)`));
       return { status: 'return', finalContent: assistantContent };
     }
 
     if ((err as Error)?.name === 'AbortError' || signal?.aborted) {
-      log(`⏹ 已中断（流式读取中）| 已收 chunks=${chunkCount} | 已输出=${assistantContent.length}字`);
+      log(`⏹ Aborted while reading the stream | chunks received=${chunkCount} | output=${assistantContent.length} characters`);
       if (assistantContent || reasoningContent) {
         const partial: Message = {
           id: randomUUID(),
@@ -286,13 +286,13 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
 
     const e = err as Error & { cause?: { message?: string; code?: string } };
     const detail = [
-      `已收到 chunks=${chunkCount}`,
-      `已输出文本=${assistantContent.length}字`,
-      `已输出思维=${reasoningContent.length}字`,
-      `本轮耗时=${Date.now() - roundStart}ms`,
+      `chunks received=${chunkCount}`,
+      `text output=${assistantContent.length} characters`,
+      `reasoning output=${reasoningContent.length} characters`,
+      `round duration=${Date.now() - roundStart}ms`,
       `cause=${e.cause?.message ?? 'N/A'}`,
     ].join(' | ');
-    logErr(`✗ [流式中断] ${e.name}: ${e.message} | ${detail}`);
+    logErr(`✗ [Stream interrupted] ${e.name}: ${e.message} | ${detail}`);
     if (assistantContent || reasoningContent) {
       const partial: Message = {
         id: randomUUID(),
@@ -305,7 +305,7 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
       if (reasoningContent) partial.reasoning_content = reasoningContent;
       callbacks.onAssistantMessage?.(partial);
     }
-    const surfaced = new Error(`[流式中断] ${e.message}（已接收 ${chunkCount} 个 chunk）`);
+    const surfaced = new Error(`[Stream interrupted] ${e.message} (${chunkCount} chunks received)`);
     callbacks.onError(surfaced);
     return { status: 'return', finalContent };
   }

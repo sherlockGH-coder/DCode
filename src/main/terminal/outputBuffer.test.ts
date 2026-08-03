@@ -23,7 +23,7 @@ describe('TerminalOutputBuffer', () => {
     buffer.append('abc');
     buffer.append('de');
     buffer.append('fg');
-    // 'abc' 被整片淘汰，保留 'de' + 'fg'
+    // 'abc' is evicted as a whole, leaving 'de' + 'fg'.
     expect(buffer.read()).toBe('defg');
     expect(buffer.size).toBe(4);
   });
@@ -43,7 +43,7 @@ describe('TerminalOutputBuffer', () => {
       expect(buffer.size).toBeLessThanOrEqual(max);
     }
     expect(buffer.read().length).toBeLessThanOrEqual(max);
-    // 保留的一定是最新的输出
+    // The retained output must always be the newest output.
     expect(buffer.read().endsWith('chunk-4999-')).toBe(true);
   });
 
@@ -74,7 +74,8 @@ describe('TerminalOutputBuffer', () => {
     const elapsed = performance.now() - started;
 
     expect(buffer.size).toBe(256 * 1024);
-    // 旧实现在缓冲填满后每片都要复制 256KB，这个循环会慢几个数量级
+    // The old implementation copied 256 KB for every chunk after the buffer filled,
+    // making this loop several orders of magnitude slower.
     expect(elapsed).toBeLessThan(2000);
   });
 });

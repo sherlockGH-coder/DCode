@@ -28,7 +28,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
   if (isLoading || !settings) {
     return (
       <div className="flex-1 flex items-center justify-center bg-[#F7F8FA] dark:bg-zinc-950">
-        <p className="text-[13px] text-text-tertiary">加载中...</p>
+        <p className="text-[13px] text-text-tertiary">Loading...</p>
       </div>
     );
   }

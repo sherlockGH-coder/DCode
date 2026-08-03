@@ -18,7 +18,7 @@ const FullscreenOverlay: React.FC<{
         <button
           onClick={onClose}
           className="absolute top-3 right-3 p-1.5 rounded-md bg-black/5 hover:bg-black/10 text-text-tertiary hover:text-text-secondary transition-colors"
-          title="关闭全屏 (Esc)"
+          title="Exit fullscreen (Esc)"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6L6 18M6 6l12 12" />

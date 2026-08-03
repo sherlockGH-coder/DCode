@@ -46,7 +46,7 @@ describe('TaskManager', () => {
 
     expect(() => {
       manager.create('project', { title: 'Second', status: 'in_progress' }, '/workspace/project');
-    }).toThrow('已有任务处于 in_progress 状态');
+    }).toThrow('Another task is already in progress');
   });
 
   it('rejects invalid status transitions', () => {
@@ -55,7 +55,7 @@ describe('TaskManager', () => {
 
     expect(() => {
       manager.update(task!.id, { status: 'completed' });
-    }).toThrow('非法任务状态流转: pending -> completed');
+    }).toThrow('Invalid task status transition: pending -> completed');
   });
 
   it('rejects missing and self dependencies', () => {
@@ -64,11 +64,11 @@ describe('TaskManager', () => {
 
     expect(() => {
       manager.update(task!.id, { addBlockedBy: ['missing-task'] });
-    }).toThrow('依赖任务不存在: missing-task');
+    }).toThrow('Dependency task does not exist: missing-task');
 
     expect(() => {
       manager.update(task!.id, { addBlocks: [task!.id] });
-    }).toThrow('任务不能依赖或阻塞自身');
+    }).toThrow('A task cannot depend on or block itself');
   });
 
   it('rejects dependency cycles', () => {
@@ -79,7 +79,7 @@ describe('TaskManager', () => {
 
     expect(() => {
       manager.update(first!.id, { addBlockedBy: [second!.id] });
-    }).toThrow('依赖关系会形成循环');
+    }).toThrow('The dependency relationship would create a cycle');
   });
 
   it('rejects starting a task while blockers are unresolved', () => {
@@ -89,6 +89,6 @@ describe('TaskManager', () => {
 
     expect(() => {
       manager.update(blocked!.id, { status: 'in_progress' });
-    }).toThrow(`任务 ${blocked!.id} 仍被未完成任务阻塞: ${blocker!.id}`);
+    }).toThrow(`Task ${blocked!.id} is still blocked by unfinished tasks: ${blocker!.id}`);
   });
 });

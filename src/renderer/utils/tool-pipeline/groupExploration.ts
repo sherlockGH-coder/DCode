@@ -1,7 +1,7 @@
 import type { ToolItem } from '../../../shared/types';
 import type { SegmentChildRenderUnit } from './types';
 
-/** 判断是否为只读探索工具（不包含 read，read 作为独立项展示） */
+/** Return whether an item is a read-only exploration tool (read is shown separately). */
 function isExploration(item: ToolItem): boolean {
   return item.kind === 'grep'
     || item.kind === 'glob'
@@ -12,8 +12,8 @@ function isExploration(item: ToolItem): boolean {
 
 function joinSummaryParts(parts: string[]): string {
   if (parts.length <= 1) return parts[0] ?? 'Explored';
-  if (parts.length === 2) return `${parts[0]}和${parts[1]}`;
-  return `${parts.slice(0, -1).join('、')}和${parts[parts.length - 1]}`;
+  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`;
+  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
 }
 
 function formatExplorationSummary(items: ToolItem[]): string {
@@ -25,9 +25,9 @@ function formatExplorationSummary(items: ToolItem[]): string {
 
   if (readCount === 1) parts.push('Read a file');
   else if (readCount > 1) parts.push(`Read ${readCount} files`);
-  if (searchCount > 0) parts.push(`已搜索 ${searchCount} 次`);
-  if (listedCount > 0) parts.push('已列出文件');
-  if (webCount > 0) parts.push(`已搜索网页 ${webCount} 次`);
+  if (searchCount > 0) parts.push(`Searched ${searchCount} times`);
+  if (listedCount > 0) parts.push('Listed files');
+  if (webCount > 0) parts.push(`Searched the web ${webCount} times`);
 
   return joinSummaryParts(parts);
 }

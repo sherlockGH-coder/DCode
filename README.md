@@ -74,7 +74,6 @@ Secrets are stored locally and are never exposed through the renderer-facing set
 | `pnpm dev` | Start the application in development mode |
 | `pnpm typecheck` | Type-check the main, preload, and renderer code |
 | `pnpm test` | Run the Vitest test suite |
-| `pnpm test:e2e` | Build the app and run Playwright end-to-end tests |
 | `pnpm native:smoke` | Verify Electron-native database, terminal, and document dependencies |
 | `pnpm build` | Create production bundles |
 | `pnpm package:dmg` | Build a macOS DMG |

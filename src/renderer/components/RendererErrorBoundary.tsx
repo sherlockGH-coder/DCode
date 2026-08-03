@@ -23,13 +23,13 @@ export default class RendererErrorBoundary extends React.Component<React.PropsWi
         <section className="renderer-error-card" role="alert">
           <span className="renderer-error-icon" aria-hidden>!</span>
           <div>
-            <h1>界面暂时无法显示</h1>
-            <p>应用状态没有被删除。重新载入后仍可继续；如果问题重复出现，请保留日志用于诊断。</p>
+            <h1>The interface is temporarily unavailable</h1>
+            <p>Your application state was not deleted. Reload to continue; if the problem persists, keep the logs for diagnosis.</p>
             {(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
               <pre>{this.state.error.message}</pre>
             )}
           </div>
-          <button type="button" onClick={() => window.location.reload()}>重新载入</button>
+          <button type="button" onClick={() => window.location.reload()}>Reload</button>
         </section>
       </main>
     );

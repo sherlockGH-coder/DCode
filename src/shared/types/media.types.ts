@@ -3,13 +3,13 @@ import type { WithApiKey } from './common.types';
 export type VisionProvider = 'anthropic' | 'openai' | 'custom' | 'none';
 
 export interface VisionSettings extends WithApiKey {
-  /** 旧版开关字段；保留用于兼容已有设置。 */
+  /** Legacy toggle field retained for compatibility with existing settings. */
   enabled: boolean;
-  /** 视觉识别 API 协议 */
+  /** Vision API protocol. */
   provider: VisionProvider;
   /** API Base URL */
   baseUrl: string;
-  /** 视觉模型名 */
+  /** Vision model name. */
   model: string;
 }
 

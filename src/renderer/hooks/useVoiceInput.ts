@@ -227,7 +227,7 @@ function startLevelMeter(
 function stopRecorder(recorder: MediaRecorder, getChunks: () => BlobPart[]): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const mimeType = recorder.mimeType || 'audio/webm';
-    recorder.onerror = () => reject(new Error('录音失败'));
+    recorder.onerror = () => reject(new Error('Recording failed'));
     recorder.onstop = () => resolve(new Blob(getChunks(), { type: mimeType }));
     recorder.stop();
   });
@@ -235,10 +235,10 @@ function stopRecorder(recorder: MediaRecorder, getChunks: () => BlobPart[]): Pro
 
 function errorToMessage(error: unknown): string {
   if (error instanceof DOMException) {
-    if (error.name === 'NotAllowedError') return '麦克风权限被拒绝';
-    if (error.name === 'NotFoundError') return '未找到可用麦克风';
-    if (error.name === 'NotReadableError') return '麦克风正被其他应用占用';
+    if (error.name === 'NotAllowedError') return 'Microphone permission was denied';
+    if (error.name === 'NotFoundError') return 'No available microphone was found';
+    if (error.name === 'NotReadableError') return 'The microphone is being used by another application';
   }
   if (error instanceof Error) return error.message;
-  return '语音输入失败';
+  return 'Voice input failed';
 }

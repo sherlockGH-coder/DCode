@@ -223,14 +223,14 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
 
   return (
     <aside
-      aria-label="当前会话任务及资源"
+      aria-label="Current session tasks and resources"
       style={style}
       className={`bg-bg-main flex flex-col min-h-0 overflow-hidden font-sans text-text-primary transition-[width] duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] ${className}`}
     >
       <div className="flex flex-1 flex-col overflow-y-auto min-h-0 custom-scrollbar">
         <RuntimeEnvironment activeProject={activeProject} />
         <CollapsibleSection
-          title="变更"
+          title="Changes"
           meta={filesCount}
           testId="files"
           collapsed={filesCollapsed}
@@ -240,8 +240,8 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
           {changedFiles.length === 0 ? (
             <EmptyState
               illustration={<FolderIllustration />}
-              title="暂无文件变更"
-              description="本会话暂无修改或创建的文件。"
+              title="No file changes"
+              description="This session has not modified or created any files."
             />
           ) : (
             <div className="flex flex-col gap-0.5">
@@ -257,7 +257,7 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
         </CollapsibleSection>
 
         <CollapsibleSection
-          title="外部资源"
+          title="External resources"
           meta={resourcesCount}
           testId="resources"
           collapsed={resourcesCollapsed}
@@ -267,8 +267,8 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
           {externalResources.length === 0 ? (
             <EmptyState
               illustration={<ContextIllustration />}
-              title="暂无外部资源"
-              description="本会话暂无使用网页搜索、MCP或技能。"
+              title="No external resources"
+              description="This session has not used web search, MCP, or skills."
             />
           ) : (
             <div className="flex flex-col gap-1">
@@ -306,7 +306,7 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
 
         {hasActiveTodo ? (
           <CollapsibleSection
-            title="待办事项"
+            title="Task list"
             meta={todoCount}
             testId="todo"
             collapsed={todoCollapsed}
@@ -319,7 +319,7 @@ const DevDashboard: React.FC<DevDashboardProps> = ({
               )}
               {latestPlanUpdate && sortedSessionTasks.length > 0 && (
                 <div className="px-3 pb-1 text-[12px] font-normal text-text-tertiary">
-                  任务记录
+                  Task records
                 </div>
               )}
               {sortedSessionTasks.map((task) => (

@@ -23,12 +23,12 @@ export function bridgeMcpTool(client: McpClient, tool: McpToolFull): ToolExecuto
       } catch (err) {
         if (ctx.signal?.aborted || (err instanceof Error && err.name === 'AbortError')) {
           return {
-            content: '[Aborted] 用户中止了执行',
+            content: '[Aborted] The user stopped execution',
             error: true,
           };
         }
         return {
-          content: `[MCP] ${client.serverName}/${tool.name} 调用失败：${err instanceof Error ? err.message : String(err)}`,
+          content: `[MCP] ${client.serverName}/${tool.name} call failed: ${err instanceof Error ? err.message : String(err)}`,
           error: true,
         };
       }

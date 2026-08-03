@@ -16,7 +16,7 @@ describe('writeFileTool', () => {
         { projectPath: projectRoot, toolCallId: 'call_1' },
       );
 
-      expect(result.content).toContain('文件写入成功');
+      expect(result.content).toContain('File written successfully');
       expect(readFileSync(filePath, 'utf8')).toBe('hello\n');
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });
@@ -52,7 +52,7 @@ describe('writeFileTool', () => {
         { projectPath: projectRoot, toolCallId: 'call_3' },
       );
 
-      expect(result.content).toContain('文件写入成功');
+      expect(result.content).toContain('File written successfully');
       expect(readFileSync(filePath, 'utf8')).toBe('new\n');
     } finally {
       rmSync(projectRoot, { recursive: true, force: true });

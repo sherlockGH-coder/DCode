@@ -47,8 +47,8 @@ const InputToolbar: React.FC<{
             className="w-7 h-7 inline-flex items-center justify-center border-none rounded-[7px] transition-colors duration-150 disabled:opacity-55 shrink-0 cursor-pointer bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover"
             onClick={() => onPlusMenuOpenChange(!isPlusMenuOpen)}
             disabled={isLoading}
-            aria-label="附加选项"
-            title="附加选项"
+            aria-label="More options"
+            title="More options"
           >
             <IconPlus size={17} />
           </button>
@@ -56,7 +56,7 @@ const InputToolbar: React.FC<{
           {isPlusMenuOpen && (
             <div
               role="menu"
-              aria-label="附加选项"
+              aria-label="More options"
               className="absolute bottom-full left-0 z-50 mb-2 min-w-[160px] bg-bg-main border border-hairline rounded-[14px] shadow-floating overflow-hidden animate-[menu-in_150ms_ease-out]"
             >
               <button
@@ -71,7 +71,7 @@ const InputToolbar: React.FC<{
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-text-secondary shrink-0">
                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                 </svg>
-                <span>添加照片和文件</span>
+                <span>Add photos and files</span>
               </button>
               {onModeChange && (
                 <button
@@ -89,7 +89,7 @@ const InputToolbar: React.FC<{
                   }}
                 >
                   <IconPlan size={15} className="shrink-0 text-current" />
-                  <span>计划</span>
+                  <span>Plan</span>
                 </button>
               )}
             </div>
@@ -103,8 +103,8 @@ const InputToolbar: React.FC<{
               ? 'bg-diff-del-bg text-diff-del'
               : 'bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover'
           }`}
-          aria-label={voiceInput.isRecording ? '停止录音并转写' : '语音输入'}
-          title={voiceInput.isRecording ? '停止录音并转写' : '语音输入'}
+          aria-label={voiceInput.isRecording ? 'Stop recording and transcribe' : 'Voice input'}
+          title={voiceInput.isRecording ? 'Stop recording and transcribe' : 'Voice input'}
           disabled={isLoading || voiceInput.isBusy}
           onClick={() => {
             if (voiceInput.isRecording) {
@@ -121,8 +121,8 @@ const InputToolbar: React.FC<{
           <button
             type="button"
             data-testid="plan-mode-indicator"
-            aria-label="关闭计划模式"
-            title="关闭计划模式"
+            aria-label="Close plan mode"
+            title="Close plan mode"
             disabled={isLoading}
             onClick={() => onModeChange('execute')}
             className="group ml-0.5 inline-flex h-7 shrink-0 cursor-pointer items-center gap-1 rounded-[6px] border-0 bg-transparent px-2 text-text-secondary transition-colors duration-150 hover:bg-bg-hover hover:text-text-primary focus-visible:bg-bg-hover focus-visible:text-text-primary disabled:cursor-not-allowed disabled:opacity-45"
@@ -131,7 +131,7 @@ const InputToolbar: React.FC<{
               <IconPlan size={14} className="absolute inset-0 text-current transition-opacity duration-150 group-hover:opacity-0 group-focus-visible:opacity-0" />
               <IconX size={14} className="absolute inset-0 text-current opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100" />
             </span>
-            <span className="text-[12px] font-medium">计划</span>
+            <span className="text-[12px] font-medium">Plan</span>
           </button>
         )}
       </div>

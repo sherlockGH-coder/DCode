@@ -2,8 +2,8 @@ import Anthropic from '@anthropic-ai/sdk';
 import { settingsManager } from './settings';
 
 /**
- * 创建 Anthropic API 客户端
- * 每次调用都从 settingsManager 读取最新配置，确保设置变更即时生效
+ * Create the Anthropic API client.
+ * Read the latest settingsManager configuration on every call so changes take effect immediately.
  */
 export function createAnthropicClient(): Anthropic {
   settingsManager.assertActiveApiProfileSupported();

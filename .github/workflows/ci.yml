@@ -61,7 +61,7 @@ jobs:
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest
-    # 建议性质：先让结果可见，等基线漏洞被分类处理后再改为阻断
+    # Advisory only: expose the result first, then make it blocking after baseline vulnerabilities are classified.
     continue-on-error: true
 
     steps:

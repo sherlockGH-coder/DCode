@@ -209,7 +209,7 @@ async function run(): Promise<void> {
       baseUrl: settingsManager.getBaseUrl(),
       model: settingsManager.getPublic().api.defaultModel,
       projectPath: null,
-      environmentInfoOverride: '- 操作系统: Linux (Harbor isolated task container)\n- bash_exec executes inside the task container, not on the macOS host',
+      environmentInfoOverride: '- Operating system: Linux (Harbor isolated task container)\n- bash_exec executes inside the task container, not on the macOS host',
       systemPrompt: BENCHMARK_SYSTEM_PROMPT,
       conversationId: null,
       approvalPolicy: 'auto-approve',

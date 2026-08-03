@@ -1,11 +1,11 @@
 import { collapsePath, getPathContext } from './collapsePath';
 
-/** 转义正则特殊字符 */
+/** Escape regular-expression special characters. */
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** 检查路径是否在允许的范围内（cwd 或 home） */
+/** Check whether a path is within an allowed root, either cwd or home. */
 function isAllowedPath(absolutePath: string): boolean {
   const { cwd, home } = getPathContext();
 
@@ -15,12 +15,12 @@ function isAllowedPath(absolutePath: string): boolean {
 }
 
 /**
- * 将文本中的绝对路径（cwd 或 home 下）转为 Markdown 链接
+ * Convert absolute paths under cwd or home into Markdown links.
  *
- * 安全策略：
- * - 跳过代码块（```...```）内的路径
- * - 跳过已经是 Markdown 链接的路径
- * - 保留行号后缀（:42）
+ * Safety rules:
+ * - Skip paths inside code blocks (```...```).
+ * - Skip paths that are already Markdown links.
+ * - Preserve line-number suffixes such as :42.
  */
 export function linkifyFilePaths(text: string): string {
   if (!text) return text;

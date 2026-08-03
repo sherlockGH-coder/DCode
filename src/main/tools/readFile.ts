@@ -316,14 +316,14 @@ export const readFileTool: ToolExecutor = {
 
   async execute(args, ctx): Promise<ToolExecuteResult> {
     const rawPath = resolveRawPath(args);
-    debugLog('tool', '读取文件:', rawPath);
+    debugLog('tool', 'Reading file:', rawPath);
 
     const resolved = resolve(rawPath);
     const whitelistEntry = ctx.attachmentWhitelist?.get(resolved);
     let filePath: string;
     if (whitelistEntry) {
       filePath = resolved;
-      debugLog('tool', '命中附件白名单');
+      debugLog('tool', 'Matched attachment allowlist');
     } else {
 
       filePath = resolveInside(rawPath, ctx.projectPath).absolutePath;
@@ -354,7 +354,7 @@ export const readFileTool: ToolExecutor = {
       try {
         const parsed = await parseDocument(filePath, whitelistEntry?.mimeType);
         const { text, lineCount, truncated } = paginateAndNumber(parsed.text, args);
-        debugLog('tool', `通过 ${parsed.parser} 解析，原始文本 ${parsed.text.length} 字符${truncated ? '（已截断）' : ''}`);
+        debugLog('tool', `Parsed with ${parsed.parser}; original text ${parsed.text.length} characters${truncated ? ' (truncated)' : ''}`);
         rememberRead(filePath, args, info, lineCount, truncated);
         return {
           content: text,
@@ -362,7 +362,7 @@ export const readFileTool: ToolExecutor = {
         };
       } catch (err) {
         const error = err instanceof Error ? err.message : String(err);
-        throw new Error(`文档解析失败 (${filePath}): ${error}`);
+        throw new Error(`Failed to parse document (${filePath}): ${error}`);
       }
     }
 
@@ -383,7 +383,7 @@ export const readFileTool: ToolExecutor = {
       };
     } catch (err) {
       const error = err instanceof Error ? err.message : String(err);
-      throw new Error(`读取文件失败: ${error}`);
+      throw new Error(`Failed to read file: ${error}`);
     }
   },
 };

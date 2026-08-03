@@ -2,22 +2,22 @@ import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * shell 环境变量的磁盘缓存。
+ * Disk cache for shell environment variables.
  *
- * 解析登录 shell 需要跑一次完整的 rc 链（`zsh -i -l`），在装了
- * oh-my-zsh / nvm / conda 的机器上通常要 300ms～2s。之前每次冷启动都要
- * 同步付这个代价，而且发生在建窗之前，直接表现为白屏。
+ * Parsing a login shell requires one complete rc chain (`zsh -i -l`), which usually takes 300 ms to 2 s
+ * on machines with oh-my-zsh, nvm, or conda. Previously every cold start paid this cost synchronously
+ * before creating the window, appearing as a blank screen.
  *
- * 结果按「shell 路径 + 各 rc 文件 mtime」签名缓存：签名没变就直接复用，
- * 变了也先用旧值渲染，再在后台重新解析。
+ * Cache the result using a signature of the shell path and each rc file's mtime:
+ * reuse it directly when unchanged; when changed, render with the old value and reparse in the background.
  */
 
-/** 缓存格式或合并键集合变化时递增，使旧缓存自动失效。 */
+/** Increment when the cache format or merged-key set changes to invalidate old caches. */
 const CACHE_VERSION = 1;
 
 const CACHE_FILENAME = 'shell-env-cache.json';
 
-/** 参与签名的 rc 文件，覆盖 zsh / bash 两套常见布局。 */
+/** rc files included in the signature, covering common zsh and bash layouts. */
 const RC_FILENAMES = [
   '.zshenv',
   '.zprofile',
@@ -40,8 +40,8 @@ export function cachePath(userDataDir: string): string {
 }
 
 /**
- * 计算缓存签名：shell 路径 + 每个 rc 文件的 mtime/size。
- * 文件不存在就记为 `-`，这样「新建 .zshrc」同样会让签名变化。
+ * Calculate the cache signature from the shell path and each rc file's mtime and size.
+ * Record missing files as `-` so creating a new .zshrc also changes the signature.
  */
 export function computeSignature(shell: string, homeDir: string): string {
   const parts = [`v${CACHE_VERSION}`, shell];

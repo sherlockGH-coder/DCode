@@ -28,7 +28,7 @@ function readFile(filePath: string): Task[] {
     if (!Array.isArray(parsed.tasks)) return [];
     return parsed.tasks.filter((t) => t && typeof t.id === 'string');
   } catch (err) {
-    console.warn('[tasks] 配置文件解析失败:', filePath, err);
+    console.warn('[tasks] Failed to parse configuration file:', filePath, err);
     return [];
   }
 }
@@ -40,7 +40,7 @@ function writeFile(filePath: string, tasks: Task[]): void {
     const shape: PersistedShape = { schemaVersion: 1, tasks };
     writeFileSync(filePath, JSON.stringify(shape, null, 2), 'utf-8');
   } catch (err) {
-    console.error('[tasks] 配置写入失败:', filePath, err);
+    console.error('[tasks] Failed to write configuration file:', filePath, err);
   }
 }
 
