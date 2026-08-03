@@ -59,7 +59,7 @@ const TaskProgressAccessory: React.FC<TaskProgressAccessoryProps> = ({
   messages,
   isAgentRunning,
 }) => {
-  const { todos, completedCount, hasActiveTodo } = useConversationTodos(
+  const { todos, activeTodo, hasActiveTodo } = useConversationTodos(
     activeProject,
     activeConversationId,
     messages,
@@ -105,11 +105,16 @@ const TaskProgressAccessory: React.FC<TaskProgressAccessoryProps> = ({
       >
         <CompletedIcon />
         <span className="tabular-nums text-text-secondary">
-          步骤 {completedSnapshot.total} / {completedSnapshot.total}
+          Step {completedSnapshot.total} / {completedSnapshot.total}
         </span>
       </div>
     );
   }
+
+  const activeTodoIndex = activeTodo
+    ? todos.findIndex((item) => item.id === activeTodo.id)
+    : -1;
+  const currentStep = activeTodoIndex >= 0 ? activeTodoIndex + 1 : 1;
 
   return (
     <div
@@ -120,7 +125,7 @@ const TaskProgressAccessory: React.FC<TaskProgressAccessoryProps> = ({
     >
       <div
         data-testid="task-progress-panel"
-        className={`pointer-events-none absolute bottom-full left-1/2 z-40 mb-0.5 w-[min(320px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-[12px] border border-hairline bg-bg-main shadow-[0_10px_30px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)] transition-[opacity,transform] duration-200 ease-[var(--ease-standard)] dark:shadow-floating ${
+        className={`pointer-events-none absolute bottom-full left-1/2 z-40 mb-0.5 w-max max-w-[min(320px,calc(100vw-32px))] -translate-x-1/2 overflow-hidden rounded-[12px] border border-hairline bg-bg-main shadow-[0_10px_30px_rgba(0,0,0,0.09),0_1px_3px_rgba(0,0,0,0.05)] transition-[opacity,transform] duration-200 ease-[var(--ease-standard)] dark:shadow-floating ${
           expanded ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'
         }`}
         aria-hidden={!expanded}
@@ -154,7 +159,7 @@ const TaskProgressAccessory: React.FC<TaskProgressAccessoryProps> = ({
       <button
         type="button"
         className="inline-flex min-h-8 items-center gap-2 rounded-full border border-hairline bg-bg-main px-3.5 py-1.5 text-left shadow-card transition-colors duration-150 hover:bg-bg-hover"
-        aria-label={expanded ? '收起待办事项' : '展开待办事项'}
+        aria-label={expanded ? 'Collapse task list' : 'Expand task list'}
         aria-expanded={expanded}
         onClick={() => setExpanded((value) => !value)}
         onFocus={() => setExpanded(true)}
@@ -164,7 +169,7 @@ const TaskProgressAccessory: React.FC<TaskProgressAccessoryProps> = ({
           {isAgentRunning ? <Spinner /> : <span className="h-1.5 w-1.5 rounded-full bg-text-tertiary" />}
         </span>
         <span className="shrink-0 text-[12px] tabular-nums text-text-secondary">
-          步骤 {completedCount} / {todos.length}
+          Step {currentStep} / {todos.length}
         </span>
       </button>
     </div>

@@ -28,7 +28,7 @@ function planMessage(statuses: Array<'pending' | 'in_progress' | 'completed'>): 
     kind: 'plan_update',
     status: 'done',
     timestamp: 0,
-    plan: statuses.map((status, index) => ({ step: `步骤 ${index + 1}`, status })),
+    plan: statuses.map((status, index) => ({ step: `Step ${index + 1}`, status })),
   };
   return { id: 'assistant_1', role: 'assistant', content: '', toolItems: [plan] };
 }
@@ -91,20 +91,21 @@ describe('TaskProgressAccessory', () => {
   it('shows compact progress and expands the ordered todo list', () => {
     act(() => renderAccessory([planMessage(['completed', 'in_progress', 'pending'])]));
 
-    expect(container.textContent).toContain('步骤 1 / 3');
-    expect(container.querySelector('[aria-label="展开待办事项"]')).not.toBeNull();
+    expect(container.textContent).toContain('Step 2 / 3');
+    expect(container.querySelector('[aria-label="Expand task list"]')).not.toBeNull();
 
-    const toggle = container.querySelector('[aria-label="展开待办事项"]') as HTMLButtonElement;
+    const toggle = container.querySelector('[aria-label="Expand task list"]') as HTMLButtonElement;
     act(() => toggle.dispatchEvent(new window.Event('click', { bubbles: true })));
 
-    expect(container.querySelector('[aria-label="收起待办事项"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Collapse task list"]')).not.toBeNull();
     const text = container.textContent ?? '';
-    expect(text).toContain('步骤 1');
-    expect(text).toContain('步骤 3');
-    expect(text.indexOf('步骤 1')).toBeLessThan(text.lastIndexOf('步骤 3'));
+    expect(text).toContain('Step 1');
+    expect(text).toContain('Step 3');
+    expect(text.indexOf('Step 1')).toBeLessThan(text.lastIndexOf('Step 3'));
 
     const panel = container.querySelector('[data-testid="task-progress-panel"]');
-    expect(panel?.className).toContain('w-[min(320px,calc(100vw-32px))]');
+    expect(panel?.className).toContain('w-max');
+    expect(panel?.className).toContain('max-w-[min(320px,calc(100vw-32px))]');
     expect(panel?.className).toContain('rounded-[12px]');
 
     const completedIcon = container.querySelector('[data-todo-status="completed"]');
@@ -126,8 +127,8 @@ describe('TaskProgressAccessory', () => {
 
   it('shows progress and lists todos when no todo is in progress', () => {
     act(() => renderAccessory([planMessage(['pending'])], false));
-    expect(container.textContent).toContain('步骤 0 / 1');
-    expect(container.textContent).toContain('步骤 1');
+    expect(container.textContent).toContain('Step 1 / 1');
+    expect(container.textContent).toContain('Step 1');
   });
 
   it('briefly shows completion and then removes the accessory', () => {
@@ -136,7 +137,7 @@ describe('TaskProgressAccessory', () => {
 
     act(() => renderAccessory([planMessage(['completed'])]));
     expect(container.querySelector('[data-testid="task-progress-complete"]')).not.toBeNull();
-    expect(container.textContent).toContain('步骤 1 / 1');
+    expect(container.textContent).toContain('Step 1 / 1');
 
     act(() => vi.advanceTimersByTime(1800));
     expect(container.querySelector('[data-testid="task-progress-complete"]')).toBeNull();
@@ -144,14 +145,14 @@ describe('TaskProgressAccessory', () => {
 
   it('does not include cancelled tasks in progress', () => {
     taskMocks.tasks = [
-      task('task_pending', '待执行任务', 'pending'),
-      task('task_cancelled', '已取消任务', 'cancelled'),
+      task('task_pending', 'Task waiting to run', 'pending'),
+      task('task_cancelled', 'Cancelled task', 'cancelled'),
     ];
 
     act(() => renderAccessory([], false));
 
-    expect(container.textContent).toContain('步骤 0 / 1');
-    expect(container.textContent).toContain('待执行任务');
-    expect(container.textContent).not.toContain('已取消任务');
+    expect(container.textContent).toContain('Step 1 / 1');
+    expect(container.textContent).toContain('Task waiting to run');
+    expect(container.textContent).not.toContain('Cancelled task');
   });
 });

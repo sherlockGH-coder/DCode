@@ -12,13 +12,13 @@ test('task progress expands into a read-only checklist anchored to its trigger',
     requestIndex === 1
       ? toolResponse('task-progress-plan', 'update_plan', {
           plan: [
-            { step: '确认待办清单的数据来源与展示状态', status: 'completed' },
-            { step: '调整展开面板的尺寸、间距、阴影和颜色', status: 'in_progress' },
-            { step: '验证长文本换行及窄窗口定位', status: 'pending' },
-            { step: '运行类型检查和界面回归测试', status: 'pending' },
+            { step: 'Inspect the todo data source', status: 'completed' },
+            { step: 'Update the panel layout', status: 'in_progress' },
+            { step: 'Test the narrow viewport', status: 'pending' },
+            { step: 'Run regression checks', status: 'pending' },
           ],
         })
-      : textResponse('继续执行待办事项。')
+      : textResponse('Continue with the task list.')
   ));
 
   try {
@@ -30,12 +30,14 @@ test('task progress expands into a read-only checklist anchored to its trigger',
     page.on('pageerror', (error) => runtimeErrors.push(error.message));
 
     const composer = page.getByTestId('chat-input-composer').locator('textarea');
-    await composer.fill('执行一个包含多个步骤的任务');
+    await composer.fill('Run a task with multiple steps');
     await composer.press('Enter');
 
     const accessory = page.getByTestId('task-progress-accessory');
     const trigger = accessory.locator('button');
     await expect(trigger).toBeVisible();
+    await expect(trigger).toContainText('Step 2 / 4');
+    await expect(trigger).toHaveAttribute('aria-label', 'Expand task list');
     await trigger.hover();
 
     const panel = page.getByTestId('task-progress-panel');
@@ -43,7 +45,9 @@ test('task progress expands into a read-only checklist anchored to its trigger',
     await expect(panel.locator('[data-todo-status="completed"]')).toHaveCount(1);
     await expect(panel.locator('[data-todo-status="in_progress"]')).toHaveCount(1);
     await expect(panel.locator('[data-todo-status="pending"]')).toHaveCount(2);
-    await expect(panel).toHaveCSS('width', '320px');
+    const panelWidth = await panel.evaluate((element) => element.getBoundingClientRect().width);
+    expect(panelWidth).toBeGreaterThan(0);
+    expect(panelWidth).toBeLessThan(320);
     await expect(panel).toHaveCSS('border-radius', '12px');
     await expect(panel).toHaveCSS('background-color', 'rgb(255, 255, 255)');
     await expect(panel.getByTestId('task-progress-item').first().locator('span').last()).toHaveCSS('font-size', '13px');
@@ -65,6 +69,43 @@ test('task progress expands into a read-only checklist anchored to its trigger',
     expect(narrowPanel!.x + narrowPanel!.width).toBeLessThanOrEqual(504);
     expect(runtimeErrors).toEqual([]);
 
+  } finally {
+    await closeApiFixture(fixture);
+  }
+});
+
+test('task progress caps long checklist text and wraps it inside the hover panel', async () => {
+  const fixture = await launchApiFixture('deepseek-task-progress-long-e2e-', (requestIndex) => (
+    requestIndex === 1
+      ? toolResponse('task-progress-long-plan', 'update_plan', {
+          plan: [{
+            step: 'Inspect the complete task progress checklist, including all data sources, layout behavior, responsive wrapping, and regression coverage before finishing',
+            status: 'in_progress',
+          }],
+        })
+      : textResponse('Continue with the checklist.')
+  ));
+
+  try {
+    const { page } = fixture;
+    const composer = page.getByTestId('chat-input-composer').locator('textarea');
+    await composer.fill('Run a long checklist');
+    await composer.press('Enter');
+
+    const accessory = page.getByTestId('task-progress-accessory');
+    const trigger = accessory.locator('button');
+    await expect(trigger).toContainText('Step 1 / 1');
+    await trigger.hover();
+
+    const panel = page.getByTestId('task-progress-panel');
+    await expect(panel).toBeVisible();
+    const panelBox = await panel.boundingBox();
+    expect(panelBox).not.toBeNull();
+    expect(panelBox!.width).toBe(320);
+
+    const itemBox = await panel.getByTestId('task-progress-item').boundingBox();
+    expect(itemBox).not.toBeNull();
+    expect(itemBox!.height).toBeGreaterThan(18);
   } finally {
     await closeApiFixture(fixture);
   }
