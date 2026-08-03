@@ -259,7 +259,7 @@ const AppView: React.FC<AppViewProps> = ({
         tabIndex={sidebar.collapsed ? -1 : 0}
       >
         <span className="absolute inset-y-0 -left-1 -right-1 cursor-col-resize" />
-        <span className="sidebar-resize-indicator absolute top-3 bottom-3 left-1/2 w-px -translate-x-1/2 bg-transparent transition-[width,background-color] duration-150 group-active:w-[3px] group-active:bg-black/[0.1] dark:group-active:bg-white/[0.11]" />
+        <span className="sidebar-resize-indicator absolute top-3 bottom-3 left-1/2 w-px -translate-x-1/2 bg-transparent transition-[width,background-color] duration-150" />
       </button>
     </div>
     <button

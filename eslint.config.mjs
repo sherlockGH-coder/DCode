@@ -117,7 +117,7 @@ export default tseslint.config(
 
   // --- Relaxations for test files ---
   {
-    files: ['**/*.test.ts', '**/*.test.tsx', 'e2e/**/*.ts'],
+    files: ['**/*.test.ts', '**/*.test.tsx'],
     languageOptions: {
       globals: { ...globals.node, ...globals.browser },
     },
@@ -128,9 +128,9 @@ export default tseslint.config(
   },
 
   // --- Files outside every tsconfig: syntax-level checks only ---
-  // e2e runs directly through Playwright; resources/mcp contains ESM shims for the MCP runtime.
+  // resources/mcp contains ESM shims for the MCP runtime.
   {
-    files: ['e2e/**/*.ts', 'resources/**/*.mjs', 'resources/**/*.js'],
+    files: ['resources/**/*.mjs', 'resources/**/*.js'],
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: {
       parserOptions: { projectService: false, project: false },

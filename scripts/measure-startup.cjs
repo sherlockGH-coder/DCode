@@ -8,7 +8,7 @@
  * Each round uses a new userData directory to simulate first launch without a shell-env cache,
  * plus a reused userData directory to simulate daily launch with a cache.
  */
-const { _electron: electron } = require('@playwright/test');
+const { _electron: electron } = require('playwright-core');
 const { mkdtempSync, rmSync } = require('node:fs');
 const { tmpdir } = require('node:os');
 const { join, resolve } = require('node:path');

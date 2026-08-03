@@ -1,31 +1,6 @@
 # Project-scoped command policy for trusted DCode development.
 
 prefix_rule(
-    pattern = ["pnpm", "test:e2e"],
-    decision = "allow",
-    justification = "Run the trusted DCode Electron E2E suite.",
-    match = ["pnpm test:e2e"],
-    not_match = [
-        "pnpm test",
-        "pnpm add -D @playwright/test",
-    ],
-)
-
-prefix_rule(
-    pattern = ["pnpm", "exec", "playwright", "test"],
-    decision = "allow",
-    justification = "Run Playwright tests from the trusted DCode repository.",
-    match = [
-        "pnpm exec playwright test",
-        "pnpm exec playwright test e2e/plan-mode.e2e.ts --reporter=line",
-    ],
-    not_match = [
-        "pnpm exec playwright install",
-        "pnpm exec vitest run",
-    ],
-)
-
-prefix_rule(
     pattern = [
         "node",
         "/Users/conan/.codex/skills/.system/openai-docs/scripts/fetch-codex-manual.mjs",

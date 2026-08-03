@@ -21,7 +21,6 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "pnpm build && playwright test",
     "benchmark:terminal": "pnpm build && PYTHONPATH=$PWD harbor run -d terminal-bench@2.0 -a benchmark.harbor_dcode_agent:DCodeAgent -o benchmark/jobs",
     "benchmark:terminal:smoke": "pnpm build && PYTHONPATH=$PWD harbor run -d terminal-bench@2.0 -a benchmark.harbor_dcode_agent:DCodeAgent -l 1 -n 1 -y -o benchmark/jobs"
   },
@@ -113,7 +112,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@playwright/test": "^1.61.1",
     "@tailwindcss/vite": "^4.2.4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/react": "^19.0.0",
