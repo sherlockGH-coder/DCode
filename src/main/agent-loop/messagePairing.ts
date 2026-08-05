@@ -11,7 +11,7 @@ import type { Message } from '../../shared/types';
 export function ensureToolResultPairing(messages: Message[]): Message[] {
   const result: Message[] = [];
   const toolMessagesByCallId = new Map<string, Message[]>();
-  const consumedToolMessageIds = new Set<string>();
+  const consumedToolMessages = new Set<Message>();
 
   for (const msg of messages) {
     if (msg.role === 'tool' && msg.tool_call_id) {
@@ -23,22 +23,37 @@ export function ensureToolResultPairing(messages: Message[]): Message[] {
 
   for (const msg of messages) {
     if (msg.role === 'tool') {
-      if (consumedToolMessageIds.has(msg.id)) continue;
+      if (consumedToolMessages.has(msg)) continue;
 
       continue;
     }
 
-    result.push(msg);
+    let normalizedMessage = msg;
+    if (msg.role === 'assistant' && msg.tool_calls?.length) {
+      // Tool-start events and persisted assistant messages describe the same provider
+      // call. Treat the provider ID as the identity at this final request boundary.
+      const seenCallIds = new Set<string>();
+      const uniqueToolCalls = msg.tool_calls.filter((toolCall) => {
+        if (seenCallIds.has(toolCall.id)) return false;
+        seenCallIds.add(toolCall.id);
+        return true;
+      });
+      if (uniqueToolCalls.length !== msg.tool_calls.length) {
+        normalizedMessage = { ...msg, tool_calls: uniqueToolCalls };
+      }
+    }
 
-    if (msg.role !== 'assistant' || !msg.tool_calls?.length) continue;
+    result.push(normalizedMessage);
 
-    for (const tc of msg.tool_calls) {
+    if (normalizedMessage.role !== 'assistant' || !normalizedMessage.tool_calls?.length) continue;
+
+    for (const tc of normalizedMessage.tool_calls) {
       const candidates = toolMessagesByCallId.get(tc.id) ?? [];
-      const existing = candidates.find((candidate) => !consumedToolMessageIds.has(candidate.id));
+      const existing = candidates.find((candidate) => !consumedToolMessages.has(candidate));
 
       if (existing) {
         result.push(existing);
-        consumedToolMessageIds.add(existing.id);
+        consumedToolMessages.add(existing);
         continue;
       }
 

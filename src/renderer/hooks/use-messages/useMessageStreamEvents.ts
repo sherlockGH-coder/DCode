@@ -219,13 +219,21 @@ export function useMessageStreamEvents({
         if (idx === -1) return prev;
         const anchor = prev[idx];
         if (anchor.role === 'assistant') {
+          // The persisted assistant event can arrive before tool_call_start and already
+          // contain this call. Merge by provider ID so replay stays one-to-one.
+          const existingToolCalls = anchor.tool_calls ?? [];
+          const existingToolItems = anchor.toolItems ?? [];
+          const nextToolCalls = toolCall.serverTool || existingToolCalls.some((call) => call.id === toolCall.id)
+            ? existingToolCalls
+            : [...existingToolCalls, toolCallObj];
+          const nextToolItems = existingToolItems.some((item) => item.toolCallId === toolCall.id)
+            ? existingToolItems
+            : [...existingToolItems, newItem];
           const updated = [...prev];
           updated[idx] = {
             ...anchor,
-            ...(!toolCall.serverTool
-              ? { tool_calls: [...(anchor.tool_calls ?? []), toolCallObj] }
-              : {}),
-            toolItems: [...(anchor.toolItems ?? []), newItem],
+            ...(!toolCall.serverTool ? { tool_calls: nextToolCalls } : {}),
+            toolItems: nextToolItems,
           };
           return updated;
         }

@@ -221,4 +221,108 @@ describe('useMessages slash command handling', () => {
     expect(contentMessages[0].toolItems).toHaveLength(2);
     expect(messages.filter((message) => message.role === 'tool')).toHaveLength(2);
   });
+
+  it('does not resend a tool call twice when the persisted assistant event arrives before tool start', async () => {
+    const handlers: Record<string, (...args: any[]) => void> = {};
+    (window.deepseekApi.onToolCallStart as any).mockImplementation((callback: (...args: any[]) => void) => {
+      handlers.toolStart = callback;
+      return vi.fn();
+    });
+    (window.deepseekApi.onToolCallEnd as any).mockImplementation((callback: (...args: any[]) => void) => {
+      handlers.toolEnd = callback;
+      return vi.fn();
+    });
+    (window.deepseekApi.onAssistantMessage as any).mockImplementation((callback: (...args: any[]) => void) => {
+      handlers.assistant = callback;
+      return vi.fn();
+    });
+    (window.deepseekApi.onDone as any).mockImplementation((callback: (...args: any[]) => void) => {
+      handlers.done = callback;
+      return vi.fn();
+    });
+
+    let messages: Message[] = [];
+    const setMessages = vi.fn((updater: (prev: Message[]) => Message[]) => {
+      messages = updater(messages);
+    });
+    const toolCall = {
+      id: 'call_read_file',
+      type: 'function' as const,
+      function: {
+        name: 'read_file',
+        arguments: '{"file_path":"/tmp/example.md"}',
+      },
+    };
+
+    const Harness = () => {
+      current = useMessages();
+      return null;
+    };
+
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+    });
+
+    await act(async () => {
+      await current?.sendMessage({
+        userInput: 'Review this file',
+        attachments: [],
+        conversationId: 'conv_persisted_first',
+        existingMessages: [],
+        activeAttempts: {},
+        selectedModel: 'deepseek-chat',
+        activeProject: null,
+        bindSetMessages: () => setMessages,
+      });
+    });
+
+    await act(async () => {
+      // This is the production IPC order: agentLoop persists/sends the assistant
+      // message before executeToolCallsParallel emits tool_call_start.
+      handlers.assistant('conv_persisted_first', {
+        id: 'assistant_db',
+        content: '',
+        tool_calls: [toolCall],
+        providerContentBlocks: [{
+          type: 'tool_use',
+          id: toolCall.id,
+          name: toolCall.function.name,
+          input: { file_path: '/tmp/example.md' },
+        }],
+      });
+      handlers.toolStart('conv_persisted_first', {
+        id: toolCall.id,
+        name: toolCall.function.name,
+        arguments: toolCall.function.arguments,
+      });
+      handlers.toolEnd('conv_persisted_first', {
+        tool_call_id: toolCall.id,
+        name: toolCall.function.name,
+        content: 'file contents',
+      });
+      handlers.done('conv_persisted_first');
+    });
+
+    await act(async () => {
+      await current?.sendMessage({
+        userInput: 'Continue',
+        attachments: [],
+        conversationId: 'conv_persisted_first',
+        existingMessages: messages,
+        activeAttempts: {},
+        selectedModel: 'deepseek-chat',
+        activeProject: null,
+        bindSetMessages: () => setMessages,
+      });
+    });
+
+    const nextRequest = (window.deepseekApi.sendMessage as any).mock.calls[1][0] as Array<{
+      role: string;
+      tool_calls?: Array<{ id: string }>;
+      tool_call_id?: string;
+    }>;
+    const replayedAssistant = nextRequest.find((message) => message.role === 'assistant' && message.tool_calls);
+    expect(replayedAssistant?.tool_calls?.map((call) => call.id)).toEqual([toolCall.id]);
+    expect(nextRequest.filter((message) => message.tool_call_id === toolCall.id)).toHaveLength(1);
+  });
 });
