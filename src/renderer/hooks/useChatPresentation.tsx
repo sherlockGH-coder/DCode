@@ -227,6 +227,12 @@ export function useChatPresentation({
         if (unitIndex !== undefined) renderedUnits.add(unitIndex);
         for (const tailUnitIndex of tailUnitsByMessageId.get(message.id) ?? []) renderedUnits.add(tailUnitIndex);
 
+        // A server-side tool use (e.g. web search) is persisted on the same message as the
+        // final answer, even though it ran before that text was produced. Compute this before
+        // the content branch so exploration items on the final message are rendered before
+        // the answer instead of being pushed to trailingExploration.
+        const isFinalContent = message.id === lastContentAssistant?.id;
+
         if (message.reasoning_content) {
 
           flushExploration(foundFinalContent);
@@ -245,7 +251,6 @@ export function useChatPresentation({
 
         if (message.content?.trim()) {
           flushExploration(foundFinalContent);
-          const isFinalContent = message.id === lastContentAssistant?.id;
           const hasAwaitingApproval = message.toolItems?.some((item) => item.status === 'awaiting_approval') ?? false;
           const contentNode = (
             <MessageBubble
@@ -270,7 +275,7 @@ export function useChatPresentation({
 
         for (const toolItem of message.toolItems ?? []) {
           if (isExplorationTool(toolItem)) {
-            (foundFinalContent ? trailingExploration : exploration).push({ kind: 'tool', id: `tool-${toolItem.id}`, item: toolItem });
+            (foundFinalContent && !isFinalContent ? trailingExploration : exploration).push({ kind: 'tool', id: `tool-${toolItem.id}`, item: toolItem });
             continue;
           }
           flushExploration(foundFinalContent);

@@ -107,7 +107,10 @@ export async function agentLoop(
 
   const buildRequestMessages = (raw: Message[]): Message[] => {
     const conv = conversationId ? db.getConversationById(conversationId) : null;
-    const msgs = pruneWithSummary(raw, conv?.summary, conv?.compacted_to_message_id);
+    const msgs = pruneWithSummary(raw, conv?.summary, conv?.compacted_to_message_id)
+      // Transport/UI failures are persisted so users can see what happened, but
+      // they are not provider-authored assistant turns and must not be replayed.
+      .filter((message) => !(message.role === 'assistant' && message.error));
 
     const systemMessages: Message[] = [];
     const conversationMessages: Message[] = [...msgs];
@@ -267,6 +270,8 @@ Return a concise structured result with:
         role: 'assistant',
         content: assistantContent || '',
         tool_calls: toolCalls,
+        serverToolUses: roundResult.serverToolUses,
+        providerContentBlocks: roundResult.providerContentBlocks,
         usage: lastUsage,
         duration: Date.now() - roundStart,
         completed_at: Date.now(),
@@ -329,12 +334,37 @@ Return a concise structured result with:
       continue;
     }
 
+    if (stopReason === 'pause_turn' && roundResult.providerContentBlocks?.length) {
+      const assistantMessage: Message = {
+        id: randomUUID(),
+        role: 'assistant',
+        content: assistantContent || '',
+        serverToolUses: roundResult.serverToolUses,
+        providerContentBlocks: roundResult.providerContentBlocks,
+        usage: lastUsage,
+        duration: Date.now() - roundStart,
+        completed_at: Date.now(),
+      };
+      if (reasoningContent) assistantMessage.reasoning_content = reasoningContent;
+      workingMessages.push(assistantMessage);
+      callbacks.onAssistantMessage?.(assistantMessage);
+
+      if (roundCount >= maxRounds) {
+        finalContent = assistantContent;
+        log(`Maximum continuation rounds reached (${maxRounds}); stopping after pause_turn`);
+        break;
+      }
+      continue;
+    }
+
     finalContent = assistantContent;
     if (finalContent || reasoningContent) {
       const finalMessage: Message = {
         id: randomUUID(),
         role: 'assistant',
         content: finalContent,
+        serverToolUses: roundResult.serverToolUses,
+        providerContentBlocks: roundResult.providerContentBlocks,
         usage: lastUsage,
         duration: Date.now() - roundStart,
         completed_at: Date.now(),

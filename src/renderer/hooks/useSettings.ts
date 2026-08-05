@@ -7,7 +7,6 @@ interface UseSettingsResult {
   patch: (p: AppSettingsPatch) => Promise<AppSettings | undefined>;
   setApiKey: (key: string) => Promise<void>;
   setApiProfileApiKey: (profileId: string, key: string) => Promise<void>;
-  setTavilyApiKey: (key: string) => Promise<void>;
   setSpeechApiKey: (key: string) => Promise<void>;
   setVisionApiKey: (key: string) => Promise<void>;
   reset: () => Promise<void>;
@@ -64,17 +63,6 @@ export function useSettings(): UseSettingsResult {
     }
   }, []);
 
-  const setTavilyApiKey = useCallback(async (key: string): Promise<void> => {
-    try {
-      await window.deepseekApi.setTavilyApiKey(key);
-      const updated = await window.deepseekApi.getSettings();
-      setSettings(updated);
-    } catch (err) {
-      console.error('[useSettings] setTavilyApiKey failed:', err);
-      throw err;
-    }
-  }, []);
-
   const setSpeechApiKey = useCallback(async (key: string): Promise<void> => {
     try {
       await window.deepseekApi.setSpeechApiKey(key);
@@ -102,5 +90,5 @@ export function useSettings(): UseSettingsResult {
     setSettings(updated);
   }, []);
 
-  return { settings, isLoading, patch, setApiKey, setApiProfileApiKey, setTavilyApiKey, setSpeechApiKey, setVisionApiKey, reset };
+  return { settings, isLoading, patch, setApiKey, setApiProfileApiKey, setSpeechApiKey, setVisionApiKey, reset };
 }

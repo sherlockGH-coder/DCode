@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import SettingsNav, { type SettingsSection } from './SettingsNav';
 import ModelsSection from './sections/ModelsSection';
 import SpeechSection from './sections/SpeechSection';
-import SearchSection from './sections/SearchSection';
 import PermissionsSection from './sections/PermissionsSection';
 import AppearanceSection from './sections/AppearanceSection';
 import SkillsPage from '../skills/SkillsPage';
@@ -23,7 +22,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
   isFullscreen = false,
 }) => {
   const [activeSection, setActiveSection] = useState<SettingsSection>('appearance');
-  const { settings, isLoading, patch, setApiProfileApiKey, setTavilyApiKey, setSpeechApiKey } = useSettings();
+  const { settings, isLoading, patch, setApiProfileApiKey, setSpeechApiKey } = useSettings();
 
   if (isLoading || !settings) {
     return (
@@ -54,7 +53,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
         ) : (
           <div
             className={
-              activeSection === 'appearance' || activeSection === 'models' || activeSection === 'speech' || activeSection === 'search' || activeSection === 'permissions'
+              activeSection === 'appearance' || activeSection === 'models' || activeSection === 'speech' || activeSection === 'permissions'
                 ? 'mx-auto w-full max-w-[860px] px-6 pt-9 pb-12 sm:px-10'
                 : 'mx-auto w-full max-w-[700px] px-10 pt-8 pb-10'
             }
@@ -65,9 +64,6 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
             )}
             {activeSection === 'speech' && (
               <SpeechSection settings={settings} patch={patch} setSpeechApiKey={setSpeechApiKey} />
-            )}
-            {activeSection === 'search' && (
-              <SearchSection tavilyApiKeySet={settings.search.tavilyApiKeySet} setTavilyApiKey={setTavilyApiKey} />
             )}
             {activeSection === 'permissions' && (
               <PermissionsSection settings={settings} patch={patch} />

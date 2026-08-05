@@ -2,30 +2,18 @@ import { ToolExecutor, ToolExecuteResult } from './types';
 import { parseHTML } from 'linkedom';
 import { Readability } from '@mozilla/readability';
 import TurndownService from 'turndown';
-import { settingsManager } from '../settings';
 import { mergeAbortSignals } from '../agent-loop/signals';
 import { debugLog } from '../debug';
 
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
 const MAX_CONTENT_CHARS = 50000;
 
-type WebFetchProvider = 'tavily' | 'local' | 'jina';
+type WebFetchProvider = 'local' | 'jina';
 
 interface ExtractedPage {
   title: string;
   content: string;
   provider: WebFetchProvider;
-}
-
-interface TavilyExtractResult {
-  url: string;
-  raw_content?: string;
-  content?: string;
-  title?: string;
-}
-
-interface TavilyExtractResponse {
-  results?: TavilyExtractResult[];
 }
 
 function normalizeFetchUrl(rawUrl: string): { url: string } | { error: string } {
@@ -55,37 +43,6 @@ Use only the fetched content below to answer the prompt.
 
 ---
 ${truncated}`;
-}
-
-async function extractViaTavily(
-  url: string,
-  apiKey: string,
-  extractDepth: 'basic' | 'advanced',
-  signal?: AbortSignal,
-): Promise<ExtractedPage | null> {
-  const response = await fetch('https://api.tavily.com/extract', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      api_key: apiKey,
-      urls: [url],
-      extract_depth: extractDepth,
-    }),
-    signal: mergeAbortSignals(signal, AbortSignal.timeout(20000)),
-  });
-
-  if (!response.ok) return null;
-
-  const data: TavilyExtractResponse = await response.json();
-  const first = data.results?.[0];
-  const content = first?.raw_content ?? first?.content ?? '';
-  if (content.trim().length < 100) return null;
-
-  return {
-    title: first?.title ?? '',
-    content,
-    provider: 'tavily',
-  };
 }
 
 async function extractLocally(url: string, signal?: AbortSignal): Promise<ExtractedPage | null> {
@@ -148,7 +105,7 @@ export const webFetchTool: ToolExecutor = {
   definition: {
     name: 'web_fetch',
     description:
-      'Fetch a fully formed URL and return page content for a specific prompt. Use after web_search when you need details from a page. The prompt must say what to extract or analyze. Authenticated/private and JavaScript-heavy pages may fail; large pages may be truncated. HTTP URLs are upgraded to HTTPS. Backend priority: Tavily Extract -> local Readability -> Jina Reader.',
+      'Fetch a fully formed URL and return page content for a specific prompt. Use after web_search when you need details from a page. The prompt must say what to extract or analyze. Authenticated/private and JavaScript-heavy pages may fail; large pages may be truncated. HTTP URLs are upgraded to HTTPS. Backend priority: local Readability -> Jina Reader.',
     input_schema: {
       type: 'object',
       properties: {
@@ -160,12 +117,6 @@ export const webFetchTool: ToolExecutor = {
           type: 'string',
           description: 'What to extract, summarize, or answer from the fetched page.',
         },
-        extract_depth: {
-          type: 'string',
-          enum: ['basic', 'advanced'],
-          description: 'Tavily extraction depth. Defaults to basic.',
-          default: 'basic',
-        },
       },
       required: ['url', 'prompt'],
       additionalProperties: false,
@@ -175,7 +126,6 @@ export const webFetchTool: ToolExecutor = {
   async execute(args, ctx): Promise<ToolExecuteResult> {
     const rawUrl = typeof args.url === 'string' ? args.url.trim() : '';
     const prompt = typeof args.prompt === 'string' ? args.prompt.trim() : '';
-    const extractDepth = args.extract_depth === 'advanced' ? 'advanced' : 'basic';
     debugLog('tool', 'web_fetch:', rawUrl);
 
     const normalized = normalizeFetchUrl(rawUrl);
@@ -187,22 +137,6 @@ export const webFetchTool: ToolExecutor = {
     }
 
     const { url } = normalized;
-
-    const apiKey = settingsManager.getTavilyApiKey();
-    if (apiKey) {
-      try {
-        const tavily = await extractViaTavily(url, apiKey, extractDepth, ctx.signal);
-        if (tavily) {
-          return {
-            content: formatFetchedContent(tavily, url, prompt),
-            metadata: { kind: 'web_fetch', url, title: tavily.title, charCount: tavily.content.length, provider: tavily.provider },
-          };
-        }
-      } catch (error) {
-        if (ctx.signal?.aborted) throw error;
-
-      }
-    }
 
     const local = await extractLocally(url, ctx.signal);
     if (local) {

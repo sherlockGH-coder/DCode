@@ -71,4 +71,93 @@ describe('agentLoop maxToolRounds', () => {
     expect(execute).toHaveBeenCalledTimes(2);
     expect(callbacks.onDone).toHaveBeenCalledWith('round-2');
   });
+
+  it('keeps persisted assistant transport errors out of provider history', async () => {
+    mocks.runAnthropicRound.mockResolvedValue({
+      status: 'ok',
+      assistantContent: 'Recovered',
+      reasoningContent: '',
+      lastUsage: null,
+      stopReason: 'end_turn',
+      chunkCount: 1,
+      toolCalls: [],
+      providerContentBlocks: [{ type: 'text', text: 'Recovered' }],
+    });
+
+    const registry = new ToolRegistry();
+    const callbacks: AgentLoopCallbacks = {
+      onChunk: vi.fn(),
+      onReasoningChunk: vi.fn(),
+      onToolCallStart: vi.fn(),
+      onToolCallEnd: vi.fn(),
+      onDone: vi.fn(),
+      onError: vi.fn(),
+    };
+
+    await agentLoop(
+      [
+        { id: 'user-1', role: 'user', content: 'Fix the issue' },
+        { id: 'transport-error', role: 'assistant', content: 'HTTP 400 invalid_request_error', error: true },
+        { id: 'user-2', role: 'user', content: 'Continue' },
+      ],
+      registry,
+      callbacks,
+      { apiKey: 'test-key', model: 'test-model', systemPrompt: '', approvalPolicy: 'auto-approve' },
+    );
+
+    const pairedMessages = mocks.runAnthropicRound.mock.calls[0][0].pairedMessages;
+    expect(pairedMessages.some((message: { id: string }) => message.id === 'transport-error')).toBe(false);
+  });
+
+  it('continues a provider-managed server tool after pause_turn', async () => {
+    mocks.runAnthropicRound
+      .mockResolvedValueOnce({
+        status: 'ok',
+        assistantContent: '',
+        reasoningContent: '',
+        lastUsage: null,
+        stopReason: 'pause_turn',
+        chunkCount: 1,
+        toolCalls: [],
+        serverToolUses: [{ id: 'search_1', name: 'web_search', input: { query: 'DeepSeek docs' } }],
+        providerContentBlocks: [
+          { type: 'server_tool_use', id: 'search_1', name: 'web_search', input: { query: 'DeepSeek docs' } },
+        ],
+      })
+      .mockResolvedValueOnce({
+        status: 'ok',
+        assistantContent: 'Search complete',
+        reasoningContent: '',
+        lastUsage: null,
+        stopReason: 'end_turn',
+        chunkCount: 1,
+        toolCalls: [],
+        providerContentBlocks: [{ type: 'text', text: 'Search complete' }],
+      });
+
+    const callbacks: AgentLoopCallbacks = {
+      onChunk: vi.fn(),
+      onReasoningChunk: vi.fn(),
+      onToolCallStart: vi.fn(),
+      onToolCallEnd: vi.fn(),
+      onDone: vi.fn(),
+      onError: vi.fn(),
+      onAssistantMessage: vi.fn(),
+    };
+
+    const result = await agentLoop(
+      [{ id: 'user-1', role: 'user', content: 'Search the web' }],
+      new ToolRegistry(),
+      callbacks,
+      { apiKey: 'test-key', model: 'test-model', systemPrompt: '', approvalPolicy: 'auto-approve' },
+    );
+
+    expect(result).toBe('Search complete');
+    expect(mocks.runAnthropicRound).toHaveBeenCalledTimes(2);
+    const secondRoundMessages = mocks.runAnthropicRound.mock.calls[1][0].pairedMessages;
+    expect(secondRoundMessages.some((message: { providerContentBlocks?: unknown[] }) => (
+      message.providerContentBlocks?.[0] &&
+      (message.providerContentBlocks[0] as { type?: string }).type === 'server_tool_use'
+    ))).toBe(true);
+  });
 });

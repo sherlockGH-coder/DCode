@@ -55,6 +55,30 @@ describe('applyAssistantMessageToMessages', () => {
     expect(result[0].content).toBe('I will first analyze the code structure. Full version.');
   });
 
+  it('merges provider blocks without turning server tools into client calls', () => {
+    const req = activeRequest({ assistantAnchorId: 'assistant_1' });
+    const prev: Message[] = [assistantWithText()];
+    const providerContentBlocks = [
+      {
+        type: 'server_tool_use',
+        id: 'search_1',
+        name: 'web_search',
+        input: { query: 'DeepSeek docs' },
+      },
+    ];
+
+    const result = applyAssistantMessageToMessages(prev, req, {
+      id: 'db_1',
+      content: '',
+      serverToolUses: [{ id: 'search_1', name: 'web_search', input: { query: 'DeepSeek docs' } }],
+      providerContentBlocks,
+    });
+
+    expect(result[0].serverToolUses).toHaveLength(1);
+    expect(result[0].providerContentBlocks).toEqual(providerContentBlocks);
+    expect(result[0].tool_calls).toBeUndefined();
+  });
+
   it('inserts a new message when the anchor is not an assistant and content is non-empty', () => {
     const toolMsg: Message = {
       id: 'tool_result_1',

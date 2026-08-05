@@ -1,4 +1,4 @@
-import type { ToolCall, ToolResultContentBlock, ToolResultMetadata, ToolItem } from './tool.types';
+import type { ProviderContentBlock, ServerToolUse, ToolCall, ToolResultContentBlock, ToolResultMetadata, ToolItem } from './tool.types';
 import type { Attachment } from './attachment.types';
 import type { AgentRunStatus } from './agent.types';
 
@@ -11,6 +11,10 @@ export interface Message {
   contentBlocks?: ToolResultContentBlock[];
   reasoning_content?: string;
   tool_calls?: ToolCall[];
+  /** Server-side tool uses (for example web search) returned by the API inside this assistant message. */
+  serverToolUses?: ServerToolUse[];
+  /** Ordered provider response blocks used for lossless Anthropic history continuation. */
+  providerContentBlocks?: ProviderContentBlock[];
   tool_call_id?: string;
   name?: string;
   metadata?: ToolResultMetadata;

@@ -6,7 +6,6 @@ import {
   loadExternalSettings,
   resolveExternalApiKey,
   resolveExternalSpeechApiKey,
-  resolveExternalTavilyApiKey,
   resolveExternalVisionApiKey,
 } from './externalSettings';
 
@@ -54,14 +53,12 @@ describe('external settings', () => {
     })).toBe('generic-key');
   });
 
-  it('resolves dedicated Tavily, speech, and vision keys', () => {
+  it('resolves dedicated speech and vision keys', () => {
     const settings = loadExternalSettings(writeSettings({
-      search: { tavilyApiKey: 'tavily-key' },
       speech: { apiKey: 'speech-key' },
       vision: { anthropicApiKey: 'vision-key' },
     }));
 
-    expect(resolveExternalTavilyApiKey(settings)).toBe('tavily-key');
     expect(resolveExternalSpeechApiKey(settings)).toBe('speech-key');
     expect(resolveExternalVisionApiKey(settings, 'anthropic')).toBe('vision-key');
   });

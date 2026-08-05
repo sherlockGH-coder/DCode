@@ -1,4 +1,4 @@
-import type { Message, PlanUpdateItem, ToolCall, ToolItem, ToolResultMetadata } from '../../shared/types';
+import type { Message, PlanUpdateItem, ProviderContentBlock, ServerToolUse, ToolCall, ToolItem, ToolResultMetadata } from '../../shared/types';
 import { nameToKind } from './toolDescriptions';
 
 const INTERRUPTED_ASK_USER_OUTPUT = 'This question expired because the app was restarted. The previous pending confirmation cannot continue. Send it again or continue typing.';
@@ -176,6 +176,46 @@ export function applyMetadata(item: ToolItem, metadata: ToolResultMetadata | und
     default:
       return { ...item, status, output } as ToolItem;
   }
+}
+
+/**
+ * Rebuild ToolItem[] from persisted server-side tool uses (for example web search),
+ * which are stored on the assistant message instead of tool_calls + tool messages.
+ */
+export function reconstructServerToolItems(
+  serverToolUses: ServerToolUse[],
+  providerContentBlocks: ProviderContentBlock[] = [],
+): ToolItem[] {
+  const resultByUseId = new Map<string, ProviderContentBlock>();
+  for (const block of providerContentBlocks) {
+    if (block.type === 'web_search_tool_result' && typeof block.tool_use_id === 'string') {
+      resultByUseId.set(block.tool_use_id, block);
+    }
+  }
+
+  return serverToolUses.map((use) => {
+    const resultBlock = resultByUseId.get(use.id);
+    // Annotate explicitly: without it the object literal property widens 'done' | 'pending'
+    // to string and the result is not assignable to ToolItem[].
+    const status: 'done' | 'pending' = resultBlock || providerContentBlocks.length === 0 ? 'done' : 'pending';
+    const base = {
+      id: `ti_${use.id}`,
+      toolCallId: use.id,
+      name: use.name,
+      status,
+      timestamp: 0,
+    };
+    if (use.name !== 'web_search') {
+      return { ...base, kind: 'tool' as const, toolName: use.name, input: JSON.stringify(use.input).slice(0, 500) };
+    }
+    const results = Array.isArray(resultBlock?.content) ? resultBlock.content : [];
+    const query = typeof use.input.query === 'string' ? use.input.query : '';
+    // Only report a count when the result block is actually known. Legacy conversations
+    // persisted server_tool_uses without the matching web_search_tool_result block, so the
+    // count is unknown; showing "0 results" there would be misleading.
+    const resultCount = resultBlock ? results.length : undefined;
+    return { ...base, kind: 'web_search' as const, query, resultCount };
+  });
 }
 
 /**

@@ -2,7 +2,6 @@ import React from 'react';
 import {
   IconChevronLeft,
   IconGear,
-  IconGlobe,
   IconLayers,
   IconMicrophone,
   IconPanels,
@@ -11,7 +10,7 @@ import {
   IconShield,
 } from '../icons';
 
-export type SettingsSection = 'appearance' | 'models' | 'speech' | 'search' | 'permissions' | 'skills' | 'mcp';
+export type SettingsSection = 'appearance' | 'models' | 'speech' | 'permissions' | 'skills' | 'mcp';
 
 interface Props {
   active: SettingsSection;
@@ -31,7 +30,6 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'appearance', label: 'Appearance', Icon: IconPanels },
       { id: 'models', label: 'Configuration', Icon: IconGear },
       { id: 'speech', label: 'Voice input', Icon: IconMicrophone },
-      { id: 'search', label: 'Web search', Icon: IconGlobe },
     ],
   },
   {

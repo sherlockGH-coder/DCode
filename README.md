@@ -61,7 +61,7 @@ Open **Settings > Models** in the application and configure an API profile with:
 
 Multiple API profiles can be stored and switched from the application. Optional services are configured separately:
 
-- **Web search:** Tavily API key
+- **Web search:** built into the model API (server-side `web_search`); no external provider or key required
 - **Speech transcription:** OpenAI-compatible transcription endpoint
 - **Vision:** Anthropic, OpenAI, or a custom vision endpoint
 

@@ -5,6 +5,33 @@ export interface ToolDefinition {
   description: string;
   input_schema: Record<string, unknown>;
   strict?: boolean;
+  /**
+   * Server-side tool executed by the model provider API (for example web search).
+   * These are declared to the API as built-in server tools instead of local function tools,
+   * and their results arrive as `server_tool_use` blocks in the assistant stream.
+   */
+  serverTool?: boolean;
+}
+
+/** A `server_tool_use` block returned by the API for server-side tools such as web search. */
+export interface ServerToolUse {
+  id: string;
+  name: string;
+  /** Parsed tool input; for web search this contains the query and optional filters. */
+  input: Record<string, unknown>;
+}
+
+/**
+ * An assistant content block returned by the Anthropic-compatible API.
+ *
+ * Server tools can be interleaved with client tool calls, and the provider requires
+ * the complete ordered block array to be sent back unchanged on the next request.
+ * Keep this deliberately forward-compatible so new provider block types survive a
+ * round trip even before the UI understands them.
+ */
+export interface ProviderContentBlock {
+  type: string;
+  [key: string]: unknown;
 }
 
 export type ToolResultContentBlock =
@@ -25,6 +52,8 @@ export interface ToolCallDelta {
 export interface ToolCall {
   id: string;
   type: "function";
+  /** UI lifecycle marker only; server tools are never serialized as client tool_use calls. */
+  serverTool?: boolean;
   function: {
     name: string;
     arguments: string;
@@ -39,7 +68,7 @@ export type ToolResultMetadata =
   | { kind: 'grep'; pattern: string; matchCount: number; fileCount: number }
   | { kind: 'glob'; pattern: string; matchCount: number }
   | { kind: 'web_search'; query: string; resultCount: number }
-  | { kind: 'web_fetch'; url: string; title?: string; charCount: number; provider: 'tavily' | 'local' | 'jina' }
+  | { kind: 'web_fetch'; url: string; title?: string; charCount: number; provider: 'local' | 'jina' }
   | { kind: 'vision'; path: string; question: string; provider: VisionProvider; model: string }
   | { kind: 'list_directory'; path: string; totalCount: number; offset?: number; limit?: number }
   | { kind: 'task'; action: string; taskId?: string; title?: string }
@@ -59,6 +88,8 @@ export interface ToolResult {
   error?: boolean;
   metadata?: ToolResultMetadata;
   terminal?: boolean;
+  /** UI lifecycle marker only; server-tool results must not become user tool_result messages. */
+  serverTool?: boolean;
 }
 
 export interface ToolItemBase {
@@ -92,7 +123,7 @@ export type ToolItem =
   | (ToolItemBase & { kind: 'grep'; pattern: string; path?: string; matchCount?: number; fileCount?: number; output?: string })
   | (ToolItemBase & { kind: 'glob'; pattern: string; matchCount?: number; output?: string })
   | (ToolItemBase & { kind: 'web_search'; query: string; resultCount?: number; output?: string })
-  | (ToolItemBase & { kind: 'web_fetch'; url: string; title?: string; charCount?: number; provider?: 'tavily' | 'local' | 'jina'; output?: string })
+  | (ToolItemBase & { kind: 'web_fetch'; url: string; title?: string; charCount?: number; provider?: 'local' | 'jina'; output?: string })
   | (ToolItemBase & { kind: 'vision'; path: string; question: string; provider?: VisionProvider; model?: string; output?: string })
   | (ToolItemBase & { kind: 'list_directory'; path: string; totalCount?: number; output?: string })
   | (ToolItemBase & { kind: 'task'; action: string; taskId?: string; title?: string; output?: string })

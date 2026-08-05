@@ -29,7 +29,6 @@ const previewSettings: AppSettings = {
     bashWhitelist: [],
     skills: { disabled: [] },
   },
-  search: { tavilyApiKeySet: false },
   compact: {
     model: '',
     autoThreshold: 0.8,

@@ -23,11 +23,6 @@ export const settingsApi = {
     return ipcRenderer.invoke('settings:setApiProfileApiKey', profileId, plaintext);
   },
 
-  /** Set the Tavily API key separately. */
-  setTavilyApiKey: (plaintext: string): Promise<void> => {
-    return ipcRenderer.invoke('settings:setTavilyApiKey', plaintext);
-  },
-
   /** Set the voice-input API key separately. */
   setSpeechApiKey: (plaintext: string): Promise<void> => {
     return ipcRenderer.invoke('settings:setSpeechApiKey', plaintext);

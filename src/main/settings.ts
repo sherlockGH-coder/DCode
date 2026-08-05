@@ -34,15 +34,12 @@ import {
 import {
   getApiKeyForProfile,
   getSpeechApiKey as readSpeechApiKey,
-  getTavilyApiKey as readTavilyApiKey,
   getVisionApiKey as readVisionApiKey,
   hasApiKeyForProfile as hasStoredOrExternalApiKeyForProfile,
   hasSpeechApiKey as hasStoredOrExternalSpeechApiKey,
-  hasTavilyApiKey as hasStoredOrExternalTavilyApiKey,
   hasVisionApiKey as hasStoredOrExternalVisionApiKey,
   setApiKeyForProfile as setStoredApiKeyForProfile,
   setSpeechApiKey as writeSpeechApiKey,
-  setTavilyApiKey as writeTavilyApiKey,
   setVisionApiKey as writeVisionApiKey,
 } from './settings/secrets';
 
@@ -143,7 +140,6 @@ class SettingsManager {
       externalSettings,
       hasProfileApiKey: this.hasApiKeyForProfile.bind(this),
       hasSpeechApiKey: this.hasSpeechApiKey.bind(this),
-      hasTavilyApiKey: this.hasTavilyApiKey.bind(this),
       hasVisionApiKey: this.hasVisionApiKey.bind(this),
       state: this.state,
     });
@@ -307,19 +303,6 @@ class SettingsManager {
   assertActiveApiProfileSupported(): void {
     const error = this.getActiveApiCompatibilityError();
     if (error) throw new Error(error);
-  }
-
-  setTavilyApiKey(plaintext: string): void {
-    writeTavilyApiKey(this.state, plaintext);
-    this.save();
-  }
-
-  getTavilyApiKey(): string {
-    return readTavilyApiKey(this.state, this.loadExternalSettings());
-  }
-
-  hasTavilyApiKey(externalSettings: ExternalSettings | null = this.loadExternalSettings()): boolean {
-    return hasStoredOrExternalTavilyApiKey(this.state, externalSettings);
   }
 
   setSpeechApiKey(plaintext: string): void {

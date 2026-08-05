@@ -47,10 +47,6 @@ export interface PersistedShape {
     bashWhitelist: string[];
     skills: { disabled: string[] };
   };
-  search: {
-    tavilyApiKeyEncrypted?: string;
-    tavilyApiKeyPlain?: string;
-  };
   compact: {
     model: string;
     autoThreshold: number;
@@ -176,7 +172,6 @@ export function buildPublicSettings<TExternal>({
   externalSettings,
   hasProfileApiKey,
   hasSpeechApiKey,
-  hasTavilyApiKey,
   hasVisionApiKey,
   state,
 }: {
@@ -184,7 +179,6 @@ export function buildPublicSettings<TExternal>({
   externalSettings: TExternal;
   hasProfileApiKey: (profile: PersistedApiProfile, externalSettings: TExternal) => boolean;
   hasSpeechApiKey: (externalSettings: TExternal) => boolean;
-  hasTavilyApiKey: (externalSettings: TExternal) => boolean;
   hasVisionApiKey: (externalSettings: TExternal) => boolean;
   state: PersistedShape;
 }): AppSettings {
@@ -207,9 +201,6 @@ export function buildPublicSettings<TExternal>({
       bashExec: state.permissions.bashExec,
       bashWhitelist: [...state.permissions.bashWhitelist],
       skills: { disabled: [...state.permissions.skills.disabled] },
-    },
-    search: {
-      tavilyApiKeySet: hasTavilyApiKey(externalSettings),
     },
     compact: { ...state.compact },
     speech: {
@@ -250,7 +241,6 @@ export function defaults(): PersistedShape {
       bashWhitelist: [],
       skills: { disabled: [] },
     },
-    search: {},
     compact: {
       model: '',
       autoThreshold: 0.8,
@@ -334,7 +324,6 @@ export function mergePersistedShape(base: PersistedShape, patch: Partial<Persist
         ...(patch.permissions?.skills || {}),
       },
     },
-    search: { ...base.search, ...(patch.search || {}) },
     compact: { ...base.compact, ...(patch.compact || {}) },
     speech: {
       ...base.speech,

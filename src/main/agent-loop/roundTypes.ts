@@ -1,4 +1,4 @@
-import type { AgentLoopCallbacks, AgentLoopConfig, Message, ToolCall } from '../../shared/types';
+import type { AgentLoopCallbacks, AgentLoopConfig, Message, ProviderContentBlock, ServerToolUse, ToolCall } from '../../shared/types';
 import type { ToolExecutionContext, ToolRegistry } from '../tools/types';
 
 export interface RoundRunnerParams {
@@ -28,6 +28,10 @@ export type RoundRunnerResult =
       stopReason: string | undefined;
       chunkCount: number;
       toolCalls: ToolCall[];
+      /** Server-side tool uses (for example web search) executed by the API in this round. */
+      serverToolUses?: ServerToolUse[];
+      /** Complete ordered assistant blocks returned by the provider. */
+      providerContentBlocks?: ProviderContentBlock[];
     }
   | {
       status: 'break';

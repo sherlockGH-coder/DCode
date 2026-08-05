@@ -55,10 +55,6 @@ export interface AppSettings {
     /** Disabled skill names; empty means all are enabled. */
     skills: { disabled: string[] };
   };
-  search: {
-    /** Whether a Tavily API key is configured; plaintext is never sent to the renderer. */
-    tavilyApiKeySet: boolean;
-  };
   compact: {
     /** Compaction model name, using the same baseUrl and apiKey. */
     model: string;
@@ -84,7 +80,6 @@ export type AppSettingsPatch = {
     bashWhitelist?: string[];
     skills?: { disabled?: string[] };
   };
-  search?: { tavilyApiKeySet?: boolean };
   compact?: Partial<AppSettings['compact']>;
   speech?: Partial<Omit<SpeechSettings, 'apiKeySet'>>;
   vision?: Partial<Omit<VisionSettings, 'apiKeySet'>>;

@@ -69,8 +69,8 @@ export function prepareStatements(database: Database.Database): Record<string, D
     `),
 
     addMessage: database.prepare(`
-      INSERT INTO messages (id, conversation_id, role, content, tool_calls, tool_call_id, metadata, reasoning_content, attachments, name, error, usage, duration, turn_id, attempt_no, seq, content_blocks, context_epoch, origin, plan_artifact_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO messages (id, conversation_id, role, content, tool_calls, tool_call_id, metadata, reasoning_content, attachments, name, error, usage, duration, turn_id, attempt_no, seq, content_blocks, context_epoch, origin, plan_artifact_id, server_tool_uses, provider_content_blocks)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `),
 
     getMessages: database.prepare(`

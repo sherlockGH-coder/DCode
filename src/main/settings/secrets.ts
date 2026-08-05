@@ -4,7 +4,6 @@ import { env } from '../env';
 import {
   resolveExternalApiKey,
   resolveExternalSpeechApiKey,
-  resolveExternalTavilyApiKey,
   resolveExternalVisionApiKey,
   type ExternalSettings,
 } from '../externalSettings';
@@ -65,26 +64,6 @@ export function getApiKeyForProfile({
   const externalApiKey = getExternalApiKeyForProfile(profile, externalSettings);
   if (externalApiKey) return externalApiKey;
   return env.ANTHROPIC_API_KEY;
-}
-
-export function setTavilyApiKey(state: PersistedShape, plaintext: string): void {
-  const secret = encryptSecret(plaintext, 'Tavily API Key');
-  state.search.tavilyApiKeyEncrypted = secret?.encrypted;
-  state.search.tavilyApiKeyPlain = secret?.plain;
-}
-
-export function getTavilyApiKey(state: PersistedShape, externalSettings: ExternalSettings | null): string {
-  return decryptSecret(state.search.tavilyApiKeyEncrypted, 'Tavily API Key')
-    || state.search.tavilyApiKeyPlain
-    || resolveExternalTavilyApiKey(externalSettings);
-}
-
-export function hasTavilyApiKey(state: PersistedShape, externalSettings: ExternalSettings | null): boolean {
-  return !!(
-    state.search.tavilyApiKeyEncrypted
-    || state.search.tavilyApiKeyPlain
-    || resolveExternalTavilyApiKey(externalSettings)
-  );
 }
 
 export function setSpeechApiKey(state: PersistedShape, plaintext: string): void {

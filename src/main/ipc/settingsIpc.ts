@@ -120,11 +120,6 @@ export function registerSettingsIpc(): void {
     broadcastSettingsChanged();
   });
 
-  ipcMain.handle('settings:setTavilyApiKey', (_event, plaintext: string) => {
-    settingsManager.setTavilyApiKey(plaintext);
-    broadcastSettingsChanged();
-  });
-
   ipcMain.handle('settings:setSpeechApiKey', (_event, plaintext: string) => {
     settingsManager.setSpeechApiKey(plaintext);
     broadcastSettingsChanged();

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Conversation, Message } from '../../shared/types';
-import { reconstructToolItems } from '../utils/toolItemHelpers';
+import { reconstructServerToolItems, reconstructToolItems } from '../utils/toolItemHelpers';
 import { applyApprovalToMessages, type ActiveRequest } from './useMessages';
 
 const MAX_CACHED_CONVERSATIONS = 5;
@@ -84,11 +84,21 @@ export function useConversations(activeProject: string | null) {
           toolMsgsByCallId.set(m.tool_call_id, m);
         }
       }
+      const providerContentBlocks = raw.flatMap((message) => message.providerContentBlocks ?? []);
       const restored = raw.map((m): Message => {
-        if (m.role === 'assistant' && m.tool_calls?.length) {
+        if (m.role === 'assistant') {
+          const toolItems = [
+            ...(m.serverToolUses?.length
+              ? reconstructServerToolItems(m.serverToolUses, providerContentBlocks)
+              : []),
+            ...(m.tool_calls?.length
+              ? reconstructToolItems(m.tool_calls, m.tool_calls.map((tc) => toolMsgsByCallId.get(tc.id)).filter(Boolean) as Message[])
+              : []),
+          ];
+          if (toolItems.length === 0) return m;
           return {
             ...m,
-            toolItems: reconstructToolItems(m.tool_calls, m.tool_calls.map((tc) => toolMsgsByCallId.get(tc.id)).filter(Boolean) as Message[]),
+            toolItems,
           };
         }
         return m;

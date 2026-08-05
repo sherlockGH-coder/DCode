@@ -148,6 +148,7 @@ export function registerChatIpc(): void {
                 id: toolCall.id,
                 name: toolCall.function.name,
                 arguments: toolCall.function.arguments,
+                serverTool: toolCall.serverTool,
               });
             },
             onToolCallEnd: (result) => {
@@ -158,6 +159,7 @@ export function registerChatIpc(): void {
                 contentBlocks: result.contentBlocks,
                 error: result.error,
                 metadata: result.metadata,
+                serverTool: result.serverTool,
               });
               if (conversationId && result.metadata?.kind === 'plan_artifact') {
                 safeSend(IPC_EVENTS.PLAN_ARTIFACT_CREATED, conversationId, result.metadata.plan);
@@ -172,6 +174,9 @@ export function registerChatIpc(): void {
                 duration: msg.duration,
                 completed_at: msg.completed_at,
                 content: msg.content,
+                tool_calls: msg.tool_calls,
+                serverToolUses: msg.serverToolUses,
+                providerContentBlocks: msg.providerContentBlocks,
               };
 
               if (conversationId) {
@@ -183,6 +188,12 @@ export function registerChatIpc(): void {
                     undefined, msg.usage, msg.duration,
                     turnId, attemptNo, ourSeq,
                     msg.id,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    msg.serverToolUses,
+                    msg.providerContentBlocks,
                   );
                 } catch (err) {
                   console.warn('[chat] Failed to persist assistant message:', err);

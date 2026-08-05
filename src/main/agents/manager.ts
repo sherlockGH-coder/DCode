@@ -228,6 +228,12 @@ export class SubAgentManager {
               undefined,
               seqCounter++,
               msg.id,
+              undefined,
+              undefined,
+              undefined,
+              undefined,
+              msg.serverToolUses,
+              msg.providerContentBlocks,
             );
           },
           onToolMessage: (msg) => {

@@ -1,12 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../settings', () => ({
-  settingsManager: {
-    getTavilyApiKey: vi.fn(),
-  },
-}));
-
-import { settingsManager } from '../settings';
 import { webFetchTool } from './webFetch';
 import type { ToolExecutionContext } from './types';
 
@@ -19,12 +12,25 @@ function context(): ToolExecutionContext {
   };
 }
 
-function jsonResponse(body: unknown, status = 200): Response {
+function htmlResponse(html: string, status = 200): Response {
   return {
     ok: status >= 200 && status < 300,
     status,
-    json: vi.fn(async () => body),
-    text: vi.fn(async () => JSON.stringify(body)),
+    headers: {
+      get: (name: string) => (name.toLowerCase() === 'content-type' ? 'text/html; charset=utf-8' : null),
+    },
+    text: vi.fn(async () => html),
+    json: vi.fn(async () => ({})),
+  } as unknown as Response;
+}
+
+function markdownResponse(markdown: string, status = 200): Response {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: () => null },
+    text: vi.fn(async () => markdown),
+    json: vi.fn(async () => ({})),
   } as unknown as Response;
 }
 
@@ -32,16 +38,16 @@ describe('web_fetch tool', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubGlobal('fetch', fetchMock);
-    vi.mocked(settingsManager.getTavilyApiKey).mockReturnValue('tvly-test-key');
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  it('uses concise Claude-style prompt schema with Tavily extraction', () => {
+  it('uses a prompt schema without external extraction providers', () => {
     expect(webFetchTool.definition.description).toContain('Fetch a fully formed URL');
-    expect(webFetchTool.definition.description).toContain('Backend priority: Tavily Extract');
+    expect(webFetchTool.definition.description).toContain('Backend priority: local Readability -> Jina Reader');
+    expect(webFetchTool.definition.description).not.toContain('Tavily');
 
     const schema = webFetchTool.definition.input_schema as {
       properties: Record<string, Record<string, unknown>>;
@@ -49,43 +55,52 @@ describe('web_fetch tool', () => {
       additionalProperties?: boolean;
     };
     expect(schema.required).toEqual(['url', 'prompt']);
-    expect(schema.properties.extract_depth.enum).toEqual(['basic', 'advanced']);
+    expect(schema.properties.extract_depth).toBeUndefined();
     expect(schema.additionalProperties).toBe(false);
   });
 
-  it('uses Tavily Extract first and wraps content with the prompt', async () => {
-    const rawContent = `# Setup\n\n${'Install and configure the package. '.repeat(8)}`;
-    fetchMock.mockResolvedValue(jsonResponse({
-      results: [{
-        url: 'https://example.com/docs',
-        title: 'Example Docs',
-        raw_content: rawContent,
-      }],
-    }));
+  it('extracts content locally with Readability and wraps it with the prompt', async () => {
+    const paragraph = 'Install and configure the package before running the test suite. '.repeat(8);
+    fetchMock.mockResolvedValue(htmlResponse(
+      `<html><head><title>Example Docs</title></head><body><article><h1>Example Docs</h1><p>${paragraph}</p></article></body></html>`,
+    ));
 
     const result = await webFetchTool.execute({
       url: 'http://example.com/docs',
       prompt: 'Summarize the setup steps.',
-      extract_depth: 'advanced',
     }, context());
 
-    const [endpoint, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    const body = JSON.parse(init.body as string);
-    expect(endpoint).toBe('https://api.tavily.com/extract');
-    expect(body).toMatchObject({
-      api_key: 'tvly-test-key',
-      urls: ['https://example.com/docs'],
-      extract_depth: 'advanced',
-    });
+    const [endpoint] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(endpoint).toBe('https://example.com/docs');
     expect(result.content).toContain('Web page: https://example.com/docs');
     expect(result.content).toContain('Prompt: Summarize the setup steps.');
-    expect(result.content).toContain(rawContent);
+    expect(result.content).toContain('Example Docs');
     expect(result.metadata).toMatchObject({
       kind: 'web_fetch',
       url: 'https://example.com/docs',
       title: 'Example Docs',
-      charCount: rawContent.length,
-      provider: 'tavily',
+      provider: 'local',
+    });
+  });
+
+  it('falls back to Jina Reader when local extraction fails', async () => {
+    fetchMock
+      .mockResolvedValueOnce(htmlResponse('', 403))
+      .mockResolvedValueOnce(markdownResponse('# Jina Docs\n\nDetailed markdown content from Jina Reader. '.repeat(5)));
+
+    const result = await webFetchTool.execute({
+      url: 'https://example.com/docs',
+      prompt: 'Summarize the docs.',
+    }, context());
+
+    const [, init] = fetchMock.mock.calls[1] as [string, RequestInit];
+    expect(init?.method ?? 'GET').toBe('GET');
+    expect(result.content).toContain('Web page: https://example.com/docs');
+    expect(result.content).toContain('Jina Docs');
+    expect(result.metadata).toMatchObject({
+      kind: 'web_fetch',
+      url: 'https://example.com/docs',
+      provider: 'jina',
     });
   });
 
@@ -99,13 +114,10 @@ describe('web_fetch tool', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('propagates user cancellation to the active extraction request', async () => {
-    fetchMock.mockResolvedValue(jsonResponse({
-      results: [{
-        url: 'https://example.com/docs',
-        raw_content: 'Enough content for extraction. '.repeat(10),
-      }],
-    }));
+  it('propagates user cancellation to the active fetch request', async () => {
+    fetchMock.mockResolvedValue(htmlResponse(
+      `<html><head><title>Docs</title></head><body><article><p>${'Enough content for extraction. '.repeat(10)}</p></article></body></html>`,
+    ));
     const controller = new AbortController();
 
     await webFetchTool.execute({

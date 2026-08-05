@@ -51,11 +51,11 @@ export const chatApi = {
     return subscribe('chat:error', callback);
   },
 
-  onToolCallStart: (callback: (conversationId: string, toolCall: { id: string; name: string; arguments: string }) => void) => {
+  onToolCallStart: (callback: (conversationId: string, toolCall: { id: string; name: string; arguments: string; serverTool?: boolean }) => void) => {
     return subscribe('chat:tool_call_start', callback);
   },
 
-  onToolCallEnd: (callback: (conversationId: string, result: { tool_call_id: string; name: string; content: string; error?: boolean; metadata?: ToolResultMetadata }) => void) => {
+  onToolCallEnd: (callback: (conversationId: string, result: { tool_call_id: string; name: string; content: string; error?: boolean; metadata?: ToolResultMetadata; serverTool?: boolean }) => void) => {
     return subscribe('chat:tool_call_end', callback);
   },
 

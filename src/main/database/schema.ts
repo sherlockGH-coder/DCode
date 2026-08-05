@@ -54,6 +54,8 @@ export function initializeSchema(database: Database.Database): void {
   safeAddColumn(database, 'messages', 'attempt_no', 'INTEGER');
   safeAddColumn(database, 'messages', 'seq', 'INTEGER');
   safeAddColumn(database, 'messages', 'content_blocks', 'TEXT');
+  safeAddColumn(database, 'messages', 'server_tool_uses', 'TEXT');
+  safeAddColumn(database, 'messages', 'provider_content_blocks', 'TEXT');
   safeAddColumn(database, 'messages', 'context_epoch', 'INTEGER DEFAULT 0');
   safeAddColumn(database, 'messages', 'origin', "TEXT DEFAULT 'chat'");
   safeAddColumn(database, 'messages', 'plan_artifact_id', 'TEXT');

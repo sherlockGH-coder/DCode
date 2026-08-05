@@ -25,6 +25,9 @@ interface AssistantMessagePayload {
   usage?: Message['usage'];
   duration?: number;
   completed_at?: number;
+  tool_calls?: Message['tool_calls'];
+  serverToolUses?: Message['serverToolUses'];
+  providerContentBlocks?: Message['providerContentBlocks'];
 }
 
 /**
@@ -50,6 +53,9 @@ export function applyAssistantMessageToMessages(
       usage: data.usage,
       duration: data.duration,
       completed_at: data.completed_at,
+      tool_calls: data.tool_calls,
+      serverToolUses: data.serverToolUses,
+      providerContentBlocks: data.providerContentBlocks,
       turnId: req.turnId,
       attemptNo: req.attemptNo,
     };
@@ -68,6 +74,9 @@ export function applyAssistantMessageToMessages(
         usage: data.usage,
         duration: data.duration,
         completed_at: data.completed_at,
+        ...(data.tool_calls ? { tool_calls: data.tool_calls } : {}),
+        ...(data.serverToolUses ? { serverToolUses: data.serverToolUses } : {}),
+        ...(data.providerContentBlocks ? { providerContentBlocks: data.providerContentBlocks } : {}),
       };
       if (dbId) updateAssistantId(req, oldId, dbId);
       break;
@@ -213,7 +222,9 @@ export function useMessageStreamEvents({
           const updated = [...prev];
           updated[idx] = {
             ...anchor,
-            tool_calls: [...(anchor.tool_calls ?? []), toolCallObj],
+            ...(!toolCall.serverTool
+              ? { tool_calls: [...(anchor.tool_calls ?? []), toolCallObj] }
+              : {}),
             toolItems: [...(anchor.toolItems ?? []), newItem],
           };
           return updated;
@@ -223,7 +234,7 @@ export function useMessageStreamEvents({
           clientId: `tool_holder_${toolCall.id}`,
           role: 'assistant',
           content: '',
-          tool_calls: [toolCallObj],
+          ...(!toolCall.serverTool ? { tool_calls: [toolCallObj] } : {}),
           toolItems: [newItem],
           turnId: req.turnId,
           attemptNo: req.attemptNo,
@@ -254,6 +265,7 @@ export function useMessageStreamEvents({
             }
           }
         }
+        if (result.serverTool) return updated;
         const toolMsg: Message = {
           id: `tool_result_${result.tool_call_id}`,
           clientId: `tool_result_${result.tool_call_id}`,

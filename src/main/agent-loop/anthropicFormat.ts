@@ -75,6 +75,23 @@ export function convertMessagesToAnthropic(messages: Message[]): {
     }
 
     if (msg.role === 'assistant') {
+      if (msg.providerContentBlocks && msg.providerContentBlocks.length > 0) {
+        // Server-side tool blocks (server_tool_use / web_search_tool_result) are response-only:
+        // replaying them as-is makes providers reject the request with
+        // "tool_use ids were found without tool_result blocks immediately after"
+        // (the provider executes those tools server-side and they must not be re-sent).
+        const replayableBlocks = msg.providerContentBlocks.filter(
+          (block) => block.type !== 'server_tool_use' && block.type !== 'web_search_tool_result',
+        );
+        if (replayableBlocks.length > 0) {
+          anthropicMessages.push({
+            role: 'assistant',
+            content: replayableBlocks as unknown as Anthropic.ContentBlockParam[],
+          });
+          continue;
+        }
+      }
+
       const contentBlocks: Anthropic.ContentBlockParam[] = [];
 
       if (msg.reasoning_content) {
@@ -133,11 +150,24 @@ export function convertMessagesToAnthropic(messages: Message[]): {
 
 /**
  * Convert internal tool definitions to Anthropic format.
+ *
+ * Server-side tools (marked `serverTool` in the definition, for example web search)
+ * are declared as Anthropic built-in server tools so the API executes them and
+ * returns `server_tool_use` blocks instead of local `tool_use` calls.
  */
-export function convertToolsToAnthropic(tools: any[]): Anthropic.Tool[] {
-  return tools.map((t) => ({
-    name: t.name,
-    description: t.description,
-    input_schema: t.input_schema,
-  }));
+export function convertToolsToAnthropic(tools: any[]): any[] {
+  return tools.map((t) => {
+    if (t.serverTool) {
+      return {
+        type: 'web_search_20250305' as const,
+        name: t.name,
+        max_uses: 5,
+      };
+    }
+    return {
+      name: t.name,
+      description: t.description,
+      input_schema: t.input_schema,
+    };
+  });
 }

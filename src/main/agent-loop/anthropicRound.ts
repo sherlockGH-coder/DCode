@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Message, ToolCall } from '../../shared/types';
+import type { Message, ProviderContentBlock, ServerToolUse, ToolCall } from '../../shared/types';
 import { streamAnthropicMessages } from '../anthropicStreamClient';
 import {
   MAX_STREAM_RETRIES,
@@ -11,6 +11,32 @@ import { mergeAbortSignals, waitForAbortableDelay } from './signals';
 import type { RoundRunnerParams, RoundRunnerResult } from './roundTypes';
 
 const MAX_CACHE_BREAKPOINTS = 4;
+
+/** Summarize a server-side web search result block for the tool activity UI. */
+function describeWebSearchResult(content: unknown): { resultCount: number; summary: string } {
+  const rawResults = Array.isArray(content) ? content : [];
+  const results = rawResults.slice(0, 10);
+  const lines = results.map((raw, i) => {
+    const rec = (raw ?? {}) as Record<string, unknown>;
+    const title = typeof rec.title === 'string' ? rec.title : '';
+    const url = typeof rec.url === 'string' ? rec.url : '';
+    const pageAge = typeof rec.page_age === 'string' ? rec.page_age : '';
+    const display = title || url || 'Untitled result';
+    const link = url ? `[${display}](${url})` : display;
+    return `${i + 1}. ${link}${pageAge ? `\n   Page age: ${pageAge}` : ''}`;
+  });
+  const error = !Array.isArray(content) && content && typeof content === 'object'
+    ? (content as Record<string, unknown>).error_code
+    : undefined;
+  return {
+    resultCount: rawResults.length,
+    summary: lines.length > 0
+      ? `Web search results (${rawResults.length} total, server-side search)\n\n${lines.join('\n\n')}`
+      : error
+        ? `Web search failed: ${String(error)}`
+        : 'Web search returned no results.',
+  };
+}
 
 export function applyCacheBreakpoints(
   systemBlocks: any[],
@@ -58,6 +84,24 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
   let stopReason: string | undefined;
   let chunkCount = 0;
   let toolCalls: ToolCall[] = [];
+  const serverToolUses: ServerToolUse[] = [];
+  const providerBlockMap = new Map<number, ProviderContentBlock>();
+  const inputFragments = new Map<number, string>();
+  const serverToolQueries = new Map<string, string>();
+
+  for (const message of pairedMessages) {
+    for (const use of message.serverToolUses ?? []) {
+      const query = typeof use.input.query === 'string' ? use.input.query : '';
+      serverToolQueries.set(use.id, query);
+    }
+    for (const block of message.providerContentBlocks ?? []) {
+      if (block.type !== 'server_tool_use' || typeof block.id !== 'string') continue;
+      const input = block.input && typeof block.input === 'object'
+        ? block.input as Record<string, unknown>
+        : {};
+      serverToolQueries.set(block.id, typeof input.query === 'string' ? input.query : '');
+    }
+  }
 
   const { systemPrompt: combinedSystem, anthropicMessages } = convertMessagesToAnthropic(pairedMessages);
   const anthropicTools = convertToolsToAnthropic(tools);
@@ -147,10 +191,24 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
   }
 
   const toolUseBlocks: Array<{ id: string; name: string; input: string }> = [];
-  let currentBlockType: string | undefined;
-  let currentBlockId = '';
-  let currentBlockName = '';
-  let currentBlockInput = '';
+  let currentBlockIndex = -1;
+  let fallbackBlockIndex = -1;
+  const describedToolResultIds = new Set<string>();
+
+  const emitWebSearchResult = (toolUseId: string, content: unknown) => {
+    const { resultCount, summary } = describeWebSearchResult(content);
+    callbacks.onToolCallEnd?.({
+      tool_call_id: toolUseId,
+      name: 'web_search',
+      content: summary,
+      metadata: {
+        kind: 'web_search',
+        query: serverToolQueries.get(toolUseId) ?? '',
+        resultCount,
+      },
+      serverTool: true,
+    });
+  };
 
   resetIdleTimer();
 
@@ -181,43 +239,124 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
         }
 
         case 'content_block_start': {
-          const block = event.content_block;
-          if (block.type === 'text') {
-            currentBlockType = 'text';
-          } else if (block.type === 'tool_use') {
-            currentBlockType = 'tool_use';
-            currentBlockId = block.id;
-            currentBlockName = block.name;
-            currentBlockInput = '';
-          } else if (block.type === 'thinking') {
-            currentBlockType = 'thinking';
+          const block = event.content_block as ProviderContentBlock;
+          const blockIndex = typeof event.index === 'number' ? event.index : ++fallbackBlockIndex;
+          fallbackBlockIndex = Math.max(fallbackBlockIndex, blockIndex);
+          currentBlockIndex = blockIndex;
+          providerBlockMap.set(blockIndex, { ...block });
+
+          if (block.type === 'tool_use' || block.type === 'server_tool_use') {
+            inputFragments.set(blockIndex, '');
+          } else if (block.type === 'web_search_tool_result') {
+            const toolUseId = typeof block.tool_use_id === 'string' ? block.tool_use_id : '';
+            // DeepSeek delivers the results inline at content_block_start. If content is not
+            // present yet it may arrive via deltas, so defer to content_block_stop in that case.
+            if (!describedToolResultIds.has(toolUseId) && Array.isArray(block.content) && block.content.length > 0) {
+              describedToolResultIds.add(toolUseId);
+              emitWebSearchResult(toolUseId, block.content);
+            }
           }
           break;
         }
 
         case 'content_block_delta': {
           const delta = event.delta;
+          const blockIndex = typeof event.index === 'number' ? event.index : currentBlockIndex;
+          const block = providerBlockMap.get(blockIndex);
           if (delta.type === 'text_delta') {
             assistantContent += delta.text;
             callbacks.onChunk(delta.text);
+            if (block) block.text = `${typeof block.text === 'string' ? block.text : ''}${delta.text}`;
           } else if (delta.type === 'thinking_delta') {
             reasoningContent += delta.thinking;
             callbacks.onReasoningChunk(delta.thinking);
+            if (block) block.thinking = `${typeof block.thinking === 'string' ? block.thinking : ''}${delta.thinking}`;
+          } else if (delta.type === 'signature_delta') {
+            if (block) block.signature = `${typeof block.signature === 'string' ? block.signature : ''}${delta.signature}`;
           } else if (delta.type === 'input_json_delta') {
-            currentBlockInput += delta.partial_json;
+            inputFragments.set(blockIndex, `${inputFragments.get(blockIndex) ?? ''}${delta.partial_json}`);
+          } else if (delta.type === 'citations_delta' && block) {
+            const citations = Array.isArray(block.citations) ? block.citations : [];
+            block.citations = [...citations, delta.citation];
           }
           break;
         }
 
         case 'content_block_stop': {
-          if (currentBlockType === 'tool_use') {
+          const blockIndex = typeof event.index === 'number' ? event.index : currentBlockIndex;
+          const block = providerBlockMap.get(blockIndex);
+          if (block?.type === 'tool_use') {
+            const inputJson = inputFragments.get(blockIndex) ?? '';
+            let input: Record<string, unknown> = {};
+            try {
+              input = inputJson ? JSON.parse(inputJson) : (block.input as Record<string, unknown> ?? {});
+            } catch {
+              log('⚠ Failed to parse tool_use input JSON');
+            }
+            block.input = input;
             toolUseBlocks.push({
-              id: currentBlockId,
-              name: currentBlockName,
-              input: currentBlockInput,
+              id: typeof block.id === 'string' ? block.id : '',
+              name: typeof block.name === 'string' ? block.name : '',
+              input: JSON.stringify(input),
             });
+          } else if (block?.type === 'server_tool_use') {
+            const inputJson = inputFragments.get(blockIndex) ?? '';
+            let input: Record<string, unknown> = {};
+            try {
+              input = inputJson ? JSON.parse(inputJson) : (block.input as Record<string, unknown> ?? {});
+            } catch {
+              log('⚠ Failed to parse server_tool_use input JSON');
+            }
+            block.input = input;
+            const id = typeof block.id === 'string' ? block.id : '';
+            const name = typeof block.name === 'string' ? block.name : '';
+            serverToolUses.push({
+              id,
+              name,
+              input,
+            });
+            serverToolQueries.set(id, typeof input.query === 'string' ? input.query : '');
+            callbacks.onToolCallStart?.({
+              id,
+              type: 'function',
+              serverTool: true,
+              function: { name, arguments: JSON.stringify(input) },
+            });
+            // Anthropic-native providers include the search results inline in the
+            // server_tool_use input; DeepSeek delivers them in a separate
+            // web_search_tool_result block. Emit the completion once either arrives.
+            const inlineResults = Array.isArray(input.search_result) ? input.search_result : [];
+            if (inlineResults.length > 0 && !describedToolResultIds.has(id)) {
+              describedToolResultIds.add(id);
+              emitWebSearchResult(id, inlineResults);
+            }
+          } else if (block?.type === 'web_search_tool_result') {
+            const toolUseId = typeof block.tool_use_id === 'string' ? block.tool_use_id : '';
+            if (!describedToolResultIds.has(toolUseId)) {
+              describedToolResultIds.add(toolUseId);
+              let content = block.content;
+              if (!Array.isArray(content)) {
+                const inputJson = inputFragments.get(blockIndex) ?? '';
+                if (inputJson) {
+                  try {
+                    const parsed = JSON.parse(inputJson) as unknown;
+                    if (Array.isArray(parsed)) {
+                      content = parsed;
+                    } else if (parsed && typeof parsed === 'object') {
+                      const rec = parsed as Record<string, unknown>;
+                      content = Array.isArray(rec.content) ? rec.content : Array.isArray(rec.search_result) ? rec.search_result : content;
+                    }
+                  } catch {
+                    log('⚠ Failed to parse web_search_tool_result input JSON');
+                  }
+                  block.content = content;
+                }
+              }
+              emitWebSearchResult(toolUseId, content);
+            }
           }
-          currentBlockType = undefined;
+          inputFragments.delete(blockIndex);
+          currentBlockIndex = -1;
           break;
         }
 
@@ -320,6 +459,9 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
       arguments: b.input || '{}',
     },
   }));
+  const providerContentBlocks = [...providerBlockMap.entries()]
+    .sort(([left], [right]) => left - right)
+    .map(([, block]) => block);
 
   return {
     status: 'ok',
@@ -329,5 +471,7 @@ export async function runAnthropicRound(params: RoundRunnerParams): Promise<Roun
     stopReason,
     chunkCount,
     toolCalls,
+    serverToolUses,
+    providerContentBlocks,
   };
 }

@@ -31,7 +31,7 @@ function describeExplorationItem(item: ToolItem): string {
     case 'grep':
       return isSimplePattern(item.pattern) ? `Searched ${item.pattern}` : 'Searched code';
     case 'web_search':
-      return `Searched the web for ${item.query}`;
+      return item.query ? `Searched the web for ${item.query}` : 'Searched the web';
     case 'web_fetch':
       return `Fetched ${item.title || item.url}`;
     default:

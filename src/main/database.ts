@@ -9,6 +9,8 @@ import type {
   Attachment,
   AgentRunStatus,
   ConversationMode,
+  ProviderContentBlock,
+  ServerToolUse,
 } from '../shared/types';
 import { initializeSchema } from './database/schema';
 import { prepareStatements } from './database/statements';
@@ -222,6 +224,8 @@ export function addMessage(
   contextEpoch?: number,
   origin: string = 'chat',
   planArtifactId?: string,
+  serverToolUses?: ServerToolUse[],
+  providerContentBlocks?: ProviderContentBlock[],
 ): string {
   ensureInitialized();
   const finalId = id ?? randomUUID();
@@ -230,11 +234,15 @@ export function addMessage(
   const attachmentsJson = attachments && attachments.length > 0 ? JSON.stringify(attachments) : null;
   const usageJson = usage ? JSON.stringify(usage) : null;
   const contentBlocksJson = contentBlocks && contentBlocks.length > 0 ? JSON.stringify(contentBlocks) : null;
+  const serverToolUsesJson = serverToolUses && serverToolUses.length > 0 ? JSON.stringify(serverToolUses) : null;
+  const providerContentBlocksJson = providerContentBlocks && providerContentBlocks.length > 0
+    ? JSON.stringify(providerContentBlocks)
+    : null;
 
   db().transaction(() => {
     const conversation = stmts().getConversationById.get(conversationId) as { current_context_epoch?: number } | undefined;
     const epoch = contextEpoch ?? conversation?.current_context_epoch ?? 0;
-    stmts().addMessage.run(finalId, conversationId, role, content, toolCallsJson, toolCallId || null, metadataJson, reasoningContent || null, attachmentsJson, name || null, error ? 1 : null, usageJson, duration || null, turnId || null, attemptNo ?? null, seq ?? null, contentBlocksJson, epoch, origin, planArtifactId ?? null);
+    stmts().addMessage.run(finalId, conversationId, role, content, toolCallsJson, toolCallId || null, metadataJson, reasoningContent || null, attachmentsJson, name || null, error ? 1 : null, usageJson, duration || null, turnId || null, attemptNo ?? null, seq ?? null, contentBlocksJson, epoch, origin, planArtifactId ?? null, serverToolUsesJson, providerContentBlocksJson);
     if (role === 'user' && origin !== 'plan_execution') {
       db().prepare(`
         UPDATE plan_artifacts
@@ -265,6 +273,8 @@ export function getMessages(conversationId: string) {
     attachments: safeJsonParse(row.attachments, undefined),
     usage: safeJsonParse(row.usage, undefined),
     contentBlocks: safeJsonParse(row.content_blocks, undefined),
+    serverToolUses: safeJsonParse(row.server_tool_uses, undefined),
+    providerContentBlocks: safeJsonParse(row.provider_content_blocks, undefined),
     contextEpoch: row.context_epoch ?? 0,
     origin: row.origin ?? 'chat',
     planArtifactId: row.plan_artifact_id ?? undefined,

@@ -16,6 +16,8 @@ interface ApiMessage {
   tool_calls?: ToolCall[];
   tool_call_id?: string;
   reasoning_content?: string;
+  serverToolUses?: Message['serverToolUses'];
+  providerContentBlocks?: Message['providerContentBlocks'];
   contextEpoch?: number;
   origin?: Message['origin'];
   planArtifactId?: string;
@@ -284,6 +286,8 @@ export function useMessages() {
         if (msg.role === 'assistant') {
           if (msg.tool_calls) apiMsg.tool_calls = msg.tool_calls;
           if (msg.reasoning_content) apiMsg.reasoning_content = msg.reasoning_content;
+          if (msg.serverToolUses) apiMsg.serverToolUses = msg.serverToolUses;
+          if (msg.providerContentBlocks) apiMsg.providerContentBlocks = msg.providerContentBlocks;
         }
         if (msg.role === 'tool' && msg.tool_call_id) apiMsg.tool_call_id = msg.tool_call_id;
         if (msg.contextEpoch !== undefined && msg.contextEpoch !== 0) apiMsg.contextEpoch = msg.contextEpoch;

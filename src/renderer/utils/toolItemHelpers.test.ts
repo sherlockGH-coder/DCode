@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Message, ToolCall } from '../../shared/types';
-import { createToolItemFromStart, reconstructToolItems } from './toolItemHelpers';
+import { createToolItemFromStart, reconstructServerToolItems, reconstructToolItems } from './toolItemHelpers';
 
 function toolCall(name: string, args: Record<string, unknown>): ToolCall {
   return {
@@ -14,6 +14,75 @@ function toolCall(name: string, args: Record<string, unknown>): ToolCall {
 }
 
 describe('reconstructToolItems', () => {
+  it('reconstructs a completed server search from the provider result block', () => {
+    const items = reconstructServerToolItems(
+      [{ id: 'search_1', name: 'web_search', input: { query: 'DeepSeek docs' } }],
+      [
+        {
+          type: 'web_search_tool_result',
+          tool_use_id: 'search_1',
+          content: [
+            {
+              type: 'web_search_result',
+              title: 'DeepSeek API Docs',
+              url: 'https://api-docs.deepseek.com',
+              encrypted_content: 'opaque-result',
+            },
+          ],
+        },
+      ],
+    );
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        kind: 'web_search',
+        toolCallId: 'search_1',
+        query: 'DeepSeek docs',
+        resultCount: 1,
+        status: 'done',
+      }),
+    ]);
+  });
+
+  it('does not report a misleading 0 results when the result block is missing (legacy conversations)', () => {
+    const items = reconstructServerToolItems(
+      [{ id: 'search_1', name: 'web_search', input: { query: 'DeepSeek docs' } }],
+      [],
+    );
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        kind: 'web_search',
+        toolCallId: 'search_1',
+        query: 'DeepSeek docs',
+        resultCount: undefined,
+        status: 'done',
+      }),
+    ]);
+  });
+
+  it('reports 0 results when the result block is present but empty', () => {
+    const items = reconstructServerToolItems(
+      [{ id: 'search_1', name: 'web_search', input: { query: 'DeepSeek docs' } }],
+      [
+        {
+          type: 'web_search_tool_result',
+          tool_use_id: 'search_1',
+          content: [],
+        },
+      ],
+    );
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        kind: 'web_search',
+        toolCallId: 'search_1',
+        resultCount: 0,
+        status: 'done',
+      }),
+    ]);
+  });
+
   it('marks interrupted ask-user questions as failed instead of running forever', () => {
     const items = reconstructToolItems([
       toolCall('ask_user_question', {

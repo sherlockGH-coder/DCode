@@ -48,9 +48,9 @@ declare global {
       onReasoningChunk: (callback: (conversationId: string, content: string) => void) => () => void;
       onDone: (callback: (conversationId: string) => void) => () => void;
       onError: (callback: (conversationId: string, errorMessage: string) => void) => () => void;
-      onToolCallStart: (callback: (conversationId: string, toolCall: { id: string; name: string; arguments: string }) => void) => () => void;
-      onToolCallEnd: (callback: (conversationId: string, result: { tool_call_id: string; name: string; content: string; contentBlocks?: import('../../shared/types').ToolResultContentBlock[]; error?: boolean; metadata?: ToolResultMetadata }) => void) => () => void;
-      onAssistantMessage: (callback: (conversationId: string, msg: { id: string; usage?: any; duration?: number }) => void) => () => void;
+      onToolCallStart: (callback: (conversationId: string, toolCall: { id: string; name: string; arguments: string; serverTool?: boolean }) => void) => () => void;
+      onToolCallEnd: (callback: (conversationId: string, result: { tool_call_id: string; name: string; content: string; contentBlocks?: import('../../shared/types').ToolResultContentBlock[]; error?: boolean; metadata?: ToolResultMetadata; serverTool?: boolean }) => void) => () => void;
+      onAssistantMessage: (callback: (conversationId: string, msg: { id: string; content?: string; tool_calls?: import('../../shared/types').ToolCall[]; serverToolUses?: import('../../shared/types').ServerToolUse[]; providerContentBlocks?: import('../../shared/types').ProviderContentBlock[]; usage?: any; duration?: number; completed_at?: number }) => void) => () => void;
       onToolMessagePersisted: (callback: (conversationId: string, msg: { tool_call_id: string; id: string }) => void) => () => void;
       onStreamRetry: (callback: (conversationId: string, info: { attempt: number; maxAttempts: number; delayMs: number; reason: string }) => void) => () => void;
       agentsList: () => Promise<AgentRunSummary[]>;
@@ -103,7 +103,6 @@ declare global {
       patchSettings: (patch: AppSettingsPatch) => Promise<AppSettings>;
       setApiKey: (plaintext: string) => Promise<void>;
       setApiProfileApiKey: (profileId: string, plaintext: string) => Promise<void>;
-      setTavilyApiKey: (plaintext: string) => Promise<void>;
       setSpeechApiKey: (plaintext: string) => Promise<void>;
       setVisionApiKey: (plaintext: string) => Promise<void>;
       resetSettings: () => Promise<AppSettings>;

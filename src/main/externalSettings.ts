@@ -22,7 +22,6 @@ const GENERIC_API_KEY_KEYS = [
 ];
 const OPENAI_API_KEY_KEYS = ['openaiApiKey', 'openai_api_key', 'OPENAI_API_KEY'];
 const ANTHROPIC_API_KEY_KEYS = ['anthropicApiKey', 'anthropic_api_key', 'ANTHROPIC_API_KEY'];
-const TAVILY_API_KEY_KEYS = ['tavilyApiKey', 'tavily_api_key', 'TAVILY_API_KEY'];
 const SPEECH_API_KEY_KEYS = [
   'speechApiKey',
   'speech_api_key',
@@ -53,14 +52,6 @@ export function resolveExternalApiKey(
   return readProfileApiKey(settings.root, context)
     || readProviderApiKey(settings.root, 'anthropic')
     || readGenericApiKey(settings.root);
-}
-
-export function resolveExternalTavilyApiKey(settings: ExternalSettings | null): string {
-  if (!settings) return '';
-  const search = asRecord(settings.root.search);
-  return readString(search, TAVILY_API_KEY_KEYS)
-    || readString(settings.root, TAVILY_API_KEY_KEYS)
-    || readString(asRecord(settings.root.keys), TAVILY_API_KEY_KEYS);
 }
 
 export function resolveExternalSpeechApiKey(settings: ExternalSettings | null): string {
