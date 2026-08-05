@@ -10,7 +10,6 @@ export default defineConfig({
       rollupOptions: {
         input: {
           index: resolve('src/main/index.ts'),
-          'benchmark-runner': resolve('src/main/benchmark/runner.ts'),
         },
       },
     },

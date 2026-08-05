@@ -17,7 +17,6 @@ DeepSeek App is a local-first desktop coding assistant for working with software
 - **Integrated development surfaces** - Review tool activity and file changes, preview common file types, use the built-in terminal, and undo eligible edits from a conversation turn.
 - **Rich input and context** - Attach files and images, use optional voice transcription and vision models, and compact long conversations when they approach the configured context limit.
 - **Local persistence** - Store conversations, projects, tasks, and settings on the local machine. API keys are kept out of the renderer process and use platform secure storage when available.
-- **Benchmark harness** - Run the same agent loop headlessly against terminal-bench 2.0 through a Harbor adapter (see [Terminal-Bench 2.0](#terminal-bench-20)).
 
 ![Agent conversation with web search and rendered results](docs/screenshots/chat-web-search.png)
 
@@ -87,24 +86,6 @@ pnpm typecheck
 pnpm test
 pnpm build
 ```
-
-## Terminal-Bench 2.0
-
-The Harbor adapter runs the existing Electron main-process agent loop without opening the UI. Model credentials and the default model are read from the same `DeepSeek-Dev` user-data settings used by `pnpm dev`; credentials are not copied into Harbor job files.
-
-Prerequisites are a running Docker daemon and Harbor CLI (`uv tool install harbor`). Run one task serially as a smoke test:
-
-```bash
-pnpm benchmark:terminal:smoke
-```
-
-For a larger sample, pass Harbor options to the general script. `max_tool_rounds` limits model/tool iterations per task:
-
-```bash
-pnpm benchmark:terminal -- -l 10 -n 2 -y --ak max_tool_rounds=30
-```
-
-Results and per-trial tool transcripts are written under `benchmark/jobs/`.
 
 ## Architecture
 
