@@ -61,8 +61,6 @@ jobs:
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest
-    # Advisory only: expose the result first, then make it blocking after baseline vulnerabilities are classified.
-    continue-on-error: true
 
     steps:
       - name: Checkout
