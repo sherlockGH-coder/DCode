@@ -91,6 +91,42 @@ describe('ModelSelector', () => {
     expect(props.onOpenChange).toHaveBeenCalledWith(false);
   });
 
+  it('aligns the model submenu with the hovered provider row', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this.getAttribute('data-testid') === 'model-selector-menu') {
+        return { top: 100 } as DOMRect;
+      }
+      if (this.getAttribute('aria-label') === 'Provider Provider A') {
+        return { top: 140 } as DOMRect;
+      }
+      if (this.getAttribute('aria-label') === 'Provider Provider B') {
+        return { top: 192 } as DOMRect;
+      }
+      return { top: 0 } as DOMRect;
+    });
+
+    renderSelector({
+      providers: [
+        { profileId: 'provider-a', providerName: 'Provider A', models: ['model-a'], isActive: true },
+        { profileId: 'provider-b', providerName: 'Provider B', models: ['model-b'], isActive: false },
+      ],
+    });
+
+    const providerA = container.querySelector('[aria-label="Provider Provider A"]');
+    act(() => {
+      providerA?.dispatchEvent(new window.Event('mouseenter', { bubbles: true }));
+      providerA?.dispatchEvent(new window.Event('mouseover', { bubbles: true }));
+    });
+    expect(container.querySelector('[data-testid="model-submenu"]')?.getAttribute('style')).toContain('top:40px');
+
+    const providerB = container.querySelector('[aria-label="Provider Provider B"]');
+    act(() => {
+      providerB?.dispatchEvent(new window.Event('mouseenter', { bubbles: true }));
+      providerB?.dispatchEvent(new window.Event('mouseover', { bubbles: true }));
+    });
+    expect(container.querySelector('[data-testid="model-submenu"]')?.getAttribute('style')).toContain('top:92px');
+  });
+
   it('opens effort submenu on model hover and updates effort', () => {
     const props = renderSelector({ reasoningEffort: 'high' });
     const providerRow = container.querySelector('[aria-label="Provider DeepSeek"]');
@@ -122,6 +158,6 @@ describe('ModelSelector', () => {
     renderSelector();
 
     const menu = container.querySelector('[data-testid="model-selector-menu"]');
-    expect(menu?.textContent).not.toContain('管理模型');
+    expect(menu?.textContent).not.toContain('Manage models');
   });
 });

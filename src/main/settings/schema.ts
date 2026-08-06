@@ -130,8 +130,12 @@ export function normalizeModels(models: unknown): string[] {
 type LegacyProfileInput = Partial<PersistedApiProfile> & { provider?: unknown };
 
 function normalizeApiProtocol(protocol: unknown, legacyProvider?: unknown): ApiProtocol {
-  if (protocol === 'anthropic' || protocol === 'legacy-openai') return protocol;
-  return legacyProvider === 'openai' ? 'legacy-openai' : 'anthropic';
+  // `legacy-openai` was the temporary persisted name used before Chat
+  // Completions support was implemented. Normalize it while loading so old
+  // profiles continue to work and are rewritten with the public name on save.
+  if (protocol === 'chat-completions' || protocol === 'legacy-openai') return 'chat-completions';
+  if (protocol === 'responses') return 'responses';
+  return legacyProvider === 'openai' ? 'chat-completions' : 'anthropic';
 }
 
 export function normalizeProfile(raw: LegacyProfileInput, fallbackId: string): PersistedApiProfile {

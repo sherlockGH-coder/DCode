@@ -68,19 +68,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <button
             type="button"
-            className="flex items-center gap-1.5 flex-1 py-1 px-2 rounded-[7px] bg-bg-chip text-text-secondary hover:bg-bg-hover transition-colors duration-150 text-left text-[13px] cursor-pointer min-w-0 select-none h-7 [-webkit-app-region:no-drag]"
+            className="flex items-center gap-1.5 flex-1 py-1 px-2 rounded-[7px] bg-black/[0.04] text-[#2C3038] hover:bg-black/[0.07] border border-black/[0.06] transition-colors duration-150 text-left text-[13px] cursor-pointer min-w-0 select-none h-7 [-webkit-app-region:no-drag] dark:bg-white/[0.08] dark:border-white/[0.06] dark:text-zinc-200 dark:hover:bg-white/[0.12]"
             onClick={onOpenSearch}
           >
-            <IconSearch size={13} className="text-text-secondary shrink-0" />
-            <span className="flex-1 select-none text-text-tertiary whitespace-nowrap truncate min-w-0">Search</span>
-            <kbd className="text-[10px] text-text-tertiary font-mono px-1 py-0.5 rounded border border-hairline shrink-0 hidden xs:inline-block">
+            <IconSearch size={13} className="text-[#646873] dark:text-zinc-400 shrink-0" />
+            <span className="flex-1 select-none text-[#747882] dark:text-zinc-400 whitespace-nowrap truncate min-w-0 font-medium">Search</span>
+            <kbd className="text-[10px] text-[#747882] dark:text-zinc-400 font-mono px-1 py-0.5 rounded border border-black/[0.1] dark:border-white/[0.1] shrink-0 hidden xs:inline-block">
               {isMacOS ? '⌘K' : 'Ctrl+K'}
             </kbd>
           </button>
 
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-[7px] hover:bg-bg-hover text-text-secondary transition-colors duration-150 shrink-0 cursor-pointer [-webkit-app-region:no-drag]"
+            className="w-8 h-8 flex items-center justify-center rounded-[7px] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] text-[#4B5058] dark:text-zinc-300 transition-colors duration-150 shrink-0 cursor-pointer [-webkit-app-region:no-drag]"
             title="Collapse sidebar"
             onClick={onCollapseSidebar}
           >
@@ -91,10 +91,10 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="shrink-0 pt-2 px-2 pb-1.5">
           <button
             type="button"
-            className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-[11px] border border-black/[0.09] bg-white text-[13.5px] font-semibold text-text-primary shadow-[0_1.5px_4px_rgba(0,0,0,0.035)] transition-all duration-150 hover:bg-bg-hover hover:border-black/[0.14] hover:shadow-[0_2px_6px_rgba(0,0,0,0.06)] active:scale-[0.99] cursor-pointer dark:border-white/[0.1] dark:bg-white/[0.06] dark:shadow-none dark:hover:bg-white/[0.1]"
+            className="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-[10px] border border-black/[0.08] bg-white/80 text-[13.5px] font-semibold text-[#1C1C1E] shadow-[0_1px_2px_rgba(0,0,0,0.04)] backdrop-blur-md transition-all duration-150 hover:bg-white hover:border-black/[0.14] hover:shadow-[0_2px_5px_rgba(0,0,0,0.06)] active:scale-[0.99] cursor-pointer dark:border-white/[0.1] dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
             onClick={onNewConversation}
           >
-            <IconChatPlus size={16} className="text-text-primary shrink-0" />
+            <IconChatPlus size={16} className="text-[#1C1C1E] dark:text-white shrink-0" />
             <span>New conversation</span>
           </button>
         </div>
@@ -116,17 +116,17 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        <div className="shrink-0 p-2 flex flex-col gap-0.5">
+        <div className="shrink-0 p-2 flex flex-col gap-0.5 border-t border-black/[0.06] dark:border-white/[0.06]">
           <button
             type="button"
-            className={`flex items-center gap-2.5 w-full py-1.5 px-2 rounded-[7px] text-[13.5px] transition-colors duration-150 text-left cursor-pointer ${
+            className={`flex items-center gap-2.5 w-full py-1.5 px-2 rounded-[7px] text-[13.5px] font-medium transition-colors duration-150 text-left cursor-pointer ${
               activeView === 'settings'
-                ? 'bg-accent-bg text-accent font-medium'
-                : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'
+                ? 'bg-accent-bg text-accent font-semibold'
+                : 'text-[#2C3038] dark:text-zinc-200 hover:bg-black/[0.05] dark:hover:bg-white/[0.08] hover:text-[#111827] dark:hover:text-white'
             }`}
             onClick={onOpenSettings}
           >
-            <IconGear size={15} className={activeView === 'settings' ? 'text-accent' : 'text-text-secondary'} />
+            <IconGear size={15} className={activeView === 'settings' ? 'text-accent' : 'text-[#4B5058] dark:text-zinc-300'} />
             <span>Settings</span>
           </button>
         </div>

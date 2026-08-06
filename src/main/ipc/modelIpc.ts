@@ -54,19 +54,22 @@ export async function fetchModelsForProfileId(profileId: string): Promise<string
     return cached.models;
   }
 
-  const fallback = profile.defaultModel ? [profile.defaultModel] : settingsManager.getDefaultModels();
+  const fallback = profile.defaultModel
+    ? [profile.defaultModel]
+    : settingsManager.getDefaultModelsForProtocol(profile.protocol);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
     const modelsUrl = buildModelsUrl(baseUrl);
-    const authHeaders: Record<string, string> = {
-      'anthropic-version': '2023-06-01',
-    };
+    const authHeaders: Record<string, string> = {};
+    if (profile.protocol === 'anthropic') {
+      authHeaders['anthropic-version'] = '2023-06-01';
+    }
     if (apiKey) {
       authHeaders['Authorization'] = `Bearer ${apiKey}`;
-      authHeaders['x-api-key'] = apiKey;
+      if (profile.protocol === 'anthropic') authHeaders['x-api-key'] = apiKey;
     }
 
     const response = await fetch(modelsUrl, {

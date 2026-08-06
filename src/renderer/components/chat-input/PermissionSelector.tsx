@@ -35,22 +35,22 @@ const PERMISSION_OPTIONS: {
 }[] = [
   {
     value: 'default',
-    label: '默认确认',
-    desc: '读文件自动允许，命令与写文件需要确认',
+    label: 'Default Confirmation',
+    desc: 'File reads are allowed automatically; commands and file writes require confirmation.',
     Icon: ShieldIconDefault,
     colorClass: 'text-text-secondary',
   },
   {
     value: 'auto_review',
-    label: '自动文件操作',
-    desc: '读写文件自动允许，Terminal 命令仍需确认',
+    label: 'Automatic File Operations',
+    desc: 'File reads and writes are allowed automatically; terminal commands still require confirmation.',
     Icon: ShieldIconAuto,
     colorClass: 'text-accent',
   },
   {
     value: 'full_access',
-    label: '完全访问',
-    desc: '完全信任环境，Terminal 命令与文件操作自动运行',
+    label: 'Full Access',
+    desc: 'Fully trusted environment; terminal commands and file operations run automatically.',
     Icon: ShieldIconFullAccess,
     colorClass: 'text-amber-500 dark:text-amber-400',
   },

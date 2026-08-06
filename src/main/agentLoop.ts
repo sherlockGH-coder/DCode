@@ -11,6 +11,8 @@ import { ensureToolResultPairing } from './agent-loop/messagePairing';
 import { executeToolCallsParallel } from './agent-loop/toolExecution';
 import { truncateToolResult } from './agent-loop/toolResults';
 import { runAnthropicRound } from './agent-loop/anthropicRound';
+import { runChatCompletionsRound } from './agent-loop/chatCompletionsRound';
+import { runResponsesRound } from './agent-loop/responsesRound';
 
 export { convertMessagesToAnthropic } from './agent-loop/anthropicFormat';
 
@@ -26,6 +28,7 @@ export async function agentLoop(
   const {
     model = 'claude-sonnet-4-6',
     baseUrl = DEFAULT_BASE_URL,
+    protocol = 'anthropic',
     projectPath = null,
     attachmentWhitelist,
     enabledSkills,
@@ -205,11 +208,12 @@ Return a concise structured result with:
     log(`▶ Round ${roundCount} | messages=${workingMessages.length}`);
 
     const pairedMessages = ensureToolResultPairing(workingMessages);
-    const roundResult = await runAnthropicRound({
+    const roundParams = {
       pairedMessages,
       tools,
       model,
       baseUrl,
+      protocol,
       reasoningEffort,
       signal,
       callbacks,
@@ -221,7 +225,12 @@ Return a concise structured result with:
       toolCtx,
       log,
       logErr,
-    });
+    };
+    const roundResult = protocol === 'chat-completions'
+      ? await runChatCompletionsRound(roundParams)
+      : protocol === 'responses'
+        ? await runResponsesRound(roundParams)
+        : await runAnthropicRound(roundParams);
 
     if (roundResult.status === 'return') {
       return roundResult.finalContent;
@@ -262,7 +271,10 @@ Return a concise structured result with:
       }
     }
 
-    if (stopReason === 'tool_use' && toolCalls.length > 0) {
+    // Anthropic calls this stop reason `tool_use`; OpenAI-compatible protocols
+    // use `tool_calls`. Both results require executing the calls and appending
+    // matching tool outputs before the next provider request.
+    if ((stopReason === 'tool_use' || stopReason === 'tool_calls') && toolCalls.length > 0) {
       log(`Received ${toolCalls.length} tool calls: [${toolCalls.map(t => t.function.name).join(', ')}]`);
 
       const assistantMessage: Message = {

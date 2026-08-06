@@ -2,7 +2,7 @@ import { app } from 'electron';
 import { resolve } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import type { AppSettings, AppSettingsPatch, BashExecPolicy, SpeechProvider, VisionProvider } from '../shared/types';
+import type { ApiProtocol, AppSettings, AppSettingsPatch, BashExecPolicy, SpeechProvider, VisionProvider } from '../shared/types';
 import { env } from './env';
 import {
   loadExternalSettings,
@@ -288,7 +288,13 @@ class SettingsManager {
       const nextDefaultModel = typeof patch.defaultModel === 'string'
         ? patch.defaultModel.trim() || defaultModel()
         : profile.defaultModel;
-      return normalizeProfile({ ...profile, baseUrl, models, defaultModel: nextDefaultModel }, profile.id);
+      return normalizeProfile({
+        ...profile,
+        protocol: patch.protocol ?? profile.protocol,
+        baseUrl,
+        models,
+        defaultModel: nextDefaultModel,
+      }, profile.id);
     });
     this.state.apiProfiles = nextProfiles;
   }
@@ -330,8 +336,10 @@ class SettingsManager {
 
   getActiveApiCompatibilityError(): string | null {
     const active = this.activeProfile;
-    if (active.protocol !== 'legacy-openai') return null;
-    return `Profile "${active.name}" uses the legacy OpenAI Chat Completions API, while this version supports only Anthropic Messages. Update the Base URL and model in settings, then confirm the conversion before using it.`;
+    if (active.protocol === 'anthropic' || active.protocol === 'chat-completions' || active.protocol === 'responses') {
+      return null;
+    }
+    return `Profile "${active.name}" uses an unsupported API protocol.`;
   }
 
   assertActiveApiProfileSupported(): void {
@@ -386,8 +394,16 @@ class SettingsManager {
     return this.state.api.baseUrl || env.ANTHROPIC_BASE_URL;
   }
 
+  getProtocol(): ApiProtocol {
+    return this.activeProfile.protocol;
+  }
+
   getDefaultModels(): string[] {
     return [...env.ANTHROPIC_MODELS];
+  }
+
+  getDefaultModelsForProtocol(protocol: ApiProtocol): string[] {
+    return protocol === 'anthropic' ? [...env.ANTHROPIC_MODELS] : [...env.OPENAI_MODELS];
   }
 
   /** User-defined model list; empty means load models automatically. */

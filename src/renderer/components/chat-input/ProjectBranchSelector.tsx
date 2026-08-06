@@ -27,9 +27,9 @@ const ProjectBranchSelector: React.FC<{
     className="flex min-w-0 shrink items-center gap-1 text-text-tertiary overflow-visible"
   >
     {projectSelector || (activeProject && (
-      <div className="inline-flex min-w-0 shrink items-center gap-1 text-[12.5px] text-text-tertiary select-none overflow-hidden">
-        <IconProjectFolder size={14} className="text-text-tertiary shrink-0" />
-        <span className="min-w-0 max-w-[72px] xs:max-w-[96px] sm:max-w-[120px] truncate font-normal ml-[2px]">
+      <div className="inline-flex min-w-0 shrink items-center gap-1 text-[12.5px] text-text-secondary select-none overflow-hidden">
+        <IconProjectFolder size={14} className="text-text-secondary shrink-0" />
+        <span className="min-w-0 max-w-[72px] xs:max-w-[96px] sm:max-w-[120px] truncate font-medium text-text-primary ml-[2px]">
           {activeProject.split(/[/\\]/).pop()}
         </span>
       </div>

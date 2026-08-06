@@ -61,11 +61,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
       </div>
 
       <div className="col-span-2 flex items-center justify-between gap-2 md:col-span-1 md:justify-end">
-        {profile.protocol === 'legacy-openai' ? (
-          <span className="inline-flex h-7 items-center rounded-[7px] bg-amber-500/12 px-2.5 text-[11.5px] font-semibold text-amber-700 dark:text-amber-300">
-            {active ? 'Current profile · migration required' : 'Migrate after editing'}
-          </span>
-        ) : active ? (
+        {active ? (
           <span className="inline-flex h-7 items-center gap-1.5 rounded-[7px] bg-[#3897F8]/10 px-2.5 text-[11.5px] font-semibold text-[#147CE5]">
             <IconCheck size={12} className="text-current" />
             In use
@@ -126,7 +122,16 @@ export const ProfileSummaryPanel: React.FC<ProfileSummaryPanelProps> = ({
 
       <div className="grid grid-cols-2 gap-2 lg:min-w-[360px] lg:grid-cols-3">
         <SummaryMetric label="Default model" value={profile ? getDefaultModelLabel(profile) : '-'} />
-        <SummaryMetric label="Protocol" value={profile?.protocol === 'legacy-openai' ? 'Migration required' : 'Anthropic Messages'} />
+        <SummaryMetric
+          label="Protocol"
+          value={profile?.protocol === 'anthropic'
+            ? 'Anthropic Messages'
+            : profile?.protocol === 'chat-completions'
+              ? 'Chat Completions'
+              : profile?.protocol === 'responses'
+                ? 'Responses'
+                : '-'}
+        />
         <button
           type="button"
           onClick={onEditActive}
@@ -138,11 +143,6 @@ export const ProfileSummaryPanel: React.FC<ProfileSummaryPanelProps> = ({
         </button>
       </div>
     </div>
-    {profile?.protocol === 'legacy-openai' && (
-      <div className="mt-4 rounded-[9px] border border-amber-500/20 bg-amber-500/[0.08] px-3.5 py-3 text-[12px] leading-relaxed text-amber-900 dark:text-amber-200">
-        This profile comes from the legacy OpenAI Chat Completions API. Chat and model loading are paused to prevent Anthropic requests from being sent to the old endpoint; edit the profile to complete the migration.
-      </div>
-    )}
   </section>
 );
 

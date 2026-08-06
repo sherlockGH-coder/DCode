@@ -75,6 +75,8 @@ export interface AgentLoopCallbacks {
 
 export interface AgentLoopConfig {
   apiKey: string;
+  /** Provider request protocol selected by the active API profile. */
+  protocol?: import('./settings.types').ApiProtocol;
   model?: string;
   baseUrl?: string;
   /** Project root for the current conversation; null means unassigned and file access requires separate confirmation. */

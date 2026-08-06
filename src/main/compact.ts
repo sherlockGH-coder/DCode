@@ -2,6 +2,8 @@ import { createAnthropicClient } from './anthropicClient';
 import { settingsManager } from './settings';
 import * as db from './database';
 import type { Message } from '../shared/types';
+import { requestOpenAIJson } from './openaiStreamClient';
+import { convertMessagesToResponses } from './agent-loop/openaiFormat';
 
 interface CompactResult {
   /** Updated rolling summary, or the existing summary when this run is a no-op. */
@@ -141,20 +143,75 @@ async function generateSummary(
     ? `Here is the conversation summary so far; update it based on the following:\n${previousSummary}\n\nHere is the new conversation after the previous summary. Merge its key points into the summary:\n\n${formatted}`
     : `Compress the following conversation history:\n\n${formatted}`;
 
-  const client = createAnthropicClient();
-  const response = await client.messages.create({
-    model,
-    max_tokens: 1024,
-    system: SUMMARY_SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: userContent }],
-  });
+  const protocol = settingsManager.getProtocol();
+  let content: string | undefined;
 
-  const textBlock = response.content.find((b) => b.type === 'text');
-  const content = textBlock?.text;
+  if (protocol === 'anthropic') {
+    const client = createAnthropicClient();
+    const response = await client.messages.create({
+      model,
+      max_tokens: 1024,
+      system: SUMMARY_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: userContent }],
+    });
+    const textBlock = response.content.find((b) => b.type === 'text');
+    content = textBlock?.text;
+  } else if (protocol === 'chat-completions') {
+    const response = await requestOpenAIJson({
+      apiKey: settingsManager.getApiKey(),
+      baseUrl: settingsManager.getBaseUrl(),
+      protocol,
+      body: {
+        model,
+        max_tokens: 1024,
+        messages: [
+          { role: 'system', content: SUMMARY_SYSTEM_PROMPT },
+          { role: 'user', content: userContent },
+        ],
+      },
+    });
+    const value = response.choices?.[0]?.message?.content;
+    content = typeof value === 'string'
+      ? value
+      : Array.isArray(value)
+        ? value.map((part: any) => typeof part?.text === 'string' ? part.text : '').join('')
+        : undefined;
+  } else {
+    const converted = convertMessagesToResponses([
+      { id: 'compact-system', role: 'system', content: SUMMARY_SYSTEM_PROMPT },
+      { id: 'compact-user', role: 'user', content: userContent },
+    ]);
+    const response = await requestOpenAIJson({
+      apiKey: settingsManager.getApiKey(),
+      baseUrl: settingsManager.getBaseUrl(),
+      protocol,
+      body: {
+        model,
+        input: converted.input,
+        instructions: converted.instructions,
+        max_output_tokens: 1024,
+      },
+    });
+    content = typeof response.output_text === 'string'
+      ? response.output_text
+      : extractResponsesText(response.output);
+  }
+
   if (!content) {
     throw new Error('Compact model returned empty response');
   }
   return content;
+}
+
+function extractResponsesText(output: unknown): string | undefined {
+  if (!Array.isArray(output)) return undefined;
+  const text = output.flatMap((item: any) => {
+    if (item?.type !== 'message' || !Array.isArray(item.content)) return [];
+    return item.content
+      .filter((part: any) => part?.type === 'output_text' && typeof part.text === 'string')
+      .map((part: any) => part.text);
+  }).join('');
+  return text || undefined;
 }
 
 /**

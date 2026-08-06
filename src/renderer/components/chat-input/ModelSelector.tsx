@@ -60,19 +60,37 @@ const ModelSelector: React.FC<{
   const [hoveredProvider, setHoveredProvider] = React.useState<string | null>(null);
   // hoveredModel: model name whose effort submenu is shown
   const [hoveredModel, setHoveredModel] = React.useState<string | null>(null);
+  const [modelSubmenuTop, setModelSubmenuTop] = React.useState(0);
+  const menuPopoverRef = React.useRef<HTMLDivElement>(null);
+  const providerRowRefs = React.useRef(new Map<string, HTMLButtonElement>());
   const currentEffort = effortLabel(reasoningEffort);
 
   React.useEffect(() => {
     if (!isOpen) {
       setHoveredProvider(null);
       setHoveredModel(null);
+      setModelSubmenuTop(0);
     }
   }, [isOpen]);
 
   const closeMenu = () => {
     setHoveredProvider(null);
     setHoveredModel(null);
+    setModelSubmenuTop(0);
     onOpenChange(false);
+  };
+
+  const showProviderMenu = (profileId: string) => {
+    setHoveredProvider(profileId);
+    setHoveredModel(null);
+
+    const providerRow = providerRowRefs.current.get(profileId);
+    const menuPopover = menuPopoverRef.current;
+    if (!providerRow || !menuPopover) return;
+
+    const rowRect = providerRow.getBoundingClientRect();
+    const menuRect = menuPopover.getBoundingClientRect();
+    setModelSubmenuTop(Math.max(0, rowRect.top - menuRect.top));
   };
 
   // Find which provider is currently active (contains the selected model)
@@ -109,6 +127,7 @@ const ModelSelector: React.FC<{
         <div
           data-testid="model-selector-menu"
           className="absolute bottom-full right-0 z-50 mb-1.5 overflow-visible"
+          ref={menuPopoverRef}
           onMouseLeave={() => { setHoveredProvider(null); setHoveredModel(null); }}
         >
           {/* Level 1: Provider list */}
@@ -121,12 +140,16 @@ const ModelSelector: React.FC<{
                   <button
                     key={provider.profileId}
                     type="button"
+                    ref={(element) => {
+                      if (element) providerRowRefs.current.set(provider.profileId, element);
+                      else providerRowRefs.current.delete(provider.profileId);
+                    }}
                     aria-label={`Provider ${provider.providerName}`}
                     aria-expanded={isHovered}
                     className={`flex h-9 w-full items-center gap-2.5 rounded-[8px] border-none px-2.5 text-left text-[13px] transition-colors ${isHovered ? 'bg-bg-hover' : 'bg-transparent hover:bg-bg-hover'}`}
-                    onMouseEnter={() => { setHoveredProvider(provider.profileId); setHoveredModel(null); }}
-                    onMouseOver={() => { setHoveredProvider(provider.profileId); setHoveredModel(null); }}
-                    onFocus={() => setHoveredProvider(provider.profileId)}
+                    onMouseEnter={() => showProviderMenu(provider.profileId)}
+                    onMouseOver={() => showProviderMenu(provider.profileId)}
+                    onFocus={() => showProviderMenu(provider.profileId)}
                   >
                     <span className="min-w-0 truncate font-medium text-text-primary">{provider.providerName}</span>
                     <span className="ml-auto flex items-center justify-center w-[14px] shrink-0">
@@ -142,7 +165,8 @@ const ModelSelector: React.FC<{
           {hoveredProviderData && (
             <div
               data-testid="model-submenu"
-              className="absolute bottom-0 right-full mr-0.5 w-[200px] overflow-visible rounded-[12px] border border-hairline bg-bg-main p-1.5 shadow-floating animate-[menu-in_150ms_ease-out]"
+              className="absolute right-full mr-0.5 w-[200px] overflow-visible rounded-[12px] border border-hairline bg-bg-main p-1.5 shadow-floating animate-[menu-in_150ms_ease-out]"
+              style={{ top: modelSubmenuTop }}
               onMouseLeave={() => setHoveredModel(null)}
             >
               <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
@@ -177,7 +201,7 @@ const ModelSelector: React.FC<{
                   data-testid="effort-submenu"
                   className="absolute bottom-0 right-full mr-0.5 w-[160px] overflow-hidden rounded-[12px] border border-hairline bg-bg-main p-1.5 shadow-floating animate-[menu-in_150ms_ease-out]"
                 >
-                  <p className="px-2.5 pb-1 pt-0.5 text-[11px] font-medium text-text-tertiary select-none">推理强度</p>
+                  <p className="px-2.5 pb-1 pt-0.5 text-[11px] font-medium text-text-tertiary select-none">Reasoning Effort</p>
                   {([
                     ['Off', undefined],
                     ['High', 'high'],

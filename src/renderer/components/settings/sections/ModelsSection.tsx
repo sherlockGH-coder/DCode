@@ -34,8 +34,8 @@ const DEFAULT_DEEPSEEK_ID = 'default-anthropic';
 
 const PROTOCOL_OPTIONS: { value: ApiProfile['protocol']; label: string }[] = [
   { value: 'anthropic', label: 'Anthropic Messages (/v1/messages)' },
-  { value: 'legacy-openai', label: 'Chat Completions (/chat/completions)' },
-  { value: 'responses', label: 'Responses (/responses)' },
+  { value: 'chat-completions', label: 'Chat Completions (/v1/chat/completions)' },
+  { value: 'responses', label: 'Responses (/v1/responses)' },
 ];
 
 const CustomFormatSelect: React.FC<{
@@ -131,7 +131,7 @@ const EditModelModal: React.FC<EditModelModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold text-gray-900 dark:text-white">
-            编辑模型配置
+            Edit Model Configuration
           </h3>
           <button
             type="button"
@@ -146,7 +146,7 @@ const EditModelModal: React.FC<EditModelModalProps> = ({
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">
-              模型 ID
+              Model ID
             </label>
             <input
               type="text"
@@ -158,7 +158,7 @@ const EditModelModal: React.FC<EditModelModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">
-              上下文窗口
+              Context Window
             </label>
             <input
               type="text"
@@ -176,7 +176,7 @@ const EditModelModal: React.FC<EditModelModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 rounded-xl text-xs font-semibold border border-gray-200 dark:border-zinc-700/80 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
           >
-            取消
+            Cancel
           </button>
           <button
             type="button"
@@ -187,7 +187,7 @@ const EditModelModal: React.FC<EditModelModalProps> = ({
             }}
             className="px-4 py-2 rounded-xl text-xs font-semibold bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-90 transition-all cursor-pointer"
           >
-            保存
+            Save
           </button>
         </div>
       </div>
@@ -214,7 +214,7 @@ const EditProviderNameModal: React.FC<EditProviderNameModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold text-gray-900 dark:text-white">
-            修改供应商名称
+            Edit Provider Name
           </h3>
           <button
             type="button"
@@ -228,7 +228,7 @@ const EditProviderNameModal: React.FC<EditProviderNameModalProps> = ({
         {/* Input */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">
-            供应商名称
+            Provider Name
           </label>
           <input
             type="text"
@@ -252,7 +252,7 @@ const EditProviderNameModal: React.FC<EditProviderNameModalProps> = ({
             onClick={onClose}
             className="px-4 py-2 rounded-xl text-xs font-semibold border border-gray-200 dark:border-zinc-700/80 text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
           >
-            取消
+            Cancel
           </button>
           <button
             type="button"
@@ -263,7 +263,7 @@ const EditProviderNameModal: React.FC<EditProviderNameModalProps> = ({
             }}
             className="px-4 py-2 rounded-xl text-xs font-semibold bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-90 transition-all cursor-pointer"
           >
-            保存
+            Save
           </button>
         </div>
       </div>
@@ -319,11 +319,6 @@ const ModelsSection: React.FC<Props> = ({
   const customProfiles = React.useMemo(
     () => settings.apiProfiles.filter((p) => p.id !== officialProfile?.id),
     [settings.apiProfiles, officialProfile],
-  );
-
-  const activeProfile = React.useMemo(
-    () => settings.apiProfiles.find((p) => p.id === settings.activeApiProfileId),
-    [settings.activeApiProfileId, settings.apiProfiles],
   );
 
   const showSaved = () => {
@@ -399,11 +394,11 @@ const ModelsSection: React.FC<Props> = ({
           nextEnabled = [id];
         }
         // If we're disabling the active profile, switch active to the first remaining enabled
-        const patchData: Record<string, unknown> = { enabledApiProfileIds: nextEnabled };
+        const patchData: AppSettingsPatch = { enabledApiProfileIds: nextEnabled };
         if (id === settings.activeApiProfileId) {
           patchData.activeApiProfileId = nextEnabled[0];
         }
-        await patch(patchData as any);
+        await patch(patchData);
       } else {
         // Enable: add to enabled list
         nextEnabled = [...currentEnabled, id];
@@ -498,7 +493,7 @@ const ModelsSection: React.FC<Props> = ({
         ? currentEnabled
         : [...currentEnabled, editing.id];
 
-      const updated = await patch({
+      await patch({
         apiProfiles: nextProfiles.map((p) => ({ ...p })),
         activeApiProfileId: nextActiveId,
         enabledApiProfileIds: nextEnabled,
@@ -563,9 +558,9 @@ const ModelsSection: React.FC<Props> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">模型设置</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Model Settings</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-zinc-400">
-            管理自定义模型供应商，配置后可在聊天时选择使用。
+            Manage custom model providers and configure which models are available in chat.
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -573,7 +568,7 @@ const ModelsSection: React.FC<Props> = ({
           <button
             type="button"
             onClick={handleRefresh}
-            title="刷新供应商"
+            title="Refresh providers"
             aria-label="Refresh providers"
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors shadow-xs"
           >
@@ -612,7 +607,7 @@ const ModelsSection: React.FC<Props> = ({
                       className={`h-2 w-2 rounded-full ${
                         officialProfile.apiKeySet ? 'bg-[#4D6BFE]' : 'bg-gray-300 dark:bg-zinc-600'
                       }`}
-                      title={officialProfile.apiKeySet ? 'API Key 已配置' : 'API Key 未配置'}
+                      title={officialProfile.apiKeySet ? 'API key configured' : 'API key not configured'}
                     />
                   </div>
                 </div>
@@ -622,7 +617,7 @@ const ModelsSection: React.FC<Props> = ({
             {/* Custom Providers List */}
             <div>
               <p className="px-2 mb-2 text-[11px] font-semibold text-gray-400 dark:text-zinc-500 uppercase tracking-wider">
-                自定义供应商
+                Custom Providers
               </p>
               <div className="space-y-1">
                 {customProfiles.map((p) => {
@@ -646,7 +641,7 @@ const ModelsSection: React.FC<Props> = ({
                           className={`h-2 w-2 rounded-full ${
                             p.apiKeySet ? 'bg-[#4D6BFE]' : 'bg-gray-300 dark:bg-zinc-600'
                           }`}
-                          title={p.apiKeySet ? 'API Key 已配置' : 'API Key 未配置'}
+                          title={p.apiKeySet ? 'API key configured' : 'API key not configured'}
                         />
                       </div>
                     </div>
@@ -665,7 +660,7 @@ const ModelsSection: React.FC<Props> = ({
                 }`}
               >
                 <IconPlus size={14} />
-                添加供应商
+                Add Provider
               </button>
             </div>
           </div>
@@ -679,14 +674,14 @@ const ModelsSection: React.FC<Props> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  {isNewMode ? '添加模型供应商' : editing.name}
+                  {isNewMode ? 'Add Model Provider' : editing.name}
                 </h2>
                 {!isNewMode && editing.id !== officialProfile?.id && (
                   <button
                     type="button"
                     onClick={() => setIsEditingProviderName(true)}
                     className="p-1 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all cursor-pointer"
-                    title="修改供应商名称"
+                    title="Edit provider name"
                   >
                     <IconEdit size={16} />
                   </button>
@@ -695,25 +690,25 @@ const ModelsSection: React.FC<Props> = ({
                   <div className="inline-flex items-center p-0.5 rounded-full bg-gray-100 dark:bg-zinc-800 text-xs font-medium border border-gray-200/80 dark:border-zinc-700 select-none">
                     <button
                       type="button"
-                      onClick={() => { if (!isCurrentEnabled) handleActivate(editing.id); }}
+                      onClick={() => { if (!isCurrentEnabled) void handleActivate(editing.id); }}
                       className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                         isCurrentEnabled
                           ? 'bg-[#4D6BFE] text-white shadow-xs'
                           : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white'
                       }`}
                     >
-                      启用
+                      Enable
                     </button>
                     <button
                       type="button"
-                      onClick={() => { if (isCurrentEnabled) handleActivate(editing.id); }}
+                      onClick={() => { if (isCurrentEnabled) void handleActivate(editing.id); }}
                       className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                         !isCurrentEnabled
                           ? 'bg-[#4D6BFE] text-white shadow-xs'
                           : 'text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-zinc-200'
                       }`}
                     >
-                      禁用
+                      Disable
                     </button>
                   </div>
                 )}
@@ -724,7 +719,7 @@ const ModelsSection: React.FC<Props> = ({
                 <button
                   type="button"
                   onClick={() => handleDelete(editing.id)}
-                  title="删除供应商"
+                  title="Delete provider"
                   aria-label="Delete provider"
                   className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
                 >
@@ -735,7 +730,7 @@ const ModelsSection: React.FC<Props> = ({
 
             {isNewMode && (
               <p className="text-xs text-gray-500 dark:text-zinc-400">
-                配置一个完全自定义的 API 端点和初始模型。
+                Configure a fully custom API endpoint and initial model.
               </p>
             )}
 
@@ -746,13 +741,13 @@ const ModelsSection: React.FC<Props> = ({
               {isNewMode && (
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">
-                    名称
+                    Name
                   </label>
                   <input
                     type="text"
                     value={editing.name}
                     onChange={(e) => setEditing({ ...editing, name: e.target.value })}
-                    placeholder="如：DeepSeek"
+                    placeholder="e.g. DeepSeek"
                     className="w-full h-10 px-3.5 rounded-xl border border-gray-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/80 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                 </div>
@@ -775,7 +770,7 @@ const ModelsSection: React.FC<Props> = ({
               {/* API Format Dropdown */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">
-                  API 格式
+                  API Format
                 </label>
                 <CustomFormatSelect
                   value={editing.protocol}
@@ -793,14 +788,14 @@ const ModelsSection: React.FC<Props> = ({
                     type={showApiKey ? 'text' : 'password'}
                     value={keyDraft}
                     onChange={(e) => setKeyDraft(e.target.value)}
-                    placeholder={editing.apiKeySet && !keyDraft ? '••••••••••••••••••••••••••••••••' : '输入 API Key'}
+                    placeholder={editing.apiKeySet && !keyDraft ? '••••••••••••••••••••••••••••••••' : 'Enter API key'}
                     className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-gray-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/80 text-sm font-mono text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                   />
                   <button
                     type="button"
                     onClick={handleToggleShowKey}
                     disabled={isLoadingKey}
-                    title={showApiKey ? '隐藏 API Key' : '显示 API Key'}
+                    title={showApiKey ? 'Hide API key' : 'Show API key'}
                     className="absolute right-3 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
                   >
                     {showApiKey ? <IconEyeOff size={18} /> : <IconEye size={18} />}
@@ -811,7 +806,7 @@ const ModelsSection: React.FC<Props> = ({
               {/* Model List Section matching screenshot layout */}
               <div className="pt-2">
                 <label className="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-2">
-                  模型列表
+                  Model List
                 </label>
 
                 {/* Model Items Container */}
@@ -838,7 +833,7 @@ const ModelsSection: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={() => setEditing({ ...editing, defaultModel: model })}
-                            title={isDefault ? '当前默认模型' : '测试连接并设为默认'}
+                            title={isDefault ? 'Current default model' : 'Test connection and set as default'}
                             className="p-1.5 rounded-lg text-gray-400 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-700/60 transition-all"
                           >
                             <IconTestConnection size={16} />
@@ -855,7 +850,7 @@ const ModelsSection: React.FC<Props> = ({
                                 contextWindow: ctx,
                               });
                             }}
-                            title="编辑模型配置"
+                            title="Edit model configuration"
                             className="p-1.5 rounded-lg text-gray-400 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-700/60 transition-all"
                           >
                             <IconEdit size={14} />
@@ -865,7 +860,7 @@ const ModelsSection: React.FC<Props> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveModel(model)}
-                            title="删除模型"
+                            title="Delete model"
                             className="p-1.5 rounded-lg text-gray-400 dark:text-zinc-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-zinc-700/60 transition-all"
                           >
                             <IconTrash size={15} />
@@ -889,7 +884,7 @@ const ModelsSection: React.FC<Props> = ({
                           handleAddModel();
                         }
                       }}
-                      placeholder="如：deepseek-v4-flash"
+                      placeholder="e.g. deepseek-v4-flash"
                       autoFocus
                       className="flex-1 h-9 px-3 rounded-xl border border-blue-500 bg-white dark:bg-zinc-800 text-xs font-mono text-gray-900 dark:text-white focus:outline-none"
                     />
@@ -898,7 +893,7 @@ const ModelsSection: React.FC<Props> = ({
                       onClick={handleAddModel}
                       className="h-9 px-3 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors"
                     >
-                      确认
+                      Confirm
                     </button>
                     <button
                       type="button"
@@ -908,7 +903,7 @@ const ModelsSection: React.FC<Props> = ({
                       }}
                       className="h-9 px-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-zinc-800"
                     >
-                      取消
+                      Cancel
                     </button>
                   </div>
                 ) : (
@@ -918,7 +913,7 @@ const ModelsSection: React.FC<Props> = ({
                     className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-xs font-semibold text-gray-700 dark:text-zinc-300 transition-colors"
                   >
                     <IconPlus size={14} />
-                    添加模型
+                    Add Model
                   </button>
                 )}
               </div>
@@ -934,7 +929,7 @@ const ModelsSection: React.FC<Props> = ({
               disabled={saveState === 'saving'}
               className="h-10 px-6 rounded-xl bg-[#4A4B50] hover:bg-[#38393D] dark:bg-zinc-700 dark:hover:bg-zinc-600 text-white text-xs font-semibold transition-all shadow-xs disabled:opacity-50"
             >
-              {isNewMode ? '添加供应商' : '保存供应商'}
+              {isNewMode ? 'Add Provider' : 'Save Provider'}
             </button>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconInfo, IconKey } from '../../../icons';
+import { IconKey } from '../../../icons';
 import type { ApiProfile } from '../../../../../shared/types';
 
 export const PANEL_CLASS = 'rounded-lg border border-black/[0.07] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.025)] dark:border-white/[0.08] dark:bg-[#1E1E20]';
@@ -19,14 +19,13 @@ export const KeyBadge: React.FC<{ active: boolean }> = ({ active }) => (
 
 export const ProtocolBadge: React.FC<{ protocol: ApiProfile['protocol'] }> = ({ protocol }) => (
   <span
-    className={`inline-flex h-5 items-center gap-1 rounded-md px-1.5 text-[10px] font-medium ${
-      protocol === 'legacy-openai'
-        ? 'bg-amber-500/12 text-amber-700 dark:text-amber-300'
-        : 'bg-blue-500/10 text-blue-700 dark:text-blue-300'
-    }`}
+    className="inline-flex h-5 items-center gap-1 rounded-md bg-blue-500/10 px-1.5 text-[10px] font-medium text-blue-700 dark:text-blue-300"
   >
-    {protocol === 'legacy-openai' && <IconInfo size={9} className="shrink-0" />}
-    {protocol === 'legacy-openai' ? 'Migration required' : 'Anthropic'}
+    {protocol === 'anthropic'
+      ? 'Anthropic Messages'
+      : protocol === 'chat-completions'
+        ? 'Chat Completions'
+        : 'Responses'}
   </span>
 );
 

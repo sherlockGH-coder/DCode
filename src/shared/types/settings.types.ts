@@ -7,12 +7,12 @@ import type { SpeechSettings, VisionSettings } from './media.types';
  *  - full_access: full access; skip all tool permission approvals.
  */
 export type BashExecPolicy = 'default' | 'auto_review' | 'full_access';
-export type ApiProtocol = 'anthropic' | 'legacy-openai' | 'responses';
+export type ApiProtocol = 'anthropic' | 'chat-completions' | 'responses';
 
 export interface ApiProfile extends WithApiKey {
   id: string;
   name: string;
-  /** Request protocol; legacy-openai only marks a pre-migration profile and is not called at runtime. */
+  /** Request protocol used by the active model endpoint. */
   protocol: ApiProtocol;
   /** API Base URL */
   baseUrl: string;
