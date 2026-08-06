@@ -128,7 +128,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                     className={INPUT_CLASS}
                     value={editing.defaultModel}
                     onChange={(event) => updateEditing({ defaultModel: event.target.value })}
-                    placeholder="For example, claude-sonnet-4-6"
+                    placeholder="For example, deepseek-v4-flash"
                   />
                 </Field>
               )}

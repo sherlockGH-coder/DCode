@@ -103,6 +103,7 @@ declare global {
       patchSettings: (patch: AppSettingsPatch) => Promise<AppSettings>;
       setApiKey: (plaintext: string) => Promise<void>;
       setApiProfileApiKey: (profileId: string, plaintext: string) => Promise<void>;
+      getApiProfileApiKey: (profileId: string) => Promise<string>;
       setSpeechApiKey: (plaintext: string) => Promise<void>;
       setVisionApiKey: (plaintext: string) => Promise<void>;
       resetSettings: () => Promise<AppSettings>;

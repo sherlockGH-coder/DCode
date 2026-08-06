@@ -289,6 +289,16 @@ class SettingsManager {
     });
   }
 
+  getApiKeyForProfileId(profileId: string): string {
+    const profile = this.state.apiProfiles.find((p) => p.id === profileId);
+    if (!profile) return '';
+    return getApiKeyForProfile({
+      externalSettings: this.loadExternalSettings(),
+      getExternalApiKeyForProfile: this.getExternalApiKeyForProfile.bind(this),
+      profile,
+    });
+  }
+
   /** Whether the user has set a key, excluding the env fallback. */
   hasUserApiKey(): boolean {
     return this.hasApiKeyForProfile(this.activeProfile);

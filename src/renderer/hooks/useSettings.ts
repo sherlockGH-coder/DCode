@@ -7,6 +7,7 @@ interface UseSettingsResult {
   patch: (p: AppSettingsPatch) => Promise<AppSettings | undefined>;
   setApiKey: (key: string) => Promise<void>;
   setApiProfileApiKey: (profileId: string, key: string) => Promise<void>;
+  getApiProfileApiKey: (profileId: string) => Promise<string>;
   setSpeechApiKey: (key: string) => Promise<void>;
   setVisionApiKey: (key: string) => Promise<void>;
   reset: () => Promise<void>;
@@ -63,6 +64,15 @@ export function useSettings(): UseSettingsResult {
     }
   }, []);
 
+  const getApiProfileApiKey = useCallback(async (profileId: string): Promise<string> => {
+    try {
+      return await window.deepseekApi.getApiProfileApiKey(profileId);
+    } catch (err) {
+      console.error('[useSettings] getApiProfileApiKey failed:', err);
+      return '';
+    }
+  }, []);
+
   const setSpeechApiKey = useCallback(async (key: string): Promise<void> => {
     try {
       await window.deepseekApi.setSpeechApiKey(key);
@@ -90,5 +100,5 @@ export function useSettings(): UseSettingsResult {
     setSettings(updated);
   }, []);
 
-  return { settings, isLoading, patch, setApiKey, setApiProfileApiKey, setSpeechApiKey, setVisionApiKey, reset };
+  return { settings, isLoading, patch, setApiKey, setApiProfileApiKey, getApiProfileApiKey, setSpeechApiKey, setVisionApiKey, reset };
 }

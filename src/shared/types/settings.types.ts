@@ -7,7 +7,7 @@ import type { SpeechSettings, VisionSettings } from './media.types';
  *  - full_access: full access; skip all tool permission approvals.
  */
 export type BashExecPolicy = 'default' | 'auto_review' | 'full_access';
-export type ApiProtocol = 'anthropic' | 'legacy-openai';
+export type ApiProtocol = 'anthropic' | 'legacy-openai' | 'responses';
 
 export interface ApiProfile extends WithApiKey {
   id: string;

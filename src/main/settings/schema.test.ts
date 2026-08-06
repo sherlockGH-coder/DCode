@@ -56,4 +56,16 @@ describe('settings schema migration', () => {
       'anthropic',
     ]);
   });
+
+  it('builds standard DeepSeek default profile', () => {
+    const defaultProfile = mergePersistedShape(defaults(), {} as any).apiProfiles[0];
+    expect(defaultProfile).toMatchObject({
+      id: 'default',
+      name: 'DeepSeek',
+      protocol: 'anthropic',
+      baseUrl: 'https://api.deepseek.com/anthropic',
+      models: ['deepseek-v4-flash'],
+      defaultModel: 'deepseek-v4-flash',
+    });
+  });
 });

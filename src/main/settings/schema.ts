@@ -75,20 +75,20 @@ export interface PersistedShape {
 export function defaultApiProfile(): PersistedApiProfile {
   return {
     id: DEFAULT_PROFILE_ID,
-    name: 'Default profile',
+    name: 'DeepSeek',
     protocol: 'anthropic',
-    baseUrl: env.ANTHROPIC_BASE_URL,
-    models: [],
-    defaultModel: 'claude-sonnet-4-6',
+    baseUrl: 'https://api.deepseek.com/anthropic',
+    models: ['deepseek-v4-flash'],
+    defaultModel: 'deepseek-v4-flash',
   };
 }
 
 export function defaultBaseUrl(): string {
-  return env.ANTHROPIC_BASE_URL;
+  return 'https://api.deepseek.com/anthropic';
 }
 
 export function defaultModel(): string {
-  return 'claude-sonnet-4-6';
+  return 'deepseek-v4-flash';
 }
 
 export function normalizeSpeechProvider(_value: unknown): SpeechProvider {
@@ -282,7 +282,7 @@ export function mergePersistedShape(base: PersistedShape, patch: Partial<Persist
     ? patch.apiProfiles ?? []
     : [{
       id: DEFAULT_PROFILE_ID,
-      name: 'Default profile',
+      name: 'DeepSeek',
       protocol: legacyApi.protocol,
       baseUrl: legacyApi.baseUrl,
       models: legacyApi.models,
