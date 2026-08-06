@@ -388,11 +388,31 @@ const ModelsSection: React.FC<Props> = ({
     setSaveState('saving');
     setError(null);
     try {
-      await patch({ activeApiProfileId: id });
+      const currentEnabled = settings.enabledApiProfileIds ?? [settings.activeApiProfileId];
+      const isAlreadyEnabled = currentEnabled.includes(id);
+      let nextEnabled: string[];
+      if (isAlreadyEnabled) {
+        // Disable: remove from enabled list (but keep at least one)
+        nextEnabled = currentEnabled.filter((eid) => eid !== id);
+        if (nextEnabled.length === 0) {
+          // Cannot disable all providers; keep this one
+          nextEnabled = [id];
+        }
+        // If we're disabling the active profile, switch active to the first remaining enabled
+        const patchData: Record<string, unknown> = { enabledApiProfileIds: nextEnabled };
+        if (id === settings.activeApiProfileId) {
+          patchData.activeApiProfileId = nextEnabled[0];
+        }
+        await patch(patchData as any);
+      } else {
+        // Enable: add to enabled list
+        nextEnabled = [...currentEnabled, id];
+        await patch({ enabledApiProfileIds: nextEnabled });
+      }
       window.dispatchEvent(new Event('models:refresh'));
       showSaved();
     } catch (err) {
-      setError((err as Error).message || 'Failed to switch profiles');
+      setError((err as Error).message || 'Failed to toggle profile');
       setSaveState('idle');
     }
   };
@@ -472,7 +492,18 @@ const ModelsSection: React.FC<Props> = ({
         nextActiveId = editing.id;
       }
 
-      await saveProfiles(nextProfiles, nextActiveId);
+      // When creating a new profile, automatically enable it
+      const currentEnabled = settings.enabledApiProfileIds ?? [settings.activeApiProfileId];
+      const nextEnabled = existingIds.has(editing.id)
+        ? currentEnabled
+        : [...currentEnabled, editing.id];
+
+      const updated = await patch({
+        apiProfiles: nextProfiles.map((p) => ({ ...p })),
+        activeApiProfileId: nextActiveId,
+        enabledApiProfileIds: nextEnabled,
+      });
+      window.dispatchEvent(new Event('models:refresh'));
 
       if (keyDraft.trim()) {
         await setApiProfileApiKey(editing.id, keyDraft.trim());
@@ -524,7 +555,8 @@ const ModelsSection: React.FC<Props> = ({
     showSaved();
   };
 
-  const isCurrentActive = !isNewMode && editing.id === activeProfile?.id;
+  const enabledIds = new Set(settings.enabledApiProfileIds ?? [settings.activeApiProfileId]);
+  const isCurrentEnabled = !isNewMode && enabledIds.has(editing.id);
 
   return (
     <div className="space-y-6 pb-12 select-none">
@@ -663,9 +695,9 @@ const ModelsSection: React.FC<Props> = ({
                   <div className="inline-flex items-center p-0.5 rounded-full bg-gray-100 dark:bg-zinc-800 text-xs font-medium border border-gray-200/80 dark:border-zinc-700 select-none">
                     <button
                       type="button"
-                      onClick={() => handleActivate(editing.id)}
+                      onClick={() => { if (!isCurrentEnabled) handleActivate(editing.id); }}
                       className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                        isCurrentActive
+                        isCurrentEnabled
                           ? 'bg-[#4D6BFE] text-white shadow-xs'
                           : 'text-gray-600 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-white'
                       }`}
@@ -674,14 +706,9 @@ const ModelsSection: React.FC<Props> = ({
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        if (isCurrentActive) {
-                          const other = settings.apiProfiles.find((p) => p.id !== editing.id);
-                          if (other) handleActivate(other.id);
-                        }
-                      }}
+                      onClick={() => { if (isCurrentEnabled) handleActivate(editing.id); }}
                       className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                        !isCurrentActive
+                        !isCurrentEnabled
                           ? 'bg-[#4D6BFE] text-white shadow-xs'
                           : 'text-gray-500 dark:text-zinc-400 hover:text-gray-800 dark:hover:text-zinc-200'
                       }`}

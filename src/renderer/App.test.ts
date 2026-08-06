@@ -82,6 +82,8 @@ vi.mock('./contexts/AppContext', () => ({
     models: {
       models: ['deepseek-v4-flash'],
       selectedModel: 'deepseek-v4-flash',
+      selectedProvider: 'DeepSeek',
+      providers: [],
       handleModelChange: mocks.handleModelChange,
     },
     project: {
@@ -124,6 +126,8 @@ vi.mock('./contexts/AppContext', () => ({
   useModelsContext: () => ({
     models: ['deepseek-v4-flash'],
     selectedModel: 'deepseek-v4-flash',
+    selectedProvider: 'DeepSeek',
+    providers: [],
     handleModelChange: mocks.handleModelChange,
   }),
   usePreviewActions: () => ({

@@ -44,6 +44,8 @@ export interface AppSettings {
   apiProfiles: ApiProfile[];
   /** ID of the active API profile. */
   activeApiProfileId: string;
+  /** IDs of enabled API profiles; all enabled providers appear in the model selector. */
+  enabledApiProfileIds: string[];
   prompt: {
     /** Override the default system prompt; an empty string uses src/main/prompts/system.md. */
     systemPromptOverride: string;
@@ -74,6 +76,7 @@ export type AppSettingsPatch = {
   api?: Partial<Omit<AppSettings['api'], 'apiKeySet'>>;
   apiProfiles?: ApiProfilePatch[];
   activeApiProfileId?: string;
+  enabledApiProfileIds?: string[];
   prompt?: Partial<AppSettings['prompt']>;
   permissions?: {
     bashExec?: BashExecPolicy;

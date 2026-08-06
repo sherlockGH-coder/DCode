@@ -28,6 +28,7 @@ function makeSettings(model: string, models: string[], profileId: string): AppSe
       apiKeySet: true,
     }],
     activeApiProfileId: profileId,
+    enabledApiProfileIds: [profileId],
     prompt: { systemPromptOverride: '' },
     permissions: {
       bashExec: 'default',

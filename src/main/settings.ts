@@ -88,6 +88,15 @@ class SettingsManager {
       ?? defaultApiProfile();
   }
 
+  getProfileById(profileId: string): PersistedApiProfile | undefined {
+    return this.state.apiProfiles.find((p) => p.id === profileId);
+  }
+
+  getEnabledProfiles(): PersistedApiProfile[] {
+    const enabledIds = new Set(this.state.enabledApiProfileIds ?? [this.state.activeApiProfileId]);
+    return this.state.apiProfiles.filter((p) => enabledIds.has(p.id));
+  }
+
   private loadExternalSettings(): ExternalSettings | null {
     try {
       return loadExternalSettings(this.externalSettingsPath);
@@ -121,6 +130,17 @@ class SettingsManager {
     if (!this.state.apiProfiles.some((profile) => profile.id === this.state.activeApiProfileId)) {
       this.state.activeApiProfileId = this.state.apiProfiles[0].id;
     }
+    // Ensure enabledApiProfileIds is initialized and consistent.
+    if (!Array.isArray(this.state.enabledApiProfileIds)) {
+      this.state.enabledApiProfileIds = [this.state.activeApiProfileId];
+    }
+    // Remove IDs of profiles that no longer exist.
+    const profileIds = new Set(this.state.apiProfiles.map((p) => p.id));
+    this.state.enabledApiProfileIds = this.state.enabledApiProfileIds.filter((id) => profileIds.has(id));
+    // Ensure the active profile is always in the enabled list.
+    if (!this.state.enabledApiProfileIds.includes(this.state.activeApiProfileId)) {
+      this.state.enabledApiProfileIds.push(this.state.activeApiProfileId);
+    }
     const active = this.activeProfile;
     this.state.api = {
       protocol: active.protocol,
@@ -151,6 +171,10 @@ class SettingsManager {
     }
     if (typeof p.activeApiProfileId === 'string') {
       this.setActiveApiProfile(p.activeApiProfileId);
+    }
+    if (Array.isArray(p.enabledApiProfileIds)) {
+      const profileIds = new Set(this.state.apiProfiles.map((profile) => profile.id));
+      this.state.enabledApiProfileIds = p.enabledApiProfileIds.filter((id) => profileIds.has(id));
     }
     if (p.api) {
       this.patchActiveApi(p.api);

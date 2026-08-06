@@ -39,6 +39,8 @@ export interface PersistedShape {
   };
   apiProfiles: PersistedApiProfile[];
   activeApiProfileId: string;
+  /** IDs of enabled API profiles; all enabled providers appear in the model selector. */
+  enabledApiProfileIds: string[];
   prompt: {
     systemPromptOverride: string;
   };
@@ -196,6 +198,7 @@ export function buildPublicSettings<TExternal>({
       hasProfileApiKey(profile, externalSettings),
     )),
     activeApiProfileId: state.activeApiProfileId,
+    enabledApiProfileIds: [...state.enabledApiProfileIds],
     prompt: { systemPromptOverride: state.prompt.systemPromptOverride },
     permissions: {
       bashExec: state.permissions.bashExec,
@@ -233,6 +236,7 @@ export function defaults(): PersistedShape {
     },
     apiProfiles: [apiProfile],
     activeApiProfileId: apiProfile.id,
+    enabledApiProfileIds: [apiProfile.id],
     prompt: {
       systemPromptOverride: '',
     },
@@ -303,6 +307,16 @@ export function mergePersistedShape(base: PersistedShape, patch: Partial<Persist
     : apiProfiles[0].id;
   const activeApiProfile = apiProfiles.find((profile) => profile.id === activeApiProfileId) ?? apiProfiles[0];
 
+  // Migrate: if enabledApiProfileIds is not present, default to just the active profile.
+  const profileIdSet = new Set(apiProfiles.map((p) => p.id));
+  const rawEnabled = Array.isArray(patch.enabledApiProfileIds)
+    ? patch.enabledApiProfileIds.filter((id) => profileIdSet.has(id))
+    : [activeApiProfileId];
+  // Ensure the active profile is always in the enabled list.
+  const enabledApiProfileIds = rawEnabled.includes(activeApiProfileId)
+    ? rawEnabled
+    : [activeApiProfileId, ...rawEnabled];
+
   return {
     schemaVersion: 1,
     api: {
@@ -315,6 +329,7 @@ export function mergePersistedShape(base: PersistedShape, patch: Partial<Persist
     },
     apiProfiles,
     activeApiProfileId,
+    enabledApiProfileIds,
     prompt: { ...base.prompt, ...(patch.prompt || {}) },
     permissions: {
       ...base.permissions,

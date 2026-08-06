@@ -294,6 +294,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, renderUnit, resp
                 isLoading={false}
                 models={models.models}
                 selectedModel={models.selectedModel}
+                selectedProvider={models.selectedProvider}
+                providers={models.providers}
                 onModelChange={models.handleModelChange}
                 reasoningEffort={reasoningEffort}
                 onReasoningEffortChange={onReasoningEffortChange ?? (() => undefined)}

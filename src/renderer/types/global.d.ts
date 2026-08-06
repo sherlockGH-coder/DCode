@@ -63,6 +63,7 @@ declare global {
       onConversationModeStateChanged: (callback: (state: ConversationModeState) => void) => () => void;
 
       getModels: () => Promise<string[]>;
+      getProviderModels: () => Promise<import('../hooks/useModels').ProviderModels[]>;
       transcribeSpeech: (audioBuffer: ArrayBuffer, mimeType: string) => Promise<SpeechTranscriptionResult>;
 
       createConversation: (title: string, projectPath: string | null) => Promise<string>;

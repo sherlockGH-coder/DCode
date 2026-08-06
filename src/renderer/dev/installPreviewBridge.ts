@@ -23,6 +23,7 @@ const previewSettings: AppSettings = {
     apiKeySet: true,
   }],
   activeApiProfileId: 'default',
+  enabledApiProfileIds: ['default'],
   prompt: { systemPromptOverride: '' },
   permissions: {
     bashExec: 'default',
@@ -204,6 +205,12 @@ export function installPreviewBridge(): void {
   let settings = structuredClone(previewSettings);
   const baseApi: Partial<Window['deepseekApi']> = {
     getModels: async () => [...settings.api.models],
+    getProviderModels: async () => settings.apiProfiles.map((p) => ({
+      profileId: p.id,
+      providerName: p.name,
+      models: p.models,
+      isActive: p.id === settings.activeApiProfileId,
+    })),
     getSettings: async () => structuredClone(settings),
     patchSettings: async (patch) => {
       settings = {

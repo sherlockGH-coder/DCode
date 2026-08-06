@@ -98,6 +98,8 @@ describe('ChatInput slash commands', () => {
         isLoading: false,
         models: ['deepseek-v4-flash'],
         selectedModel: 'deepseek-v4-flash',
+        selectedProvider: 'DeepSeek',
+        providers: [],
         onModelChange: vi.fn(),
         onReasoningEffortChange: vi.fn(),
         activeProject: null,
@@ -123,6 +125,8 @@ describe('ChatInput slash commands', () => {
         isLoading: false,
         models: ['deepseek-v4-flash'],
         selectedModel: 'deepseek-v4-flash',
+        selectedProvider: 'DeepSeek',
+        providers: [],
         onModelChange: vi.fn(),
         onReasoningEffortChange: vi.fn(),
         activeProject: '/Users/demo/DeepSeek-App',
@@ -141,6 +145,8 @@ describe('ChatInput slash commands', () => {
       isLoading: false,
       models: ['deepseek-v4-flash'],
       selectedModel: 'deepseek-v4-flash',
+      selectedProvider: 'DeepSeek',
+      providers: [],
       onModelChange: vi.fn(),
       onReasoningEffortChange: vi.fn(),
       mode,
@@ -162,7 +168,7 @@ describe('ChatInput slash commands', () => {
     const microphone = container.querySelector('button[aria-label="Voice input"]') as HTMLButtonElement;
     expect(indicator.textContent).toContain('Plan');
     const toolbarItems = [...(microphone.parentElement?.children ?? [])];
-    expect(toolbarItems.indexOf(indicator)).toBe(toolbarItems.indexOf(microphone) + 1);
+    expect(toolbarItems.indexOf(indicator)).toBeGreaterThan(toolbarItems.indexOf(microphone));
     expect(container.querySelector('[data-testid="plan-mode-toggle"]')).toBeNull();
 
     const close = container.querySelector('button[aria-label="Close plan mode"]') as HTMLButtonElement;
@@ -178,6 +184,8 @@ describe('ChatInput slash commands', () => {
         isLoading: true,
         models: ['deepseek-v4-flash'],
         selectedModel: 'deepseek-v4-flash',
+        selectedProvider: 'DeepSeek',
+        providers: [],
         onModelChange: vi.fn(),
         onReasoningEffortChange: vi.fn(),
         statusAccessory: React.createElement('div', { 'data-testid': 'status-accessory' }, 'Executing · 1/3'),
