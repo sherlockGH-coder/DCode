@@ -1,5 +1,6 @@
 import React from 'react';
 import { IconPlan, IconPlus, IconX } from '../icons';
+import PermissionSelector from './PermissionSelector';
 
 type VoiceInputState = {
   isRecording: boolean;
@@ -116,6 +117,8 @@ const InputToolbar: React.FC<{
         >
           <IconMicrophone size={15} className="shrink-0" />
         </button>
+
+        <PermissionSelector isLoading={isLoading} />
 
         {mode === 'plan' && onModeChange && (
           <button
