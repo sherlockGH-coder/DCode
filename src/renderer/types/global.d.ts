@@ -63,6 +63,7 @@ declare global {
       onConversationModeStateChanged: (callback: (state: ConversationModeState) => void) => () => void;
 
       getModels: () => Promise<string[]>;
+      getProviderModels: () => Promise<import('../hooks/useModels').ProviderModels[]>;
       transcribeSpeech: (audioBuffer: ArrayBuffer, mimeType: string) => Promise<SpeechTranscriptionResult>;
 
       createConversation: (title: string, projectPath: string | null) => Promise<string>;
@@ -103,6 +104,7 @@ declare global {
       patchSettings: (patch: AppSettingsPatch) => Promise<AppSettings>;
       setApiKey: (plaintext: string) => Promise<void>;
       setApiProfileApiKey: (profileId: string, plaintext: string) => Promise<void>;
+      getApiProfileApiKey: (profileId: string) => Promise<string>;
       setSpeechApiKey: (plaintext: string) => Promise<void>;
       setVisionApiKey: (plaintext: string) => Promise<void>;
       resetSettings: () => Promise<AppSettings>;

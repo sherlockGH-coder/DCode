@@ -2,7 +2,7 @@ import { app } from 'electron';
 import { resolve } from 'node:path';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import type { AppSettings, AppSettingsPatch, BashExecPolicy, SpeechProvider, VisionProvider } from '../shared/types';
+import type { ApiProtocol, AppSettings, AppSettingsPatch, BashExecPolicy, SpeechProvider, VisionProvider } from '../shared/types';
 import { env } from './env';
 import {
   loadExternalSettings,
@@ -88,6 +88,15 @@ class SettingsManager {
       ?? defaultApiProfile();
   }
 
+  getProfileById(profileId: string): PersistedApiProfile | undefined {
+    return this.state.apiProfiles.find((p) => p.id === profileId);
+  }
+
+  getEnabledProfiles(): PersistedApiProfile[] {
+    const enabledIds = new Set(this.state.enabledApiProfileIds ?? [this.state.activeApiProfileId]);
+    return this.state.apiProfiles.filter((p) => enabledIds.has(p.id));
+  }
+
   private loadExternalSettings(): ExternalSettings | null {
     try {
       return loadExternalSettings(this.externalSettingsPath);
@@ -121,6 +130,17 @@ class SettingsManager {
     if (!this.state.apiProfiles.some((profile) => profile.id === this.state.activeApiProfileId)) {
       this.state.activeApiProfileId = this.state.apiProfiles[0].id;
     }
+    // Ensure enabledApiProfileIds is initialized and consistent.
+    if (!Array.isArray(this.state.enabledApiProfileIds)) {
+      this.state.enabledApiProfileIds = [this.state.activeApiProfileId];
+    }
+    // Remove IDs of profiles that no longer exist.
+    const profileIds = new Set(this.state.apiProfiles.map((p) => p.id));
+    this.state.enabledApiProfileIds = this.state.enabledApiProfileIds.filter((id) => profileIds.has(id));
+    // Ensure the active profile is always in the enabled list.
+    if (!this.state.enabledApiProfileIds.includes(this.state.activeApiProfileId)) {
+      this.state.enabledApiProfileIds.push(this.state.activeApiProfileId);
+    }
     const active = this.activeProfile;
     this.state.api = {
       protocol: active.protocol,
@@ -151,6 +171,10 @@ class SettingsManager {
     }
     if (typeof p.activeApiProfileId === 'string') {
       this.setActiveApiProfile(p.activeApiProfileId);
+    }
+    if (Array.isArray(p.enabledApiProfileIds)) {
+      const profileIds = new Set(this.state.apiProfiles.map((profile) => profile.id));
+      this.state.enabledApiProfileIds = p.enabledApiProfileIds.filter((id) => profileIds.has(id));
     }
     if (p.api) {
       this.patchActiveApi(p.api);
@@ -264,7 +288,13 @@ class SettingsManager {
       const nextDefaultModel = typeof patch.defaultModel === 'string'
         ? patch.defaultModel.trim() || defaultModel()
         : profile.defaultModel;
-      return normalizeProfile({ ...profile, baseUrl, models, defaultModel: nextDefaultModel }, profile.id);
+      return normalizeProfile({
+        ...profile,
+        protocol: patch.protocol ?? profile.protocol,
+        baseUrl,
+        models,
+        defaultModel: nextDefaultModel,
+      }, profile.id);
     });
     this.state.apiProfiles = nextProfiles;
   }
@@ -289,6 +319,16 @@ class SettingsManager {
     });
   }
 
+  getApiKeyForProfileId(profileId: string): string {
+    const profile = this.state.apiProfiles.find((p) => p.id === profileId);
+    if (!profile) return '';
+    return getApiKeyForProfile({
+      externalSettings: this.loadExternalSettings(),
+      getExternalApiKeyForProfile: this.getExternalApiKeyForProfile.bind(this),
+      profile,
+    });
+  }
+
   /** Whether the user has set a key, excluding the env fallback. */
   hasUserApiKey(): boolean {
     return this.hasApiKeyForProfile(this.activeProfile);
@@ -296,8 +336,10 @@ class SettingsManager {
 
   getActiveApiCompatibilityError(): string | null {
     const active = this.activeProfile;
-    if (active.protocol !== 'legacy-openai') return null;
-    return `Profile "${active.name}" uses the legacy OpenAI Chat Completions API, while this version supports only Anthropic Messages. Update the Base URL and model in settings, then confirm the conversion before using it.`;
+    if (active.protocol === 'anthropic' || active.protocol === 'chat-completions' || active.protocol === 'responses') {
+      return null;
+    }
+    return `Profile "${active.name}" uses an unsupported API protocol.`;
   }
 
   assertActiveApiProfileSupported(): void {
@@ -352,8 +394,16 @@ class SettingsManager {
     return this.state.api.baseUrl || env.ANTHROPIC_BASE_URL;
   }
 
+  getProtocol(): ApiProtocol {
+    return this.activeProfile.protocol;
+  }
+
   getDefaultModels(): string[] {
     return [...env.ANTHROPIC_MODELS];
+  }
+
+  getDefaultModelsForProtocol(protocol: ApiProtocol): string[] {
+    return protocol === 'anthropic' ? [...env.ANTHROPIC_MODELS] : [...env.OPENAI_MODELS];
   }
 
   /** User-defined model list; empty means load models automatically. */

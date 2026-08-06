@@ -1,13 +1,12 @@
 {
   "name": "deepseek-app",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "DeepSeek desktop chat application built with Electron and React",
   "productName": "DeepSeek",
   "main": "./out/main/index.js",
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "dev": "electron-vite dev",
-    "asr:dev": "uv run scripts/local_whisper_asr.py",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "package": "electron-vite build && electron-builder build --mac",
@@ -20,9 +19,7 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "benchmark:terminal": "pnpm build && PYTHONPATH=$PWD harbor run -d terminal-bench@2.0 -a benchmark.harbor_dcode_agent:DCodeAgent -o benchmark/jobs",
-    "benchmark:terminal:smoke": "pnpm build && PYTHONPATH=$PWD harbor run -d terminal-bench@2.0 -a benchmark.harbor_dcode_agent:DCodeAgent -l 1 -n 1 -y -o benchmark/jobs"
+    "test:watch": "vitest"
   },
   "build": {
     "appId": "com.deepseek.desktop",
@@ -125,7 +122,6 @@
     "eslint": "^9.39.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.7.0",
-    "playwright-core": "^1.62.0",
     "tailwindcss": "^4.2.4",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.65.0",

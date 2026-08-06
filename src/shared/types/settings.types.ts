@@ -7,12 +7,12 @@ import type { SpeechSettings, VisionSettings } from './media.types';
  *  - full_access: full access; skip all tool permission approvals.
  */
 export type BashExecPolicy = 'default' | 'auto_review' | 'full_access';
-export type ApiProtocol = 'anthropic' | 'legacy-openai';
+export type ApiProtocol = 'anthropic' | 'chat-completions' | 'responses';
 
 export interface ApiProfile extends WithApiKey {
   id: string;
   name: string;
-  /** Request protocol; legacy-openai only marks a pre-migration profile and is not called at runtime. */
+  /** Request protocol used by the active model endpoint. */
   protocol: ApiProtocol;
   /** API Base URL */
   baseUrl: string;
@@ -44,6 +44,8 @@ export interface AppSettings {
   apiProfiles: ApiProfile[];
   /** ID of the active API profile. */
   activeApiProfileId: string;
+  /** IDs of enabled API profiles; all enabled providers appear in the model selector. */
+  enabledApiProfileIds: string[];
   prompt: {
     /** Override the default system prompt; an empty string uses src/main/prompts/system.md. */
     systemPromptOverride: string;
@@ -74,6 +76,7 @@ export type AppSettingsPatch = {
   api?: Partial<Omit<AppSettings['api'], 'apiKeySet'>>;
   apiProfiles?: ApiProfilePatch[];
   activeApiProfileId?: string;
+  enabledApiProfileIds?: string[];
   prompt?: Partial<AppSettings['prompt']>;
   permissions?: {
     bashExec?: BashExecPolicy;

@@ -4,7 +4,7 @@ import type { Project, Conversation } from '../../shared/types';
 import {
   IconFolderOpen,
   IconProjectFolder,
-  IconFolderPlus,
+  IconPlus,
   IconDots,
   IconEdit,
   IconX,
@@ -327,8 +327,8 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
           nested ? 'pl-[36px]' : 'pl-2.5'
         } ${
           isActive
-            ? 'bg-bg-hover text-text-primary font-medium'
-            : 'bg-transparent text-text-secondary hover:bg-bg-hover hover:text-text-primary'
+            ? 'bg-black/[0.07] dark:bg-white/[0.12] text-[#111827] dark:text-white font-semibold'
+            : 'bg-transparent text-[#1C1C1E] dark:text-zinc-100 font-normal hover:bg-black/[0.05] dark:hover:bg-white/[0.08]'
         }`}
         onClick={() => !isRenaming && onSelectConversation(conv.id)}
         onKeyDown={(e) => {
@@ -378,7 +378,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
 
                 <div className="group-hover:opacity-0 transition-opacity duration-150 flex items-center justify-end">
                   {relativeTime && (
-                    <span className="text-[11.5px] text-text-tertiary whitespace-nowrap font-normal">
+                    <span className="text-[11.5px] text-[#8E8E93] dark:text-zinc-400 whitespace-nowrap font-normal">
                       {relativeTime}
                     </span>
                   )}
@@ -432,17 +432,17 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
   return (
     <section className="mt-2.5 flex flex-col gap-4.5">
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between pl-2.5 pr-0 py-0.5">
-          <h2 className="text-[12px] font-normal text-text-tertiary">
+        <div className="group flex items-center justify-between pl-2.5 pr-1.5 py-0.5">
+          <h2 className="text-[11px] font-semibold text-[#8E8E93] dark:text-[#8E8E93] uppercase tracking-wider select-none">
             Projects
           </h2>
           <button
             type="button"
-            className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-transparent text-text-tertiary hover:bg-bg-hover hover:text-text-primary transition-all cursor-pointer"
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 inline-flex items-center justify-center w-6 h-6 rounded-md bg-transparent text-[#8E8E93] dark:text-[#8E8E93] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] hover:text-[#1C1C1E] dark:hover:text-white cursor-pointer"
             title="Add project"
             onClick={onAddProject}
           >
-            <IconFolderPlus size={16} />
+            <IconPlus size={14} />
           </button>
         </div>
 
@@ -456,7 +456,7 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
                 <div
                   role="button"
                   tabIndex={0}
-                  className="group flex items-center gap-1.5 w-full py-1.5 px-2.5 rounded-[7px] bg-transparent text-[13.5px] cursor-pointer text-left transition-colors duration-150 relative text-text-primary hover:bg-bg-hover"
+                  className="group flex items-center gap-1.5 w-full py-1.5 px-2.5 rounded-[7px] bg-transparent text-[13.5px] font-normal cursor-pointer text-left transition-colors duration-150 relative text-[#1C1C1E] dark:text-zinc-100 hover:bg-black/[0.05] dark:hover:bg-white/[0.08]"
                   onClick={(e) => toggleExpand(project.path, e)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -468,9 +468,9 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
                 >
                   <div className="shrink-0 rounded-md transition-all">
                     {isExpanded ? (
-                      <IconFolderOpen size={16} className="text-text-secondary transition-colors" />
+                      <IconFolderOpen size={16} className="text-[#646873] dark:text-zinc-400 transition-colors" />
                     ) : (
-                      <IconProjectFolder size={16} className="text-text-secondary transition-colors" />
+                      <IconProjectFolder size={16} className="text-[#646873] dark:text-zinc-400 transition-colors" />
                     )}
                   </div>
                   <span className="flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[13.5px]">
@@ -525,13 +525,13 @@ const ProjectSwitcher: React.FC<ProjectSwitcherProps> = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between pl-2.5 pr-0 py-0.5">
-          <h2 className="text-[12px] font-normal text-text-tertiary">
+        <div className="group flex items-center justify-between pl-2.5 pr-1.5 py-0.5">
+          <h2 className="text-[11px] font-semibold text-[#8E8E93] dark:text-[#8E8E93] uppercase tracking-wider select-none">
             Conversations
           </h2>
           <button
             type="button"
-            className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-transparent text-text-tertiary hover:bg-bg-hover hover:text-text-primary transition-all cursor-pointer"
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-150 inline-flex items-center justify-center w-6 h-6 rounded-md bg-transparent text-[#8E8E93] dark:text-[#8E8E93] hover:bg-black/[0.05] dark:hover:bg-white/[0.08] hover:text-[#1C1C1E] dark:hover:text-white cursor-pointer"
             title="New conversation"
             onClick={onNewGlobalConversation}
           >

@@ -18,6 +18,13 @@ vi.mock('../contexts/AppContext', () => ({
   useModelsContext: () => ({
     models: ['deepseek-v4-flash'],
     selectedModel: 'deepseek-v4-flash',
+    selectedProvider: 'DeepSeek',
+    providers: [{
+      profileId: 'deepseek',
+      providerName: 'DeepSeek',
+      models: ['deepseek-v4-flash'],
+      isActive: true,
+    }],
     handleModelChange: appContextMocks.handleModelChange,
   }),
 }));

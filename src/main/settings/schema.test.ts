@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { defaults, mergePersistedShape } from './schema';
 
 describe('settings schema migration', () => {
-  it('preserves legacy OpenAI profiles but marks them as incompatible', () => {
+  it('migrates legacy OpenAI profiles to Chat Completions', () => {
     const migrated = mergePersistedShape(defaults(), {
       api: {
         provider: 'openai',
@@ -23,11 +23,11 @@ describe('settings schema migration', () => {
 
     expect(migrated.apiProfiles[0]).toMatchObject({
       id: 'legacy-openai',
-      protocol: 'legacy-openai',
+      protocol: 'chat-completions',
       baseUrl: 'https://api.openai.com/v1',
       defaultModel: 'gpt-4o',
     });
-    expect(migrated.api.protocol).toBe('legacy-openai');
+    expect(migrated.api.protocol).toBe('chat-completions');
   });
 
   it('treats existing Anthropic and new protocol-less profiles as supported', () => {
@@ -48,12 +48,53 @@ describe('settings schema migration', () => {
           models: [],
           defaultModel: 'claude-sonnet-4-6',
         },
+        {
+          id: 'responses',
+          name: 'Responses',
+          protocol: 'responses',
+          baseUrl: 'https://api.openai.com/v1',
+          models: ['gpt-5'],
+          defaultModel: 'gpt-5',
+        },
       ],
     } as any);
 
     expect(migrated.apiProfiles.map((profile) => profile.protocol)).toEqual([
       'anthropic',
       'anthropic',
+      'responses',
     ]);
+  });
+
+  it('preserves a Chat Completions profile when settings are reloaded', () => {
+    const reloaded = mergePersistedShape(defaults(), {
+      apiProfiles: [{
+        id: 'chat-completions',
+        name: 'OpenAI Compatible',
+        protocol: 'chat-completions',
+        baseUrl: 'https://api.openai.com/v1',
+        models: ['gpt-4o'],
+        defaultModel: 'gpt-4o',
+      }],
+      activeApiProfileId: 'chat-completions',
+    });
+
+    expect(reloaded.api.protocol).toBe('chat-completions');
+    expect(reloaded.apiProfiles[0]).toMatchObject({
+      id: 'chat-completions',
+      protocol: 'chat-completions',
+    });
+  });
+
+  it('builds standard DeepSeek default profile', () => {
+    const defaultProfile = mergePersistedShape(defaults(), {}).apiProfiles[0];
+    expect(defaultProfile).toMatchObject({
+      id: 'default',
+      name: 'DeepSeek',
+      protocol: 'anthropic',
+      baseUrl: 'https://api.deepseek.com/anthropic',
+      models: ['deepseek-v4-flash'],
+      defaultModel: 'deepseek-v4-flash',
+    });
   });
 });

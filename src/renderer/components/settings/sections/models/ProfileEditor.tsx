@@ -1,7 +1,7 @@
 import React from 'react';
 import ModelListField from '../../controls/ModelListField';
 import MaskedSecretInput from '../../controls/MaskedSecretInput';
-import { IconChevronLeft, IconInfo } from '../../../icons';
+import { IconChevronLeft } from '../../../icons';
 import { Field } from './ProfileUi';
 import { INPUT_CLASS, type DraftProfile, type SaveState } from './profileDraft';
 import {
@@ -61,26 +61,6 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
         <div className="space-y-4">
-          {editing.protocol === 'legacy-openai' && (
-            <div className="rounded-[12px] border border-amber-500/22 bg-amber-500/[0.09] p-4 text-amber-950 dark:text-amber-100">
-              <div className="flex gap-3">
-                <IconInfo size={17} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-300" />
-                <div>
-                  <h3 className="text-[13px] font-semibold">Legacy OpenAI profile requires migration</h3>
-                  <p className="mt-1 text-[11.5px] leading-relaxed text-amber-900/75 dark:text-amber-100/70">
-                    This app sends only Anthropic Messages requests. Update the Base URL and model to values that support this protocol, then confirm the conversion; the original profile will not be rewritten or called accidentally.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => updateEditing({ protocol: 'anthropic' })}
-                    className="mt-3 inline-flex h-8 items-center rounded-[8px] bg-amber-600 px-3 text-[11.5px] font-semibold text-white transition-colors hover:bg-amber-700 dark:bg-amber-500 dark:text-black dark:hover:bg-amber-400"
-                  >
-                    I updated it and confirm Anthropic compatibility
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           <SettingsGroup className="p-5">
             <SectionTitle>Basic information</SectionTitle>
             <div className="mt-4">
@@ -123,12 +103,12 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
                 />
               </Field>
               {editing.models.length === 0 && (
-                <Field label="Default model" hint="The model used for new conversations when the custom model list is empty; leave empty to use the built-in Anthropic protocol default.">
+                <Field label="Default model" hint="The model used for new conversations when the custom model list is empty; leave empty to use the selected protocol's default.">
                   <input
                     className={INPUT_CLASS}
                     value={editing.defaultModel}
                     onChange={(event) => updateEditing({ defaultModel: event.target.value })}
-                    placeholder="For example, claude-sonnet-4-6"
+                    placeholder="For example, deepseek-v4-flash"
                   />
                 </Field>
               )}

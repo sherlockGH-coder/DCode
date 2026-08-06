@@ -23,6 +23,10 @@ export const settingsApi = {
     return ipcRenderer.invoke('settings:setApiProfileApiKey', profileId, plaintext);
   },
 
+  getApiProfileApiKey: (profileId: string): Promise<string> => {
+    return ipcRenderer.invoke('settings:getApiProfileApiKey', profileId);
+  },
+
   /** Set the voice-input API key separately. */
   setSpeechApiKey: (plaintext: string): Promise<void> => {
     return ipcRenderer.invoke('settings:setSpeechApiKey', plaintext);

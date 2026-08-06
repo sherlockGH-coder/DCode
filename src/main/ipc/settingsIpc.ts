@@ -120,6 +120,10 @@ export function registerSettingsIpc(): void {
     broadcastSettingsChanged();
   });
 
+  ipcMain.handle('settings:getApiProfileApiKey', (_event, profileId: string) => {
+    return settingsManager.getApiKeyForProfileId(profileId);
+  });
+
   ipcMain.handle('settings:setSpeechApiKey', (_event, plaintext: string) => {
     settingsManager.setSpeechApiKey(plaintext);
     broadcastSettingsChanged();

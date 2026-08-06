@@ -3,19 +3,17 @@ import { settingsManager } from '../settings';
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 8000;
-let cachedModels: string[] | null = null;
-let cacheTimestamp = 0;
-let cacheKey = '';
 
-function getCacheKey(): string {
-  return `${settingsManager.getBaseUrl()}|${settingsManager.getApiKey()}`;
+interface CacheEntry {
+  models: string[];
+  timestamp: number;
 }
+
+const profileCache = new Map<string, CacheEntry>();
 
 /** Invalidate the cache when settings change. */
 export function invalidateModelCache(): void {
-  cachedModels = null;
-  cacheTimestamp = 0;
-  cacheKey = '';
+  profileCache.clear();
 }
 
 /**
@@ -25,43 +23,54 @@ export function invalidateModelCache(): void {
 function buildModelsUrl(baseUrl: string): string {
   let url = baseUrl.replace(/\/+$/, '');
 
-  if (url.endsWith('/v1')) {
-    url = url.slice(0, -3);
+  if (url.endsWith('/models')) {
+    return url;
   }
 
-  if (url.endsWith('/anthropic')) {
+  if (url.endsWith('/v1')) {
+    url = url.slice(0, -3);
+  } else if (url.endsWith('/anthropic')) {
     url = url.slice(0, -10);
   }
   return `${url}/v1/models`;
 }
 
-async function fetchAvailableModels(): Promise<string[]> {
-  const defaultModels = settingsManager.getDefaultModels();
+/** Probe available models for a specific profile ID using its configured baseUrl and API key. */
+export async function fetchModelsForProfileId(profileId: string): Promise<string[]> {
+  const profile = settingsManager.getProfileById(profileId);
+  if (!profile) return settingsManager.getDefaultModels();
 
-  const userModels = settingsManager.getUserModels();
-  if (userModels.length > 0) return userModels;
-
-  const compatibilityError = settingsManager.getActiveApiCompatibilityError();
-  if (compatibilityError) {
-    console.warn(`[models] ${compatibilityError}`);
-    return defaultModels;
+  // If the profile has explicitly defined models, return them immediately
+  if (profile.models && profile.models.length > 0) {
+    return profile.models;
   }
 
-  const currentKey = getCacheKey();
-  if (cachedModels && cacheKey === currentKey && Date.now() - cacheTimestamp < CACHE_TTL_MS) {
-    return cachedModels;
+  const baseUrl = profile.baseUrl || settingsManager.getBaseUrl();
+  const apiKey = settingsManager.getApiKeyForProfileId(profileId);
+
+  const cacheKey = `${profileId}|${baseUrl}|${apiKey}`;
+  const cached = profileCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.models;
   }
+
+  const fallback = profile.defaultModel
+    ? [profile.defaultModel]
+    : settingsManager.getDefaultModelsForProtocol(profile.protocol);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const modelsUrl = buildModelsUrl(settingsManager.getBaseUrl());
-    const apiKey = settingsManager.getApiKey();
 
-    const authHeaders: Record<string, string> = {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    };
+  try {
+    const modelsUrl = buildModelsUrl(baseUrl);
+    const authHeaders: Record<string, string> = {};
+    if (profile.protocol === 'anthropic') {
+      authHeaders['anthropic-version'] = '2023-06-01';
+    }
+    if (apiKey) {
+      authHeaders['Authorization'] = `Bearer ${apiKey}`;
+      if (profile.protocol === 'anthropic') authHeaders['x-api-key'] = apiKey;
+    }
 
     const response = await fetch(modelsUrl, {
       signal: controller.signal,
@@ -72,43 +81,76 @@ async function fetchAvailableModels(): Promise<string[]> {
     });
 
     if (!response.ok) {
-      console.warn(`[models] Request failed: HTTP ${response.status}`);
-      return defaultModels;
+      console.warn(`[models] Probing ${profile.name} (${modelsUrl}) failed: HTTP ${response.status}`);
+      return fallback;
     }
 
     const data = await response.json();
     const models: string[] = [];
 
-    if (Array.isArray(data?.data)) {
-      for (const model of data.data) {
-        if (model.id) models.push(model.id);
-      }
-    } else if (Array.isArray(data)) {
+    const rawList = Array.isArray(data?.data)
+      ? data.data
+      : Array.isArray(data?.models)
+      ? data.models
+      : Array.isArray(data)
+      ? data
+      : [];
 
-      for (const model of data) {
-        if (model.id) models.push(model.id);
+    for (const item of rawList) {
+      if (typeof item === 'string' && item.trim()) {
+        models.push(item.trim());
+      } else if (item && typeof item.id === 'string' && item.id.trim()) {
+        models.push(item.id.trim());
       }
     }
 
     if (models.length === 0) {
-      console.warn('[models] API returned an empty list; using the default list');
-      return defaultModels;
+      console.warn(`[models] Probing ${profile.name} returned empty list; using fallback [${fallback.join(', ')}]`);
+      return fallback;
     }
 
-    cachedModels = models;
-    cacheTimestamp = Date.now();
-    cacheKey = currentKey;
+    profileCache.set(cacheKey, { models, timestamp: Date.now() });
     return models;
   } catch (err) {
-    console.warn('[models] Request failed:', (err as Error)?.message);
-    return defaultModels;
+    console.warn(`[models] Probing ${profile.name} failed:`, (err as Error)?.message);
+    return fallback;
   } finally {
     clearTimeout(timeout);
   }
 }
 
+/** Fetch models for all enabled providers. */
+export async function fetchAllProviderModels(): Promise<{
+  profileId: string;
+  providerName: string;
+  models: string[];
+  isActive: boolean;
+}[]> {
+  const settings = settingsManager.getPublic();
+  const enabledProfiles = settingsManager.getEnabledProfiles();
+
+  const results = await Promise.all(
+    enabledProfiles.map(async (profile) => {
+      const models = await fetchModelsForProfileId(profile.id);
+      return {
+        profileId: profile.id,
+        providerName: profile.name,
+        models,
+        isActive: profile.id === settings.activeApiProfileId,
+      };
+    }),
+  );
+
+  return results;
+}
+
 export function registerModelIpc(): void {
   ipcMain.handle('chat:getModels', async () => {
-    return fetchAvailableModels();
+    const active = settingsManager.getPublic().activeApiProfileId;
+    return fetchModelsForProfileId(active);
+  });
+
+  ipcMain.handle('chat:getProviderModels', async () => {
+    return fetchAllProviderModels();
   });
 }

@@ -33,10 +33,10 @@ const TOOL_BUTTON_BASE_CLASS = 'inline-flex h-7 w-7 shrink-0 items-center justif
 const TOOL_BUTTON_ACTIVE_CLASS = 'text-accent hover:text-accent';
 const MAX_VISIBLE_TITLE_CHARS = 48;
 const TITLE_GROUP_CLASS = 'flex shrink min-w-0 max-w-[min(64vw,760px)] items-center gap-2 [-webkit-app-region:drag]';
-const PROJECT_ICON_CLASS = 'shrink-0 text-text-tertiary';
-const PROJECT_NAME_CLASS = 'shrink-0 max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-normal leading-tight text-text-tertiary';
-const TITLE_SEPARATOR_CLASS = 'shrink-0 text-[14px] font-normal leading-tight text-text-tertiary';
-const CHAT_TITLE_CLASS = 'm-0 min-w-0 max-w-[520px] overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-medium leading-tight text-text-primary';
+const PROJECT_ICON_CLASS = 'shrink-0 text-text-secondary';
+const PROJECT_NAME_CLASS = 'shrink-0 max-w-[220px] overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-medium leading-tight text-text-primary';
+const TITLE_SEPARATOR_CLASS = 'shrink-0 text-[14px] font-normal leading-tight text-text-secondary';
+const CHAT_TITLE_CLASS = 'm-0 min-w-0 max-w-[520px] overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-semibold leading-tight text-text-primary';
 
 function truncateTitle(title: string, maxLength: number): string {
   const normalizedTitle = title.trim();

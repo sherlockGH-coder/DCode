@@ -22,7 +22,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
   isFullscreen = false,
 }) => {
   const [activeSection, setActiveSection] = useState<SettingsSection>('appearance');
-  const { settings, isLoading, patch, setApiProfileApiKey, setSpeechApiKey } = useSettings();
+  const { settings, isLoading, patch, setApiProfileApiKey, getApiProfileApiKey, setSpeechApiKey } = useSettings();
 
   if (isLoading || !settings) {
     return (
@@ -60,7 +60,12 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
           >
             {activeSection === 'appearance' && <AppearanceSection />}
             {activeSection === 'models' && (
-              <ModelsSection settings={settings} patch={patch} setApiProfileApiKey={setApiProfileApiKey} />
+              <ModelsSection
+                settings={settings}
+                patch={patch}
+                setApiProfileApiKey={setApiProfileApiKey}
+                getApiProfileApiKey={getApiProfileApiKey}
+              />
             )}
             {activeSection === 'speech' && (
               <SpeechSection settings={settings} patch={patch} setSpeechApiKey={setSpeechApiKey} />

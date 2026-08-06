@@ -39,6 +39,15 @@ describe('ModelSelector', () => {
       isLoading: false,
       models: ['model-a', 'model-b'],
       selectedModel: 'model-a',
+      selectedProvider: 'DeepSeek',
+      providers: [
+        {
+          profileId: 'default',
+          providerName: 'DeepSeek',
+          models: ['model-a', 'model-b'],
+          isActive: true,
+        },
+      ],
       onOpenChange: vi.fn(),
       onModelChange: vi.fn(),
       onReasoningEffortChange: vi.fn(),
@@ -48,57 +57,107 @@ describe('ModelSelector', () => {
     return props;
   };
 
-  it('keeps the trigger compact with a blue icon and no effort text', () => {
-    renderSelector({ isOpen: false, reasoningEffort: 'max' });
+  it('displays provider/model format in trigger label', () => {
+    renderSelector({ isOpen: false });
 
     const trigger = container.querySelector('[aria-label="Select model"]');
-    const icon = trigger?.querySelector('[data-testid="model-selector-icon"]');
-    expect(icon?.classList.contains('text-accent')).toBe(true);
-    expect(trigger?.textContent).toContain('model-a');
-    expect(trigger?.textContent).not.toContain('Max');
+    expect(trigger?.textContent).toContain('DeepSeek/model-a');
   });
 
-  it('shows Model and Effort rows with their current values', () => {
-    renderSelector({ reasoningEffort: undefined });
+  it('shows provider list in level 1 menu', () => {
+    renderSelector();
 
     const menu = container.querySelector('[data-testid="model-selector-menu"]');
-    expect(menu?.textContent).toContain('Model');
-    expect(menu?.textContent).toContain('model-a');
-    expect(menu?.textContent).toContain('Effort');
-    expect(menu?.textContent).toContain('Off');
+    expect(menu?.textContent).toContain('DeepSeek');
   });
 
-  it('opens the model submenu on hover and marks the selected model', () => {
+  it('opens model submenu on provider hover and triggers onModelChange with profileId', () => {
     const props = renderSelector();
-    const modelRow = container.querySelector('[aria-label="Select a specific model"]');
+    const providerRow = container.querySelector('[aria-label="Provider DeepSeek"]');
 
-    act(() => modelRow?.dispatchEvent(new window.Event('mouseover', { bubbles: true })));
+    act(() => {
+      providerRow?.dispatchEvent(new window.Event('mouseenter', { bubbles: true }));
+      providerRow?.dispatchEvent(new window.Event('mouseover', { bubbles: true }));
+    });
 
     const submenu = container.querySelector('[data-testid="model-submenu"]');
-    expect(submenu?.textContent).toContain('model-a');
-    expect(submenu?.textContent).toContain('model-b');
-    expect(submenu?.querySelector('[data-selected="true"] svg')).not.toBeNull();
+    expect(submenu?.textContent ?? '').toContain('model-a');
+    expect(submenu?.textContent ?? '').toContain('model-b');
 
     const modelB = Array.from(submenu?.querySelectorAll('button') ?? [])
       .find((button) => button.textContent?.includes('model-b'));
     act(() => modelB?.dispatchEvent(new window.Event('click', { bubbles: true })));
-    expect(props.onModelChange).toHaveBeenCalledWith('model-b');
+    expect(props.onModelChange).toHaveBeenCalledWith('model-b', 'default');
     expect(props.onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it('offers only Off, High, and Max and maps Off to undefined', () => {
+  it('aligns the model submenu with the hovered provider row', () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this.getAttribute('data-testid') === 'model-selector-menu') {
+        return { top: 100 } as DOMRect;
+      }
+      if (this.getAttribute('aria-label') === 'Provider Provider A') {
+        return { top: 140 } as DOMRect;
+      }
+      if (this.getAttribute('aria-label') === 'Provider Provider B') {
+        return { top: 192 } as DOMRect;
+      }
+      return { top: 0 } as DOMRect;
+    });
+
+    renderSelector({
+      providers: [
+        { profileId: 'provider-a', providerName: 'Provider A', models: ['model-a'], isActive: true },
+        { profileId: 'provider-b', providerName: 'Provider B', models: ['model-b'], isActive: false },
+      ],
+    });
+
+    const providerA = container.querySelector('[aria-label="Provider Provider A"]');
+    act(() => {
+      providerA?.dispatchEvent(new window.Event('mouseenter', { bubbles: true }));
+      providerA?.dispatchEvent(new window.Event('mouseover', { bubbles: true }));
+    });
+    expect(container.querySelector('[data-testid="model-submenu"]')?.getAttribute('style')).toContain('top:40px');
+
+    const providerB = container.querySelector('[aria-label="Provider Provider B"]');
+    act(() => {
+      providerB?.dispatchEvent(new window.Event('mouseenter', { bubbles: true }));
+      providerB?.dispatchEvent(new window.Event('mouseover', { bubbles: true }));
+    });
+    expect(container.querySelector('[data-testid="model-submenu"]')?.getAttribute('style')).toContain('top:92px');
+  });
+
+  it('opens effort submenu on model hover and updates effort', () => {
     const props = renderSelector({ reasoningEffort: 'high' });
-    const effortRow = container.querySelector('[aria-label="Select reasoning effort"]');
+    const providerRow = container.querySelector('[aria-label="Provider DeepSeek"]');
 
-    act(() => effortRow?.dispatchEvent(new window.Event('mouseover', { bubbles: true })));
+    act(() => {
+      providerRow?.dispatchEvent(new window.Event('mouseenter', { bubbles: true }));
+      providerRow?.dispatchEvent(new window.Event('mouseover', { bubbles: true }));
+    });
 
-    const submenu = container.querySelector('[data-testid="effort-submenu"]');
-    const options = Array.from(submenu?.querySelectorAll('button') ?? []);
+    const modelSubmenu = container.querySelector('[data-testid="model-submenu"]');
+    const modelA = Array.from(modelSubmenu?.querySelectorAll('button') ?? [])[0];
+
+    act(() => {
+      modelA?.dispatchEvent(new window.Event('mouseenter', { bubbles: true }));
+      modelA?.dispatchEvent(new window.Event('mouseover', { bubbles: true }));
+    });
+
+    const effortSubmenu = container.querySelector('[data-testid="effort-submenu"]');
+    const options = Array.from(effortSubmenu?.querySelectorAll('button') ?? []);
     expect(options.map((button) => button.textContent?.trim())).toEqual(['Off', 'High', 'Max']);
-    expect(submenu?.querySelector('[data-selected="true"]')?.textContent).toContain('High');
 
     act(() => options[0]?.dispatchEvent(new window.Event('click', { bubbles: true })));
     expect(props.onReasoningEffortChange).toHaveBeenCalledWith(undefined);
+    expect(props.onModelChange).toHaveBeenCalledWith('model-a', 'default');
     expect(props.onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('does not include manage models entry', () => {
+    renderSelector();
+
+    const menu = container.querySelector('[data-testid="model-selector-menu"]');
+    expect(menu?.textContent).not.toContain('Manage models');
   });
 });

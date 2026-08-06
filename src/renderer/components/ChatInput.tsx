@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, type KeyboardEvent } from 'react';
 import type { Attachment, SkillSummary } from '../../shared/types';
+import type { ProviderModels } from '../hooks/useModels';
 import { useVoiceInput } from '../hooks/useVoiceInput';
 import AttachmentList from './chat-input/AttachmentList';
 import InputToolbar from './chat-input/InputToolbar';
@@ -23,7 +24,9 @@ interface ChatInputProps {
   isLoading: boolean;
   models: string[];
   selectedModel: string;
-  onModelChange: (model: string) => void;
+  selectedProvider: string;
+  providers: ProviderModels[];
+  onModelChange: (model: string, profileId?: string) => void;
   reasoningEffort?: string;
   onReasoningEffortChange: (effort: string | undefined) => void;
   activeProject?: string | null;
@@ -58,6 +61,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
   isLoading,
   models,
   selectedModel,
+  selectedProvider,
+  providers,
   onModelChange,
   reasoningEffort,
   onReasoningEffortChange,
@@ -436,6 +441,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 isLoading={isLoading}
                 models={models}
                 selectedModel={selectedModel}
+                selectedProvider={selectedProvider}
+                providers={providers}
                 onOpenChange={setIsModelMenuOpen}
                 onModelChange={onModelChange}
                 onReasoningEffortChange={onReasoningEffortChange}

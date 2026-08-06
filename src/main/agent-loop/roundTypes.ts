@@ -6,6 +6,7 @@ export interface RoundRunnerParams {
   tools: any[];
   model: string;
   baseUrl: string;
+  protocol?: import('../../shared/types').ApiProtocol;
   reasoningEffort?: string;
   signal?: AbortSignal;
   callbacks: AgentLoopCallbacks;

@@ -255,6 +255,7 @@ export function registerChatIpc(): void {
             apiKey: settingsManager.getApiKey(),
             model: model || settingsManager.getPublic().api.defaultModel,
             baseUrl: settingsManager.getBaseUrl(),
+            protocol: settingsManager.getProtocol(),
             projectPath,
             attachmentWhitelist,
             enabledSkills,

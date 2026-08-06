@@ -39,6 +39,8 @@ export interface PersistedShape {
   };
   apiProfiles: PersistedApiProfile[];
   activeApiProfileId: string;
+  /** IDs of enabled API profiles; all enabled providers appear in the model selector. */
+  enabledApiProfileIds: string[];
   prompt: {
     systemPromptOverride: string;
   };
@@ -75,20 +77,20 @@ export interface PersistedShape {
 export function defaultApiProfile(): PersistedApiProfile {
   return {
     id: DEFAULT_PROFILE_ID,
-    name: 'Default profile',
+    name: 'DeepSeek',
     protocol: 'anthropic',
-    baseUrl: env.ANTHROPIC_BASE_URL,
-    models: [],
-    defaultModel: 'claude-sonnet-4-6',
+    baseUrl: 'https://api.deepseek.com/anthropic',
+    models: ['deepseek-v4-flash'],
+    defaultModel: 'deepseek-v4-flash',
   };
 }
 
 export function defaultBaseUrl(): string {
-  return env.ANTHROPIC_BASE_URL;
+  return 'https://api.deepseek.com/anthropic';
 }
 
 export function defaultModel(): string {
-  return 'claude-sonnet-4-6';
+  return 'deepseek-v4-flash';
 }
 
 export function normalizeSpeechProvider(_value: unknown): SpeechProvider {
@@ -128,8 +130,12 @@ export function normalizeModels(models: unknown): string[] {
 type LegacyProfileInput = Partial<PersistedApiProfile> & { provider?: unknown };
 
 function normalizeApiProtocol(protocol: unknown, legacyProvider?: unknown): ApiProtocol {
-  if (protocol === 'anthropic' || protocol === 'legacy-openai') return protocol;
-  return legacyProvider === 'openai' ? 'legacy-openai' : 'anthropic';
+  // `legacy-openai` was the temporary persisted name used before Chat
+  // Completions support was implemented. Normalize it while loading so old
+  // profiles continue to work and are rewritten with the public name on save.
+  if (protocol === 'chat-completions' || protocol === 'legacy-openai') return 'chat-completions';
+  if (protocol === 'responses') return 'responses';
+  return legacyProvider === 'openai' ? 'chat-completions' : 'anthropic';
 }
 
 export function normalizeProfile(raw: LegacyProfileInput, fallbackId: string): PersistedApiProfile {
@@ -196,6 +202,7 @@ export function buildPublicSettings<TExternal>({
       hasProfileApiKey(profile, externalSettings),
     )),
     activeApiProfileId: state.activeApiProfileId,
+    enabledApiProfileIds: [...state.enabledApiProfileIds],
     prompt: { systemPromptOverride: state.prompt.systemPromptOverride },
     permissions: {
       bashExec: state.permissions.bashExec,
@@ -233,6 +240,7 @@ export function defaults(): PersistedShape {
     },
     apiProfiles: [apiProfile],
     activeApiProfileId: apiProfile.id,
+    enabledApiProfileIds: [apiProfile.id],
     prompt: {
       systemPromptOverride: '',
     },
@@ -282,7 +290,7 @@ export function mergePersistedShape(base: PersistedShape, patch: Partial<Persist
     ? patch.apiProfiles ?? []
     : [{
       id: DEFAULT_PROFILE_ID,
-      name: 'Default profile',
+      name: 'DeepSeek',
       protocol: legacyApi.protocol,
       baseUrl: legacyApi.baseUrl,
       models: legacyApi.models,
@@ -303,6 +311,16 @@ export function mergePersistedShape(base: PersistedShape, patch: Partial<Persist
     : apiProfiles[0].id;
   const activeApiProfile = apiProfiles.find((profile) => profile.id === activeApiProfileId) ?? apiProfiles[0];
 
+  // Migrate: if enabledApiProfileIds is not present, default to just the active profile.
+  const profileIdSet = new Set(apiProfiles.map((p) => p.id));
+  const rawEnabled = Array.isArray(patch.enabledApiProfileIds)
+    ? patch.enabledApiProfileIds.filter((id) => profileIdSet.has(id))
+    : [activeApiProfileId];
+  // Ensure the active profile is always in the enabled list.
+  const enabledApiProfileIds = rawEnabled.includes(activeApiProfileId)
+    ? rawEnabled
+    : [activeApiProfileId, ...rawEnabled];
+
   return {
     schemaVersion: 1,
     api: {
@@ -315,6 +333,7 @@ export function mergePersistedShape(base: PersistedShape, patch: Partial<Persist
     },
     apiProfiles,
     activeApiProfileId,
+    enabledApiProfileIds,
     prompt: { ...base.prompt, ...(patch.prompt || {}) },
     permissions: {
       ...base.permissions,
